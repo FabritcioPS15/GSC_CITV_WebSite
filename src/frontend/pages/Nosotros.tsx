@@ -9,6 +9,75 @@ import { useRef, useState, useEffect } from 'react';
 import escuelaLogo from '../../resources/assets/escuela_logo.png';
 import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
 
+/* Componente Milestone para la línea de tiempo */
+interface MilestoneProps {
+  year: string;
+  title: string;
+  description: string;
+  image: string;
+  number: string;
+  side: 'left' | 'right';
+  featured?: boolean;
+}
+
+function Milestone({ year, title, description, image, number, side, featured }: MilestoneProps) {
+  const isLeft = side === 'left';
+
+  return (
+    <div className={`relative flex flex-col lg:flex-row gap-8 lg:gap-12 ${isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center`}>
+      {/* Conector en la línea central (solo desktop) */}
+      <div className={`hidden lg:block lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:w-10 lg:h-10 lg:rounded-full lg:border-4 lg:shadow-lg lg:z-10 lg:flex lg:items-center lg:justify-center ${
+        isLeft ? 'lg:-translate-y-1/2' : 'lg:-translate-y-1/2'
+      } ${
+        featured ? 'bg-gradient-to-br from-orange-400 to-orange-600 border-white/20' : 'bg-white border-orange-400'
+      }`}>
+        {featured ? (
+          <>
+            <div className="absolute inset-2 bg-white rounded-full"></div>
+            <div className="absolute inset-3 bg-orange-500 rounded-full animate-pulse"></div>
+          </>
+        ) : (
+          <div className="absolute inset-1 bg-orange-400 rounded-full animate-pulse"></div>
+        )}
+      </div>
+
+      {/* Contenido textual */}
+      <div className={`flex-1 min-w-0 ${isLeft ? 'lg:text-right lg:pr-8' : 'lg:pl-8'} lg:w-1/2 text-center lg:text-left`}>
+        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4 lg:mx-auto lg:mb-4 ${
+          featured ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' : 'bg-gray-900 text-orange-400 border border-gray-800'
+        }`}>
+          <span className={`w-2 h-2 rounded-full animate-pulse ${featured ? 'bg-white' : 'bg-orange-400'}`} />
+          {year}
+        </div>
+        <h3 className="text-2xl lg:text-3xl font-black text-gray-900 mb-4">{title}</h3>
+        <p className="text-gray-600 leading-relaxed lg:text-lg">{description}</p>
+      </div>
+
+      {/* Imagen con marco */}
+      <div className={`relative lg:w-1/2 lg:flex lg:items-center ${isLeft ? 'lg:order-last' : 'lg:order-first'}`}>
+        <div className={`relative rounded-2xl overflow-hidden shadow-xl transition-all duration-700 group-hover:scale-[1.02] ${
+          featured ? 'h-80 lg:h-96 border-2 border-orange-400/50' : 'h-72 lg:h-80 border border-gray-200'
+        }`}>
+          <img
+            src={image}
+            alt={year}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className={`absolute inset-0 transition-opacity duration-300 ${
+            featured ? 'bg-gradient-to-t from-orange-900/30 to-transparent' : 'bg-gradient-to-t from-gray-900/50 to-transparent opacity-0 group-hover:opacity-100'
+          }`} />
+        </div>
+        {/* Badge número decorativo */}
+        <div className={`absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl font-black ${
+          featured ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-2 border-white/20 shadow-2xl shadow-orange-500/50' : 'bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400 border-2 border-orange-400'
+        }`}>
+          {number}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Interface para las sucursales
 interface ServiceBranch {
   id: number;
@@ -184,9 +253,10 @@ const Counter = ({ end, duration = 2000, suffix = "" }: { end: number, duration?
 function Nosotros() {
   const [showEscuela, setShowEscuela] = useState(false);
   const [showPoliclinicos, setShowPoliclinicos] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('flotas');
+  
   const [selectedBranch, setSelectedBranch] = useState<ServiceBranch | null>(null);
   const [branchType, setBranchType] = useState<'escuela' | 'policlinico'>('escuela');
+  const [planIndex, setPlanIndex] = useState(0);
   const scrollPositionRef = useRef(0);
 
   // Bloquear scroll del body cuando el modal está abierto
@@ -225,7 +295,7 @@ function Nosotros() {
       {helmetContent}
       <div className="bg-[#f8fafc] overflow-hidden">
         {/* 1. HERO SECTION */}
-        <section className="relative h-[40vh] min-h-[350px] flex items-center bg-black overflow-hidden">
+        <section className="page-banner">
           {/* Background Layer with uniform overlay */}
           <div className="absolute inset-0 z-0">
             <div
@@ -238,8 +308,8 @@ function Nosotros() {
           <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
             <RevealOnScroll>
               <div className="max-w-4xl flex items-center gap-8 group">
-                <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
-                <div className="space-y-6">
+                <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
+                <div className="space-y-4">
                   <h1 className="banner-title text-white animate-grow-text">
                     Compromiso con la <span className="text-orange-500">Excelencia</span> Vial
                   </h1>
@@ -256,7 +326,7 @@ function Nosotros() {
         </section>
 
         {/* 2. VISION / MISSION / VALUES GRID */}
-        <section className="max-w-7xl mx-auto px-4 py-24 -mt-20 relative z-20">
+        <section className="max-w-7xl mx-auto px-4 section -mt-20 relative z-20">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
             {/* Card: Vision */}
@@ -282,8 +352,8 @@ function Nosotros() {
             </div>
 
             {/* Card: Stats (Orange) */}
-            <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center text-white shadow-xl shadow-orange-500/20 group">
-              <h4 className="text-6xl font-black mb-2 tracking-tighter">
+            <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center mb-12 text-white shadow-xl shadow-orange-500/20 group">
+              <h4 className="stat-num text-6xl font-black mb-2 tracking-tighter">
                 <Counter end={99.9} suffix="%" />
               </h4>
               <p className="text-xs uppercase tracking-[0.2em] font-bold opacity-80 mb-6">Índice de Precisión</p>
@@ -337,154 +407,82 @@ function Nosotros() {
           </div>
         </section>
 
-        {/* 3. TIMELINE SECTION (HITOS DE INNOVACIÓN) - RUTA DE PISTA */}
-        <section className="bg-gradient-to-b from-gray-50 to-white py-32 relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-orange-500 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-10 right-10 w-48 h-48 bg-orange-600 rounded-full blur-3xl"></div>
-          </div>
-
-          <div className="max-w-7xl mx-auto px-4 relative z-10">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-24 gap-8">
-              <div className="space-y-4">
-                <p className="text-orange-500 font-bold uppercase tracking-widest text-sm">TRAYECTORIA</p>
-                <h2 className="text-5xl font-bold text-gray-900 tracking-tight">Hitos de Innovación</h2>
-              </div>
-              <p className="content-text text-gray-500 max-w-md border-l-2 border-orange-500 pl-6 py-2">
+        {/* 3. TIMELINE SECTION (HITOS DE INNOVACIÓN) - LÍNEA DE TIEMPO LIMPIA */}
+        <section className="bg-gradient-to-b from-gray-50 to-white section relative overflow-hidden">
+          <div className="max-w-4xl mx-auto px-4 relative z-10">
+            <div className="text-center mb-16">
+              <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">TRAYECTORIA</p>
+              <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">Hitos de Innovación</h2>
+              <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto">
                 Una década transformando la seguridad vial a través de la excelencia técnica.
               </p>
             </div>
 
-            {/* Ruta de Pista Visual */}
-            <div className="relative">
-              {/* Pista principal - línea curva */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-2 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 rounded-full -translate-x-1/2 hidden md:block"></div>
+            {/* Línea central vertical */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 -translate-x-1/2 hidden lg:block" />
+            <div className="absolute left-1/2 top-0 bottom-0 w-[4px] bg-orange-500/30 -translate-x-1/2 lg:hidden" />
 
-              {/* Líneas de pista decorativas */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-white/50 rounded-full -translate-x-1/2 hidden md:block"></div>
+            <div className="space-y-16 lg:space-y-20">
+              {/* Hito 1 - 2014 */}
+              <RevealOnScroll className="group">
+                <Milestone
+                  year="2014"
+                  title="Fundación"
+                  description="Nacimiento del primer taller Técnico en la región, revolucionando los estándares con profesionales de la industria."
+                  image="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  number="01"
+                  side="left"
+                />
+              </RevealOnScroll>
 
-              {/* Marcas de pista */}
-              <div className="absolute left-1/2 top-0 bottom-0 w-32 h-2 bg-white/30 rounded-full -translate-x-1/2 hidden md:block" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 10px, white 10px, white 20px)' }}></div>
+              {/* Hito 2 - 2019 */}
+              <RevealOnScroll className="group delay-200">
+                <Milestone
+                  year="2019"
+                  title="Innovación Digital"
+                  description="Implementación de diagnósticos basados en la nube y reportes digitales automatizados para transparencia total."
+                  image="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  number="02"
+                  side="right"
+                />
+              </RevealOnScroll>
 
-              <div className="space-y-24 md:space-y-32">
-                {/* Hito 1 - 2014 */}
-                <div className="relative flex flex-col md:flex-row items-center gap-12 md:gap-16 group">
-                  {/* Conector de pista */}
-                  <div className="absolute left-1/2 top-1/2 w-8 h-8 bg-white border-4 border-orange-400 rounded-full -translate-x-1/2 -translate-y-1/2 hidden md:block z-20 shadow-lg">
-                    <div className="absolute inset-1 bg-orange-400 rounded-full animate-pulse"></div>
+              {/* Hito 3 - 2025 */}
+              <RevealOnScroll className="group delay-400">
+                <Milestone
+                  year="2025"
+                  title="Liderazgo Regional"
+                  description="Consolidación como la red de inspección técnica más avanzada del continente, con más de 30 centros operativos."
+                  image="https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  number="03"
+                  side="left"
+                  featured
+                />
+              </RevealOnScroll>
+
+              {/* Meta */}
+              <div className="relative lg:hidden">
+                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 rounded-full border-2 border-orange-400 shadow-xl mx-auto">
+                  <div className="w-5 h-5 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                   </div>
-
-                  <div className="flex-1 text-center md:text-right md:order-1">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900 text-orange-400 font-bold text-sm mb-6 uppercase tracking-widest border border-gray-800">
-                      <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
-                      2014
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Fundación</h3>
-                    <p className="content-text text-gray-600 max-w-md ml-auto">
-                      Nacimiento del primer taller Técnico en la región, revolucionando los estándares con profesionales de la industria.
-                    </p>
-                  </div>
-
-                  <div className="relative z-30 flex items-center justify-center md:order-2">
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl flex items-center justify-center text-orange-400 font-bold text-xl border-2 border-orange-400 transition-all duration-500 group-hover:scale-110 group-hover:rotate-6 group-hover:shadow-orange-400/50">
-                      <span className="bg-gradient-to-br from-orange-400 to-orange-600 bg-clip-text text-transparent">01</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 md:order-3">
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                      <div className="relative rounded-2xl overflow-hidden h-64 shadow-2xl border border-gray-200">
-                        <img src="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="2014" className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hito 2 - 2019 */}
-                <div className="relative flex flex-col md:flex-row items-center gap-12 md:gap-16 group">
-                  {/* Conector de pista */}
-                  <div className="absolute left-1/2 top-1/2 w-8 h-8 bg-white border-4 border-orange-400 rounded-full -translate-x-1/2 -translate-y-1/2 hidden md:block z-20 shadow-lg">
-                    <div className="absolute inset-1 bg-orange-400 rounded-full animate-pulse"></div>
-                  </div>
-
-                  <div className="flex-1 md:order-3 text-center md:text-left">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-900 text-orange-400 font-bold text-sm mb-6 uppercase tracking-widest border border-gray-800">
-                      <span className="w-2 h-2 bg-orange-400 rounded-full"></span>
-                      2019
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Innovación Digital</h3>
-                    <p className="content-text text-gray-600 max-w-md">
-                      Implementación de diagnósticos basados en la nube y reportes digitales automatizados para transparencia total.
-                    </p>
-                  </div>
-
-                  <div className="relative z-30 flex items-center justify-center md:order-2">
-                    <div className="w-20 h-20 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl flex items-center justify-center text-orange-400 font-bold text-xl border-2 border-orange-400 transition-all duration-500 group-hover:scale-110 group-hover:-rotate-6 group-hover:shadow-orange-400/50">
-                      <span className="bg-gradient-to-br from-orange-400 to-orange-600 bg-clip-text text-transparent">02</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 md:order-1">
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-orange-400 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-40 transition duration-300"></div>
-                      <div className="relative rounded-2xl overflow-hidden h-64 shadow-2xl border border-gray-200">
-                        <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="2019" className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Hito 3 - 2025 */}
-                <div className="relative flex flex-col md:flex-row items-center gap-12 md:gap-16 group">
-                  {/* Conector de pista */}
-                  <div className="absolute left-1/2 top-1/2 w-10 h-10 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full -translate-x-1/2 -translate-y-1/2 hidden md:block z-20 shadow-xl shadow-orange-400/50">
-                    <div className="absolute inset-2 bg-white rounded-full"></div>
-                    <div className="absolute inset-3 bg-orange-500 rounded-full animate-pulse"></div>
-                  </div>
-
-                  <div className="flex-1 text-center md:text-right md:order-1">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold text-sm mb-6 uppercase tracking-widest shadow-lg">
-                      <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                      2025
-                    </div>
-                    <h3 className="text-3xl font-bold text-gray-900 mb-6">Liderazgo Regional</h3>
-                    <p className="content-text text-gray-600 max-w-md ml-auto">
-                      Consolidación como la red de inspección técnica más avanzada del continente, con más de 30 centros operativos.
-                    </p>
-                  </div>
-
-                  <div className="relative z-30 flex items-center justify-center md:order-2">
-                    <div className="w-20 h-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl shadow-2xl flex items-center justify-center text-white font-bold text-xl border-2 border-white/20 transition-all duration-500 group-hover:scale-125 group-hover:rotate-12 shadow-orange-500/50">
-                      <span className="text-white">03</span>
-                    </div>
-                  </div>
-
-                  <div className="flex-1 md:order-3">
-                    <div className="relative group">
-                      <div className="absolute -inset-1 bg-gradient-to-r from-orange-500 to-orange-600 rounded-2xl blur opacity-40 group-hover:opacity-60 transition duration-300"></div>
-                      <div className="relative rounded-2xl overflow-hidden h-64 shadow-2xl border border-orange-400/50">
-                        <img src="https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="2025" className="w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-orange-900/30 to-transparent"></div>
-                      </div>
-                    </div>
+                  <span className="text-white font-bold">META: Excelencia Continua</span>
+                  <div className="w-5 h-5 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
+                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                   </div>
                 </div>
               </div>
+            </div>
 
-              {/* Meta de llegada - Bandera de meta */}
-              <div className="relative mt-16 text-center">
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 rounded-full border-2 border-orange-400 shadow-2xl">
-                  <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <span className="text-white font-bold">META: Excelencia Continua</span>
-                  <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                    <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                  </div>
+            {/* Meta de llegada - Solo desktop */}
+            <div className="hidden lg:block mt-12 text-center">
+              <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-full border-2 border-orange-400 shadow-2xl">
+                <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
+                </div>
+                <span className="text-white font-black text-lg">META: Excelencia Continua</span>
+                <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
                 </div>
               </div>
             </div>
@@ -492,142 +490,144 @@ function Nosotros() {
         </section>
 
         {/* 4. CONVENIOS Y PLANES EMPRESARIALES */}
-        <section className="max-w-7xl mx-auto px-4 py-32 border-t border-gray-100">
-          <div className="text-center mb-20">
+        <section className="max-w-7xl mx-auto px-4 section border-t border-gray-100">
+          <div className="text-center mb-12">
             <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">SOLUCIONES B2B</p>
             <h2 className="text-5xl font-bold text-gray-900 tracking-tight mb-6">Planes para cada <span className="text-orange-500">Necesidad</span></h2>
             <p className="text-gray-500 max-w-2xl mx-auto font-medium text-lg">Ofrecemos programas integrales de revisión técnica diseñados para optimizar la gestión de su flota vehicular.</p>
           </div>
 
-          {/* Tabs Navigation */}
-          <div className="flex flex-wrap justify-center border-b border-gray-200 mb-16">
-            {['flotas', 'transportistas', 'aseguradoras'].map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`px-10 py-5 text-lg font-bold transition-all relative capitalize ${activeCategory === cat ? 'text-orange-600' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-              >
-                {cat === 'flotas' ? 'Flotas Corporativas' : cat}
-                {activeCategory === cat && (
-                  <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-500 rounded-full" />
-                )}
-              </button>
-            ))}
-          </div>
+          {/* Carrusel: 1 card en móvil, 2 en tablet, 3 en desktop. Scrollbar oculta, puntos indicadores. */}
+          <div className="relative">
+            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 -mx-4 px-4 scrollbar-hide">
+              {/* Card 1: Flotas de Empresa */}
+              <RevealOnScroll>
+                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+                  <div className="h-64 overflow-hidden relative">
+                    <img
+                      src="https://images.unsplash.com/photo-1586528116311-ad86d3ef37f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                      alt="Flotas"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
+                      <Building2 className="text-orange-600 w-7 h-7" />
+                    </div>
+                  </div>
+                  <div className="p-10 flex flex-col">
+                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Flotas de Empresa</h3>
+                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
+                      Optimice la gestión técnica de sus vehículos comerciales con tarifas preferenciales y facturación centralizada.
+                    </p>
+                    <div className="space-y-4 mb-10">
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Descuentos por volumen</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Reportes mensuales de estado</span>
+                      </div>
+                    </div>
+                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
+                      Saber más
+                    </PremiumButton>
+                  </div>
+                </div>
+              </RevealOnScroll>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-            {/* Card 1: Flotas de Empresa */}
-            <RevealOnScroll>
-              <div className={`bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group h-full flex flex-col ${activeCategory !== 'flotas' && activeCategory !== 'todos' ? 'opacity-40 grayscale scale-95' : ''}`}>
-                <div className="h-64 overflow-hidden relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1586528116311-ad86d3ef37f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    alt="Flotas"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                    <Building2 className="text-orange-600 w-7 h-7" />
-                  </div>
-                </div>
-                <div className="p-10 flex-grow flex flex-col">
-                  <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Flotas de Empresa</h3>
-                  <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                    Optimice la gestión técnica de sus vehículos comerciales con tarifas preferenciales y facturación centralizada.
-                  </p>
-                  <div className="space-y-4 mb-10">
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Descuentos por volumen</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Reportes mensuales de estado</span>
+              {/* Card 2: Empresas de Transporte */}
+              <RevealOnScroll className="delay-200">
+                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+                  <div className="h-64 overflow-hidden relative">
+                    <img
+                      src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                      alt="Transporte"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
+                      <Truck className="text-orange-600 w-7 h-7" />
                     </div>
                   </div>
-                  <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                    Saber más
-                  </PremiumButton>
+                  <div className="p-10 flex flex-col">
+                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Transporte de Carga</h3>
+                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
+                      Prioridad en turnos y atención técnica especializada para vehículos pesados y de transporte logístico.
+                    </p>
+                    <div className="space-y-4 mb-10">
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Horarios flexibles VIP</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Asesoría técnica normativa</span>
+                      </div>
+                    </div>
+                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
+                      Saber más
+                    </PremiumButton>
+                  </div>
                 </div>
-              </div>
-            </RevealOnScroll>
+              </RevealOnScroll>
 
-            {/* Card 2: Empresas de Transporte */}
-            <RevealOnScroll className="delay-200">
-              <div className={`bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group h-full flex flex-col ${activeCategory !== 'transportistas' && activeCategory !== 'todos' ? 'opacity-40 grayscale scale-95' : ''}`}>
-                <div className="h-64 overflow-hidden relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    alt="Transporte"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                    <Truck className="text-orange-600 w-7 h-7" />
-                  </div>
-                </div>
-                <div className="p-10 flex-grow flex flex-col">
-                  <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Transporte de Carga</h3>
-                  <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                    Prioridad en turnos y atención técnica especializada para vehículos pesados y de transporte logístico.
-                  </p>
-                  <div className="space-y-4 mb-10">
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Horarios flexibles VIP</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Asesoría técnica normativa</span>
+              {/* Card 3: Aseguradoras */}
+              <RevealOnScroll className="delay-400">
+                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+                  <div className="h-64 overflow-hidden relative">
+                    <img
+                      src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                      alt="Aseguradoras"
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
+                      <ShieldCheck className="text-orange-600 w-7 h-7" />
                     </div>
                   </div>
-                  <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                    Saber más
-                  </PremiumButton>
+                  <div className="p-10 flex flex-col">
+                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Aliados de Seguros</h3>
+                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
+                      Integración de servicios para siniestros y revisiones preventivas personalizadas para todos sus asegurados.
+                    </p>
+                    <div className="space-y-4 mb-10">
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Validación digital inmediata</span>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                        <CheckCircle2 size={18} className="text-orange-500" />
+                        <span>Red de beneficios compartida</span>
+                      </div>
+                    </div>
+                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
+                      Saber más
+                    </PremiumButton>
+                  </div>
                 </div>
-              </div>
-            </RevealOnScroll>
+              </RevealOnScroll>
+            </div>
 
-            {/* Card 3: Aseguradoras */}
-            <RevealOnScroll className="delay-400">
-              <div className={`bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group h-full flex flex-col ${activeCategory !== 'aseguradoras' && activeCategory !== 'todos' ? 'opacity-40 grayscale scale-95' : ''}`}>
-                <div className="h-64 overflow-hidden relative">
-                  <img
-                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                    alt="Aseguradoras"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                    <ShieldCheck className="text-orange-600 w-7 h-7" />
-                  </div>
-                </div>
-                <div className="p-10 flex-grow flex flex-col">
-                  <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Aliados de Seguros</h3>
-                  <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                    Integración de servicios para siniestros y revisiones preventivas personalizadas para todos sus asegurados.
-                  </p>
-                  <div className="space-y-4 mb-10">
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Validación digital inmediata</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                      <CheckCircle2 size={18} className="text-orange-500" />
-                      <span>Red de beneficios compartida</span>
-                    </div>
-                  </div>
-                  <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                    Saber más
-                  </PremiumButton>
-                </div>
-              </div>
-            </RevealOnScroll>
+            {/* Puntos indicadores (solo móvile/tablet) */}
+            <div className="flex justify-center gap-2 mt-4 md:hidden">
+              {[0, 1, 2].map((i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setPlanIndex(i)}
+                  aria-label={`Ir al plan ${i + 1}`}
+                  aria-current={planIndex === i}
+                  className={`h-2 transition-all duration-300 ${
+                    planIndex === i ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                  } rounded-full`}
+                />
+              ))}
+            </div>
           </div>
         </section>
 
         {/* 5. SERVICIOS COMPLEMENTARIOS (ESCUELA / POLICLINICOS) */}
-        <section className="bg-gray-50 py-32 border-t border-gray-100">
+        <section className="bg-gray-50 section border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4">
-            <div className="text-center mb-20">
+            <div className="text-center mb-12">
               <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">MÁS QUE REVISIONES</p>
               <h2 className="text-5xl font-bold text-gray-900 tracking-tight mb-6">Servicios <span className="text-orange-500">Complementarios</span></h2>
               <p className="text-gray-500 max-w-2xl mx-auto font-medium text-lg">Nuestra red de excelencia incluye formación especializada y servicios médicos certificados.</p>

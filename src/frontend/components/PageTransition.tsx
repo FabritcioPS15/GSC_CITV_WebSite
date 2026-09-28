@@ -1,6 +1,7 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Loader from './Loader';
+import { scrollToTop } from './SmoothScroll';
 
 interface PageTransitionProps {
     children: ReactNode;
@@ -16,12 +17,12 @@ export default function PageTransition({ children }: PageTransitionProps) {
             // Start transition
             setIsTransitioning(true);
 
-            // Artificial delay for the loader to be visible and smooth
+            // Delay for the smooth, natural fluid wave animation to play completely
             const timer = setTimeout(() => {
                 setDisplayLocation(location);
                 setIsTransitioning(false);
-                window.scrollTo(0, 0); // Scroll to top on page change
-            }, 600); // 0.6 seconds is enough for a snappy feel
+                scrollToTop(); // Scroll to top on page change
+            }, 1450); // Gives time to appreciate the fluid wave effect
 
             return () => clearTimeout(timer);
         }

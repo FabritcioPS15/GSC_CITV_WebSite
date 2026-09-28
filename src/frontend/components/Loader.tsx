@@ -9,17 +9,26 @@ const Loader = ({ onComplete }: LoaderProps) => {
         if (onComplete) {
             const timer = setTimeout(() => {
                 onComplete();
-            }, 2000); // Wait for initial animation
+            }, 1450);
             return () => clearTimeout(timer);
         }
     }, [onComplete]);
 
     return (
         <div className="loader-container">
-            <div className="three-body">
-                <div className="three-body__dot" />
-                <div className="three-body__dot" />
-                <div className="three-body__dot" />
+            <div className="fluid-loader-wrapper">
+                <img 
+                    src="/LogoRTPSanCristobal_horizontal.png" 
+                    alt="Cargando..." 
+                    className="fluid-loader-base"
+                />
+                <div className="fluid-loader-fill-container">
+                    <img 
+                        src="/LogoRTPSanCristobal_horizontal.png" 
+                        alt="Cargando..." 
+                        className="fluid-loader-fill"
+                    />
+                </div>
             </div>
         </div>
     );

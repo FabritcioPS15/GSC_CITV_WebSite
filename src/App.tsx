@@ -1,9 +1,10 @@
-import { useEffect, lazy, Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './frontend/components/Header';
 import Footer from './frontend/components/Footer';
 import SmoothScroll from './frontend/components/SmoothScroll';
+import ScrollToTop from './frontend/components/ScrollToTop';
 import FloatingWhatsApp from './frontend/components/FloatingWhatsApp';
 import PageTransition from './frontend/components/PageTransition';
 import CookieConsent from './frontend/components/CookieConsent';
@@ -22,16 +23,6 @@ const RevisionConsultaPage = lazy(() => import('./frontend/pages/RevisionConsult
 const GasConsultaPage = lazy(() => import('./frontend/pages/GasConsultaPage'));
 const Cupon = lazy(() => import('./frontend/pages/Cupon'));
 const NotFound = lazy(() => import('./frontend/pages/NotFound'));
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
 
 function AppContent() {
   const location = useLocation();

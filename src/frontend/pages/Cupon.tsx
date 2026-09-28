@@ -3,6 +3,7 @@ import { Ticket, CheckCircle2, Send, ArrowRight, ShieldCheck, Mail, Phone, Info 
 import PremiumButton from '../components/PremiumButton';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { Helmet } from 'react-helmet-async';
+import { scrollToTop } from '../components/SmoothScroll';
 
 const CuponPage: React.FC = () => {
     const [step, setStep] = useState<'form' | 'success'>('form');
@@ -15,7 +16,7 @@ const CuponPage: React.FC = () => {
     });
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        scrollToTop();
     }, []);
 
     const handleSubmit = (e: React.FormEvent) => {

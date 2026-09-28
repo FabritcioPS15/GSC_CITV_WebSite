@@ -138,7 +138,7 @@ function Requisitos() {
     return (
         <div className="bg-gray-50 min-h-screen">
             {/* Standardized Left-Aligned Banner (Compact) */}
-            <section className="relative h-[40vh] min-h-[350px] flex items-center bg-black overflow-hidden">
+            <section className="page-banner">
                 {/* Background Layer */}
                 <div className="absolute inset-0 z-0">
                     <img
@@ -152,8 +152,8 @@ function Requisitos() {
                 <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
                     <RevealOnScroll>
                         <div className="max-w-4xl flex items-center gap-8 group">
-                            <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
-                            <div className="space-y-6">
+                            <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
+                            <div className="space-y-4">
                                 <h1 className="banner-title text-white animate-grow-text">
                                     Requisitos y <span className="text-orange-500">Proceso</span>
                                 </h1>
@@ -173,7 +173,7 @@ function Requisitos() {
             <section className="max-w-7xl mx-auto px-4 py-16">
 
                 {/* Requirements Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-24">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16">
                     {/* General Requirements */}
                     <RevealOnScroll>
                         <div>
@@ -223,8 +223,8 @@ function Requisitos() {
 
                 {/* INTERACTIVE PROCESS MAP */}
                 <RevealOnScroll>
-                    <div className="mb-24">
-                        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+                    <div className="">
+                        <h2 className="text-3xl md:text-4xl font-bold text-center mb-14">
                             Proceso de Inspección <span className="text-orange-600">Paso a Paso</span>
                         </h2>
 

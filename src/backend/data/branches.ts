@@ -1,3 +1,5 @@
+import { FotoGaleria } from './galeria';
+
 export interface Branch {
     id: number;
     name: string;
@@ -7,17 +9,44 @@ export interface Branch {
     type: 'RTP' | 'RTV';
     googleMapsUrl?: string;
     wazeUrl?: string;
-    placeId?: string; // Google Places ID para obtener reseñas
+    placeId?: string; // Google Places ID, por si se integran reseñas reales en el futuro
     phone?: string;
+    /** WhatsApp de la sede en formato internacional (solo dígitos, con 51). Si falta, usa WHATSAPP_INSPECCION. */
+    whatsapp?: string;
     schedule?: string;
     image?: string;
-    rating?: number; // Calificación promedio
-    reviewCount?: number; // Cantidad de reseñas
-    pricing: {
-        vehicleType: string;
-        usage: string;
-        price: number;
-    }[];
+    /** Overrides de precio por tarifa para esta sede. Si no existe, se usa el precio base del tarifario. */
+    tarifario?: Record<string, number>;
+    /** Fotos propias de la sede. Si no se define, se usa la galería de muestra. */
+    galeria?: FotoGaleria[];
+}
+
+/**
+ * WhatsApp central de atención para inspecciones vehiculares (RTV).
+ * Formato internacional: código de país 51 + número, solo dígitos.
+ */
+export const WHATSAPP_INSPECCION = '51958077827';
+
+/**
+ * Normaliza un número al formato que exige wa.me (solo dígitos, con código de país).
+ * Los móviles peruanos son 9 dígitos y empiezan con 9. Cualquier valor que no
+ * cumpla ese formato (fijos, garbage, vacío) cae al número central.
+ */
+export function normalizeWhatsapp(phone?: string | null): string {
+    const digits = (phone ?? '').replace(/\D/g, '');
+    if (!digits) return WHATSAPP_INSPECCION;
+
+    const nacional = digits.length > 9 && digits.startsWith('51')
+        ? digits.slice(2)
+        : digits;
+
+    if (!/^9\d{8}$/.test(nacional)) return WHATSAPP_INSPECCION;
+    return `51${nacional}`;
+}
+
+/** Construye el enlace de WhatsApp con el mensaje ya escrito. */
+export function whatsappUrl(phone: string | null | undefined, mensaje: string): string {
+    return `https://wa.me/${normalizeWhatsapp(phone)}?text=${encodeURIComponent(mensaje)}`;
 }
 
 export const branches: Branch[] = [
@@ -31,21 +60,17 @@ export const branches: Branch[] = [
         type: 'RTP',
         googleMapsUrl: 'https://maps.app.goo.gl/2khduJ8CDpCo8Bbr8',
         wazeUrl: 'https://waze.com/ul?ll=-11.984339249713159,-77.12509328775818&navigate=yes',
-        placeId: 'ChIJN8tD5K5bZFIRRMjJ3jwLmAA', // Ejemplo - reemplazar con placeId real
+        placeId: 'ChIJN8tD5K5bZFIRRMjJ3jwLmAA', // Reemplazar con el placeId real
         phone: '(01) 123-4567',
         schedule: 'Lun - Sab: 7:00 - 20:00',
-        rating: 4.7,
-        reviewCount: 234,
         image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-        pricing: [
-            { vehicleType: 'liviano', usage: 'auto particular', price: 55 },
-            { vehicleType: 'liviano', usage: 'taxi', price: 75 },
-            { vehicleType: 'liviano', usage: 'carga', price: 80 },
-            { vehicleType: 'pesado', usage: 'particular', price: 100 },
-            { vehicleType: 'pesado', usage: 'carga', price: 120 },
-            { vehicleType: 'pesado', usage: 'pasajeros', price: 130 },
-            { vehicleType: 'pesado', usage: 'escolar', price: 140 },
-        ]
+        tarifario: {
+            'part-automovil': 55,
+            'pub-taxi': 75,
+            'mer-liviano': 80,
+            'mer-camion': 120,
+            'pub-colectivo': 130,
+        }
     },
     {
         id: 2,
@@ -56,19 +81,15 @@ export const branches: Branch[] = [
         type: 'RTV',
         googleMapsUrl: 'https://maps.app.goo.gl/7F72yS6adsvrjVoa7',
         wazeUrl: 'https://waze.com/ul?ll=-11.96993651592964,-77.08508058845739&navigate=yes',
-        placeId: 'ChIJ4Y6uZj5bZFIRRMjJ3jwLmAA', // Ejemplo - reemplazar con placeId real
+        placeId: 'ChIJ4Y6uZj5bZFIRRMjJ3jwLmAA', // Reemplazar con el placeId real
         phone: '(01) 987-6543',
         schedule: 'Lun - Sab: 7:00 - 20:00',
-        rating: 4.5,
-        reviewCount: 187,
         image: 'https://images.unsplash.com/photo-1632733711679-5292d6863f12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-        pricing: [
-            { vehicleType: 'liviano', usage: 'particular', price: 70 }, // Slightly different price
-            { vehicleType: 'liviano', usage: 'taxi', price: 80 },
-            { vehicleType: 'moto', usage: 'particular', price: 45 },
-            { vehicleType: 'moto', usage: 'taxi', price: 55 },
-            // Does not support heavy vehicles
-        ]
+        tarifario: {
+            'part-automovil': 70,
+            'pub-taxi': 80,
+            'esp-motocicleta': 45,
+        }
     },
 
     // Provincia Branches
@@ -81,12 +102,11 @@ export const branches: Branch[] = [
         type: 'RTP',
         phone: '(054) 123-456',
         schedule: 'Lun - Sab: 8:00 - 18:00',
-        pricing: [
-            { vehicleType: 'liviano', usage: 'particular', price: 60 },
-            { vehicleType: 'liviano', usage: 'taxi', price: 70 },
-            { vehicleType: 'pesado', usage: 'particular', price: 90 },
-            { vehicleType: 'pesado', usage: 'carga', price: 110 },
-        ]
+        tarifario: {
+            'part-automovil': 60,
+            'pub-taxi': 70,
+            'mer-camion': 110,
+        }
     },
     {
         id: 4,
@@ -97,10 +117,10 @@ export const branches: Branch[] = [
         type: 'RTP',
         phone: '(084) 123-456',
         schedule: 'Lun - Sab: 8:00 - 17:00',
-        pricing: [
-            { vehicleType: 'liviano', usage: 'particular', price: 60 },
-            { vehicleType: 'pesado', usage: 'carga', price: 115 },
-        ]
+        tarifario: {
+            'part-automovil': 60,
+            'mer-camion': 115,
+        }
     },
     {
         id: 5,
@@ -111,10 +131,10 @@ export const branches: Branch[] = [
         type: 'RTV',
         phone: '(044) 123-456',
         schedule: 'Lun - Sab: 8:00 - 18:00',
-        pricing: [
-            { vehicleType: 'moto', usage: 'particular', price: 40 },
-            { vehicleType: 'menor', usage: 'particular', price: 35 },
-        ]
+        tarifario: {
+            'esp-motocicleta': 40,
+            'esp-menor': 35,
+        }
     },
     {
         id: 6,
@@ -125,10 +145,10 @@ export const branches: Branch[] = [
         type: 'RTV',
         phone: '(044) 123-456',
         schedule: 'Lun - Sab: 8:00 - 18:00',
-        pricing: [
-            { vehicleType: 'moto', usage: 'particular', price: 40 },
-            { vehicleType: 'menor', usage: 'particular', price: 35 },
-        ]
+        tarifario: {
+            'esp-motocicleta': 40,
+            'esp-menor': 35,
+        }
     },
     {
         id: 7,
@@ -139,9 +159,9 @@ export const branches: Branch[] = [
         type: 'RTP',
         phone: '(044) 123-456',
         schedule: 'Lun - Sab: 8:00 - 18:00',
-        pricing: [
-            { vehicleType: 'liviano', usage: 'particular', price: 60 },
-            { vehicleType: 'pesado', usage: 'carga', price: 110 },
-        ]
+        tarifario: {
+            'part-automovil': 60,
+            'mer-camion': 110,
+        }
     }
 ];

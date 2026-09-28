@@ -38,8 +38,8 @@ function Inicio() {
 
       {/* Acerca de Nosotros Section */}
       <RevealOnScroll>
-        <section className="max-w-7xl mx-auto px-4 py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <section className="max-w-7xl mx-auto px-4 section">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 mb-16 items-center">
             <div className="space-y-6">
               <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm">Sobre Nosotros</h4>
               <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
@@ -78,12 +78,12 @@ function Inicio() {
                     <div className="absolute bottom-8 left-8 right-8">
                         <div className="bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-xl flex items-center justify-around border border-white/40">
                             <div className="text-center">
-                                <p className="text-3xl font-black text-orange-500">10+</p>
+                                <p className="stat-num text-3xl font-black text-orange-500">10+</p>
                                 <p className="text-[10px] font-bold text-gray-800 uppercase tracking-wider mt-1">Años de Exp.</p>
                             </div>
                             <div className="w-[1px] h-12 bg-gray-200"></div>
                             <div className="text-center">
-                                <p className="text-3xl font-black text-orange-500">15</p>
+                                <p className="stat-num text-3xl font-black text-orange-500">15</p>
                                 <p className="text-[10px] font-bold text-gray-800 uppercase tracking-wider mt-1">Plantas</p>
                             </div>
                         </div>
@@ -99,13 +99,13 @@ function Inicio() {
 
       {/* Por qué elegirnos Section (Dark Minimalist) */}
       <RevealOnScroll>
-        <section className="bg-[#0a0a0a] py-24 relative overflow-hidden">
+        <section className="bg-[#0a0a0a] section relative overflow-hidden">
           {/* Decorative Background */}
           <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/5 skew-x-12 transform translate-x-1/2"></div>
           <div className="absolute bottom-0 left-0 w-1/4 h-1/2 bg-orange-500/5 -skew-x-12 transform -translate-x-1/2"></div>
 
           <div className="max-w-7xl mx-auto px-4 relative z-10">
-            <div className="text-center mb-16">
+            <div className="text-center mb-12">
                 <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">La seguridad es primero</h4>
                 <h2 className="text-4xl md:text-5xl font-black text-white leading-tight">¿Por qué elegir <span className="text-orange-500">GSC?</span></h2>
             </div>
@@ -134,8 +134,8 @@ function Inicio() {
 
       {/* Servicios Principales */}
       <RevealOnScroll>
-        <section className="max-w-7xl mx-auto px-4 py-24">
-          <div className="mb-16">
+        <section className="max-w-7xl mx-auto px-4 section">
+          <div className="">
               <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-3">Soluciones Integrales</h4>
               <div className="flex justify-between items-end gap-6 flex-wrap">
                   <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight leading-none">Nuestros Servicios</h2>
@@ -180,40 +180,8 @@ function Inicio() {
         </section>
       </RevealOnScroll>
 
-      {/* Testimonios */}
       <RevealOnScroll>
-        <section className="bg-white py-24 border-y border-gray-100">
-          <div className="max-w-7xl mx-auto px-4">
-            <h2 className="text-4xl font-black text-center mb-16 text-gray-900 tracking-tight">Lo que dicen <span className="text-orange-500">nuestros clientes</span></h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                  { name: "Juan Pérez", role: "Transportista Independiente", text: "Excelente servicio en RTP Callao, muy rápidos y transparentes con los resultados de mi camión." },
-                  { name: "María González", role: "Admin. de Flota", text: "El convenio corporativo nos ha ahorrado mucho tiempo. Recomendados 100% por su profesionalismo." }
-              ].map((item, index) => (
-                <div key={index} className="bg-[#f8fafc] p-8 rounded-3xl border border-gray-100">
-                  <div className="flex items-center mb-6">
-                    <div className="w-14 h-14 mr-4 overflow-hidden rounded-full border-2 border-orange-500 flex-shrink-0">
-                      <img
-                        src={`https://i.pravatar.cc/150?u=${index}`}
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">{item.name}</h4>
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mt-0.5">{item.role}</p>
-                    </div>
-                  </div>
-                  <p className="content-text text-gray-600 italic">
-                    "{item.text}"
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+        <ConveniosCarousel />
       </RevealOnScroll>
 
       <RevealOnScroll>
@@ -221,8 +189,8 @@ function Inicio() {
       </RevealOnScroll>
 
       <RevealOnScroll>
-        <section className="max-w-7xl mx-auto px-4 py-24">
-          <div className="text-center mb-16">
+        <section className="max-w-7xl mx-auto px-4 section">
+          <div className="text-center mb-12">
               <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-3">Red Nacional</h4>
               <h2 className="text-4xl font-black text-gray-900 tracking-tight">Encuentra tu Sede más Cercana</h2>
           </div>

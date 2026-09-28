@@ -63,7 +63,7 @@ export default function RevisionConsultaPage() {
                 
                 <main className="pt-[90px]">
                     {/* HERO SECTION */}
-                    <section className="relative h-[40vh] min-h-[300px] flex items-center bg-black overflow-hidden">
+                    <section className="page-banner">
                         <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
                             style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
                         />

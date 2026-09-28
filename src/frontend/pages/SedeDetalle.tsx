@@ -1,17 +1,20 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { branches } from '../../backend/data/branches';
-import { MapPin, Phone, ArrowRight, Star, Mail } from 'lucide-react';
-import PremiumButton from '../components/PremiumButton';
+import { MapPin, Phone, ArrowRight, Mail } from 'lucide-react';
 import SimpleBranchMap from '../components/SimpleBranchMap';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { useEffect } from 'react';
+import { scrollToTop } from '../components/SmoothScroll';
+import Tarifico from '../components/Tarifico';
+import GalleryCarousel from '../components/GalleryCarousel';
+import { getGaleria } from '../../backend/data/galeria';
 
 function SedeDetalle() {
     const { id } = useParams<{ id: string }>();
     const branch = branches.find(b => b.id === Number(id));
 
     useEffect(() => {
-        window.scrollTo(0, 0);
+        scrollToTop();
     }, [id]);
 
     if (!branch) {
@@ -20,20 +23,10 @@ function SedeDetalle() {
 
     const emailContacto = `contacto@gruposancristobal.pe`;
 
-    // Helper to get prices
-    const getPriceFor = (type: string, usage: string) => {
-        const p = branch.pricing?.find(p => p.vehicleType === type && (usage === 'any' || p.usage.includes(usage)));
-        return p?.price;
-    };
-
-    const autoPrice = getPriceFor('liviano', 'particular');
-    const camionetaPrice = getPriceFor('liviano', 'carga') || getPriceFor('liviano', 'taxi');
-    const camionPrice = getPriceFor('pesado', 'carga') || getPriceFor('pesado', 'particular');
-
     return (
         <div className="min-h-screen bg-white">
             {/* HERO SECTION - ADAPTADO CON ESTÉTICA PREMIUM */}
-            <section className="relative h-[40vh] min-h-[350px] w-full bg-black overflow-hidden flex items-center">
+            <section className="page-banner w-full">
                 {/* Cuadriláteros de fondo y máscara de imagen adaptativos */}
                 <div className="absolute inset-0 z-0">
                     {/* Fondo Gris Claro (Decorativo) */}
@@ -73,7 +66,7 @@ function SedeDetalle() {
                     {/* Texto Informativo Adaptado - Muy compacto en móvil */}
                     <div className="flex items-center gap-4 md:gap-8">
                         {/* Barra decorativa vertical naranja (Más pequeña en móvil) */}
-                        <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 shadow-[0_0_25px_rgba(249,115,22,0.6)] animate-grow-vertical" />
+                        <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 shadow-[0_0_25px_rgba(249,115,22,0.6)] animate-grow-vertical" />
 
                         <div className="text-white max-w-2xl">
                             <h1 className="banner-title text-white animate-grow-text">
@@ -85,7 +78,7 @@ function SedeDetalle() {
                             </h1>
 
                             {/* Botones Interactivos solo para Móvil - Mejorados */}
-                            <div className="flex gap-4 mt-6 md:hidden">
+                            <div className="flex gap-4 mt-4 md:hidden">
                                 <button className="px-5 py-2.5 bg-[#f97316] text-white text-[11px] font-black uppercase rounded-xl shadow-[0_10px_20px_rgba(249,115,22,0.3)] active:scale-95 transition-all animate-entry-fade animate-stagger-1">
                                     Reservar Cita
                                 </button>
@@ -94,7 +87,7 @@ function SedeDetalle() {
                                 </button>
                             </div>
 
-                            <p className="banner-description text-gray-400 max-w-lg mt-8 animate-entry-fade animate-stagger-3">
+                            <p className="banner-description text-gray-400 max-w-lg mt-5 animate-entry-fade animate-stagger-3">
                                 Guía completa y atención especializada para aprobar tu inspección vehicular sin contratiempos.
                             </p>
                         </div>
@@ -106,11 +99,11 @@ function SedeDetalle() {
             </section>
 
             {/* SERVICIOS SECTION */}
-            <section className="py-32 max-w-7xl mx-auto px-4">
-                <div className="flex items-start gap-6 mb-20">
+            <section className="section max-w-7xl mx-auto px-4">
+                    <div className="flex items-start gap-6 mb-14">
                     <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
                     <div>
-                        <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight uppercase">
+                        <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
                             Servicios de <span className="text-[#f97316]">Inspección</span>
                         </h2>
                         <p className="content-text text-gray-500 max-w-2xl">
@@ -175,157 +168,85 @@ function SedeDetalle() {
             </section>
 
             {/* TARIFAS SECTION */}
-            <section className="py-32 bg-gray-50/50">
+            <section className="section bg-black">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="flex items-start gap-6 mb-20">
+                    <div className="flex items-start gap-6 mb-14">
                         <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
                         <div>
-                            <h2 className="text-4xl font-black text-gray-900 mb-4 tracking-tight uppercase">
+                            <h2 className="text-4xl font-black text-white mb-5 tracking-tight uppercase">
                                 Tarifas y <span className="text-[#f97316]">Costos</span>
                             </h2>
-                            <p className="content-text text-gray-500 max-w-2xl">
+                            <p className="text-sm text-gray-400 max-w-2xl leading-relaxed">
                                 Precios competitivos y transparentes para garantizar la seguridad de su vehículo. Todas las tarifas incluyen impuestos y certificaciones oficiales.
                             </p>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                        {/* Auto */}
-                        <RevealOnScroll className="delay-100">
-                            <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col group">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Automóviles</p>
-                                <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Automóviles</h3>
-                                <p className="content-text text-gray-500 mb-10 min-h-[48px]">
-                                    Uso particular, flotas y transporte de personal ligero.
-                                </p>
-                                <div className="flex items-start gap-1 mb-10">
-                                    <span className="text-gray-900 font-black text-xl mt-1">S/</span>
-                                    <span className="text-7xl font-black text-gray-900 tracking-tighter group-hover:text-orange-500 transition-colors">{autoPrice || 60}.00</span>
-                                </div>
-                                <div className="space-y-4 mb-10 flex-grow">
-                                    {['Incluye IGV', 'Certificado MTC', 'Sticker Holográfico'].map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                                            <div className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                                                <Star size={10} fill="currentColor" />
-                                            </div>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </div>
-                                <PremiumButton className="w-full bg-[#f97316] text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-500/20 text-sm uppercase tracking-widest">
-                                    Confirmar Reserva
-                                </PremiumButton>
-                            </div>
+                    {/* Alto fijo en escritorio: cambiar de categoría con más o menos
+                        vehículos ya no debe cambiar el tamaño de la sección. */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:h-[32rem]">
+                        <RevealOnScroll className="h-full">
+                            <Tarifico
+                                overrides={branch.tarifario}
+                                sedeNombre={branch.name}
+                                whatsapp={branch.whatsapp}
+                            />
                         </RevealOnScroll>
 
-                        {/* Camionetas */}
-                        <RevealOnScroll className="delay-200">
-                            <div className="bg-white rounded-[40px] p-10 border-2 border-orange-500 shadow-2xl shadow-orange-500/10 flex flex-col relative scale-105 z-10 group">
-                                <div className="absolute top-6 right-10 bg-orange-100 text-orange-600 text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full">
-                                    MÁS SOLICITADO
-                                </div>
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Con & Pesquera</p>
-                                <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Camionetas</h3>
-                                <p className="content-text text-gray-500 mb-10 min-h-[48px]">
-                                    Vehículos SUV, pickups y furgones hasta 3.5 toneladas.
-                                </p>
-                                <div className="flex items-start gap-1 mb-10">
-                                    <span className="text-gray-400 font-bold text-sm mt-1 mr-1">Desde</span>
-                                    <span className="text-gray-900 font-black text-xl mt-1">S/</span>
-                                    <span className="text-7xl font-black text-gray-900 tracking-tighter group-hover:text-orange-500 transition-colors">{camionetaPrice || 70}.00</span>
-                                </div>
-                                <div className="space-y-4 mb-10 flex-grow">
-                                    {['Incluye IGV', 'Certificado MTC', 'Sticker Holográfico'].map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                                            <div className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                                                <Star size={10} fill="currentColor" />
-                                            </div>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </div>
-                                <PremiumButton className="w-full bg-[#f97316] text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-500/20 text-sm uppercase tracking-widest">
-                                    Confirmar Reserva
-                                </PremiumButton>
-                            </div>
-                        </RevealOnScroll>
-
-                        {/* Camiones */}
-                        <RevealOnScroll className="delay-300">
-                            <div className="bg-white rounded-[40px] p-10 border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col group">
-                                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Pesados</p>
-                                <h3 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Camiones</h3>
-                                <p className="content-text text-gray-500 mb-10 min-h-[48px]">
-                                    Vehículos de carga y transporte pesado hasta UTPL.
-                                </p>
-                                <div className="flex items-start gap-1 mb-10">
-                                    <span className="text-gray-400 font-bold text-sm mt-1 mr-1">Desde</span>
-                                    <span className="text-gray-900 font-black text-xl mt-1">S/</span>
-                                    <span className="text-7xl font-black text-gray-900 tracking-tighter group-hover:text-orange-500 transition-colors">{camionPrice || 110}.00</span>
-                                </div>
-                                <div className="space-y-4 mb-10 flex-grow">
-                                    {['Incluye IGV', 'Certificado MTC', 'Diagnóstico de RTP'].map((item, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                                            <div className="w-5 h-5 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
-                                                <Star size={10} fill="currentColor" />
-                                            </div>
-                                            {item}
-                                        </div>
-                                    ))}
-                                </div>
-                                <PremiumButton className="w-full bg-[#f97316] text-white font-black py-4 rounded-2xl shadow-lg shadow-orange-500/20 text-sm uppercase tracking-widest">
-                                    Confirmar Reserva
-                                </PremiumButton>
-                            </div>
+                        <RevealOnScroll className="h-full delay-200">
+                            <GalleryCarousel
+                                imagenes={getGaleria(branch.galeria)}
+                                titulo={`Galería · ${branch.name}`}
+                            />
                         </RevealOnScroll>
                     </div>
                 </div>
             </section>
 
             {/* INFO GRID SECTION */}
-            <section className="py-32 max-w-7xl mx-auto px-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-20">
+            <section className="section max-w-7xl mx-auto px-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-20">
                     {/* Column 1: Info Operativa */}
                     <RevealOnScroll>
                         <div>
-                            <div className="flex items-center gap-4 mb-10">
+                            <div className="flex items-center gap-3 mb-6">
                                 <div className="w-1 h-8 bg-[#f97316] rounded-full" />
                                 <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
                                     Información <span className="text-[#f97316]">Operativa</span>
                                 </h3>
                             </div>
-                            <div className="space-y-6">
-                                <div className="flex justify-between items-center text-base">
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-500 font-medium">Lunes - Viernes</span>
                                     <span className="text-gray-900 font-black">07:00 - 19:00</span>
                                 </div>
-                                <div className="flex justify-between items-center text-base">
+                                <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-500 font-medium">Sábados</span>
                                     <span className="text-gray-900 font-black">08:00 - 17:00</span>
                                 </div>
-                                <div className="flex justify-between items-center text-base">
+                                <div className="flex justify-between items-center text-sm">
                                     <span className="text-gray-500 font-medium">Domingos</span>
                                     <span className="text-red-500 font-black uppercase">Cerrado</span>
                                 </div>
                             </div>
 
-                            <div className="mt-12 space-y-4">
-                                <div className="flex items-center gap-5 bg-gray-50 p-5 rounded-[24px] border border-gray-100 transition-all hover:bg-white hover:shadow-xl group">
-                                    <div className="bg-white p-3 rounded-xl text-orange-600 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                        <Phone size={20} />
+                            <div className="mt-8 space-y-3">
+                                <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-xl group">
+                                    <div className="bg-white p-2.5 rounded-lg text-orange-600 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-all">
+                                        <Phone size={18} />
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">TELÉFONO DIRECTO</p>
-                                        <p className="font-black text-gray-900">{branch.phone || '(024) 123-456'}</p>
+                                        <p className="text-sm font-black text-gray-900">{branch.phone || '(024) 123-456'}</p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-5 bg-gray-50 p-5 rounded-[24px] border border-gray-100 transition-all hover:bg-white hover:shadow-xl group">
-                                    <div className="bg-white p-3 rounded-xl text-orange-600 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-all">
-                                        <Mail size={20} />
+                                <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100 transition-all hover:bg-white hover:shadow-xl group">
+                                    <div className="bg-white p-2.5 rounded-lg text-orange-600 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-all">
+                                        <Mail size={18} />
                                     </div>
                                     <div>
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">EMAIL CONSULTAS</p>
-                                        <p className="font-black text-gray-900 truncate max-w-[200px]">{emailContacto}</p>
+                                        <p className="text-sm font-black text-gray-900 truncate max-w-[200px]">{emailContacto}</p>
                                     </div>
                                 </div>
                             </div>
@@ -335,70 +256,27 @@ function SedeDetalle() {
                     {/* Column 2: Ubicación */}
                     <RevealOnScroll className="delay-200">
                         <div>
-                            <div className="flex items-center gap-4 mb-10">
+                            <div className="flex items-center gap-3 mb-6">
                                 <div className="w-1 h-8 bg-[#f97316] rounded-full" />
                                 <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
                                     Ubicación y <span className="text-[#f97316]">Contacto</span>
                                 </h3>
                             </div>
-                            <div className="rounded-[40px] overflow-hidden border border-gray-100 shadow-xl shadow-black/5 h-[220px] mb-8 relative group">
+                            <div className="rounded-[40px] overflow-hidden border border-gray-100 shadow-xl shadow-black/5 h-[180px] mb-6 relative group">
                                 <SimpleBranchMap branch={branch} />
                                 <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all pointer-events-none" />
                             </div>
-                            <div className="flex items-start gap-4">
-                                <div className="bg-orange-100 p-2.5 rounded-xl text-orange-600 mt-1">
-                                    <MapPin size={22} />
+                            <div className="flex items-start gap-3">
+                                <div className="bg-orange-100 p-2 rounded-lg text-orange-600 mt-0.5">
+                                    <MapPin size={18} />
                                 </div>
                                 <div>
-                                    <p className="font-black text-gray-900 text-lg mb-1">{branch.name}</p>
-                                    <p className="content-text text-gray-500 leading-relaxed">{branch.address}</p>
-                                    <button className="text-orange-600 font-black text-[11px] uppercase tracking-widest mt-6 flex items-center gap-2 hover:gap-3 transition-all">
-                                        Ver en Google Maps <ArrowRight size={14} />
+                                    <p className="text-sm font-black text-gray-900 mb-1">{branch.name}</p>
+                                    <p className="text-sm text-gray-500 leading-relaxed">{branch.address}</p>
+                                    <button className="text-orange-600 font-black text-[10px] uppercase tracking-widest mt-4 flex items-center gap-2 hover:gap-3 transition-all">
+                                        Ver en Google Maps <ArrowRight size={13} />
                                     </button>
                                 </div>
-                            </div>
-                        </div>
-                    </RevealOnScroll>
-
-                    {/* Column 3: Reseñas */}
-                    <RevealOnScroll className="delay-300">
-                        <div>
-                            <div className="flex items-center gap-4 mb-10">
-                                <div className="w-1 h-8 bg-[#f97316] rounded-full" />
-                                <h3 className="text-2xl font-black text-gray-900 tracking-tight uppercase">
-                                    Reseñas de <span className="text-[#f97316]">Clientes</span>
-                                </h3>
-                            </div>
-                            <div className="flex items-center gap-4 mb-10 bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                <div className="flex text-orange-400">
-                                    {[...Array(5)].map((_, i) => <Star key={i} size={20} fill={i < 4 ? "currentColor" : "none"} />)}
-                                </div>
-                                <span className="text-4xl font-black text-gray-900">4.5</span>
-                                <div className="h-8 w-px bg-gray-200 mx-2" />
-                                <span className="text-gray-400 text-sm font-bold uppercase tracking-widest">(150 reseñas)</span>
-                            </div>
-
-                            <div className="space-y-6">
-                                <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300">
-                                    <div className="flex items-center justify-between mb-5">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 text-white flex items-center justify-center font-black text-lg">C</div>
-                                            <div>
-                                                <p className="font-black text-gray-900">Carlos Mendoza</p>
-                                                <div className="flex text-orange-400">
-                                                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="currentColor" />)}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <span className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">hace 1 semana</span>
-                                    </div>
-                                    <p className="content-text text-gray-600 italic">
-                                        "Excelente atención muy rápida y profesional. La revisión técnica fue puntual y transparente. El personal es muy amable."
-                                    </p>
-                                </div>
-                                <button className="w-full text-center text-orange-600 font-black text-[11px] uppercase tracking-widest hover:underline pt-4 transition-all">
-                                    Leer todas las reseñas &gt;
-                                </button>
                             </div>
                         </div>
                     </RevealOnScroll>

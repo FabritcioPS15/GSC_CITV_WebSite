@@ -114,7 +114,7 @@ const InspectionWheel: React.FC = () => {
     }, [currentMonthIndex, hoveredIndex]);
 
     return (
-        <section className="py-20 bg-white overflow-hidden">
+        <section className="section bg-white overflow-hidden">
             <div className="max-w-7xl mx-auto px-4">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
 

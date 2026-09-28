@@ -1,7 +1,15 @@
-import { Mail, MapPin, Phone, Clock } from 'lucide-react';
+import React from 'react';
+import { Mail, Phone, Clock, Facebook, Instagram, Music2 } from 'lucide-react';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { Helmet } from 'react-helmet-async';
 import PremiumButton from '../components/PremiumButton';
+import { socialLinks } from '../../backend/data/social';
+
+const socialIcons: Record<string, React.ReactNode> = {
+    Facebook: <Facebook size={20} />,
+    Instagram: <Instagram size={20} />,
+    TikTok: <Music2 size={20} />,
+};
 
 function Contacto() {
     return (
@@ -13,7 +21,7 @@ function Contacto() {
                 <link rel="canonical" href="https://tu-dominio.com/contacto" />
             </Helmet>
             {/* Standardized Left-Aligned Banner (Compact) */}
-            <section className="relative h-[40vh] min-h-[350px] flex items-center bg-black overflow-hidden">
+            <section className="page-banner">
                 {/* Background Layer */}
                 <div className="absolute inset-0 z-0">
                     <img
@@ -26,9 +34,9 @@ function Contacto() {
 
                 <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
                     <RevealOnScroll>
-                        <div className="max-w-3xl flex items-center gap-8 group">
-                            <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
-                            <div className="space-y-6">
+                        <div className="max-w-3xl flex items-center gap-6 group">
+                            <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
+                            <div className="space-y-4">
                                 <h1 className="banner-title text-white animate-grow-text">
                                     Contác<span className="text-orange-500">tanos</span>
                                 </h1>
@@ -55,16 +63,6 @@ function Contacto() {
                             </p>
 
                             <div className="space-y-6">
-                                <div className="flex items-start space-x-4">
-                                    <div className="bg-black text-white p-3">
-                                        <MapPin size={24} />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-lg">Dirección Principal</h3>
-                                        <p className="content-text text-gray-600">Av. Ejemplo 123, Lima, Perú</p>
-                                    </div>
-                                </div>
-
                                 <div className="flex items-start space-x-4">
                                     <div className="bg-black text-white p-3">
                                         <Phone size={24} />
@@ -94,6 +92,37 @@ function Contacto() {
                                         <p className="content-text text-gray-600">Lunes a Sábado: 8:00 AM - 6:00 PM</p>
                                         <p className="content-text text-gray-600">Domingo: Cerrado</p>
                                     </div>
+                                </div>
+                            </div>
+
+                            {/* Redes Sociales */}
+                            <div className="mt-12">
+                                <h3 className="text-2xl font-bold mb-2">Síguenos en redes</h3>
+                                <p className="content-text text-gray-600 mb-6">
+                                    Escríbenos o síguenos para estar al tanto de nuestras sedes, promociones y novedades de seguridad vehicular.
+                                </p>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    {socialLinks.map((s, i) => (
+                                        <a
+                                            key={i}
+                                            href={s.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="group flex items-center gap-4 border-2 border-gray-200 px-5 py-4 hover:border-orange-500 transition-colors duration-300"
+                                        >
+                                            <span className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center shrink-0 group-hover:bg-orange-500 transition-colors duration-300">
+                                                {socialIcons[s.name]}
+                                            </span>
+                                            <span className="flex flex-col">
+                                                <span className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
+                                                    {s.name}
+                                                </span>
+                                                <span className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
+                                                    @gruposancristobal
+                                                </span>
+                                            </span>
+                                        </a>
+                                    ))}
                                 </div>
                             </div>
                         </div>

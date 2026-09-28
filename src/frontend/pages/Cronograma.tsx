@@ -64,7 +64,7 @@ function Cronograma() {
             {helmetContent}
             <div className="min-h-screen bg-[#f8fafc]">
                 {/* HERO SECTION */}
-                <section className="relative h-[40vh] min-h-[350px] flex items-center bg-black overflow-hidden">
+                <section className="page-banner">
                     <div className="absolute inset-0 bg-cover bg-center bg-no-repeat opacity-50"
                         style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1503376780353-7e6692767b70?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80")' }}
                     />
@@ -72,9 +72,9 @@ function Cronograma() {
 
                     <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
                         <RevealOnScroll>
-                            <div className="max-w-3xl flex items-center gap-8 group">
-                                <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
-                                <div className="space-y-6">
+                            <div className="max-w-3xl flex items-center gap-6 group">
+                                <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
+                                <div className="space-y-4">
                                     <h1 className="banner-title text-white animate-grow-text">
                                         Cronograma y <span className="text-orange-500">Consultas</span>
                                     </h1>

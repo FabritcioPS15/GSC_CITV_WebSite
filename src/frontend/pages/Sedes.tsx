@@ -1,15 +1,35 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import RevealOnScroll from '../components/RevealOnScroll';
 import SedesMap from '../components/SedesMap';
 import { branches } from '../../backend/data/branches';
-import { MapPin, Phone, Clock, ArrowRight, ShieldCheck, Navigation, Search, Loader2 } from 'lucide-react';
+import { MapPin, Phone, Clock, ArrowRight, ShieldCheck, Navigation, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PremiumButton from '../components/PremiumButton';
 import { Helmet } from 'react-helmet-async';
 
 function Sedes() {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [nearestBranchId, setNearestBranchId] = useState<number | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+
+  // Auto-scroll para el carrusel de beneficios (solo en móvil)
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const interval = setInterval(() => {
+      if (el.scrollWidth <= el.clientWidth) return; // no hay overflow (desktop)
+      const cardWidth = el.querySelector('.shrink-0')?.clientWidth ?? 0;
+      const gap = 24; // gap-6 = 24px
+      const step = cardWidth + gap;
+      const nextScroll = el.scrollLeft + step;
+      if (nextScroll >= el.scrollWidth - el.clientWidth - 1) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollTo({ left: nextScroll, behavior: 'smooth' });
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const limaBranches = branches.filter((b) => b.region === 'lima');
   const provinciaBranches = branches.filter((b) => b.region === 'provincia');
@@ -79,7 +99,7 @@ function Sedes() {
         <link rel="canonical" href="https://tu-dominio.com/sedes" />
       </Helmet>
       {/* Standardized Left-Aligned Banner (Compact) */}
-      <section className="relative h-[40vh] min-h-[350px] flex items-center bg-black overflow-hidden">
+      <section className="page-banner">
         {/* Background Layer with uniform overlay */}
         <div className="absolute inset-0 z-0">
           <img
@@ -93,23 +113,23 @@ function Sedes() {
         {/* Content Layer Aligned Left */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 w-full">
           <RevealOnScroll>
-            <div className="max-w-3xl flex items-center gap-8 group">
-              <div className="w-1.5 h-32 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
-              <div className="space-y-6">
+            <div className="max-w-3xl flex items-center gap-6 group">
+              <div className="w-1.5 h-20 bg-orange-500 rounded-full shrink-0 animate-grow-vertical" />
+              <div className="space-y-4">
                 <h1 className="banner-title text-white animate-grow-text">
                   Nuestras <span className="text-orange-500">Sedes</span>
                 </h1>
-                <p className="banner-description text-gray-400">
+                <p className="banner-description text-gray-500">
                   Encuentra la planta de revisión técnica vehicular más cercana.
                   Garantizamos una inspección rápida, profesional y certificada en todo el Perú.
                 </p>
 
                 {/* Action Buttons */}
-                <div className="flex flex-wrap gap-6 pt-4 items-center">
+                <div className="flex flex-wrap gap-4 pt-2 items-center">
                   <PremiumButton
                     onClick={findNearest}
                     disabled={loadingLocation}
-                    className="bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30 gap-3"
+                    className="!py-3 bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30 gap-3"
                   >
                     {loadingLocation ? (
                       <Loader2 className="animate-spin" size={20} />
@@ -120,7 +140,7 @@ function Sedes() {
                   </PremiumButton>
 
                   <a href="#mapa" className="text-white hover:text-orange-500 font-bold transition-colors flex items-center gap-2 group">
-                    <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
+                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
                       <Search size={20} />
                     </div>
                     Ver en el mapa
@@ -137,23 +157,27 @@ function Sedes() {
 
       {/* Hero Info Section */}
       <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+        <div className="max-w-7xl mx-auto px-4 relative">
+          {/* Carrusel en móvil, grid en tablet+ */}
+          <div
+            ref={carouselRef}
+            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 px-[calc(50vw-1.5rem)] md:px-0 md:flex-row md:overflow-visible md:snap-none md:pb-0 md:grid md:grid-cols-3 md:gap-8 scrollbar-hide"
+          >
+            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
                 <ShieldCheck className="text-orange-500" size={28} />
               </div>
               <h3 className="text-xl font-bold mb-3">Certificación MTC</h3>
               <p className="content-text text-gray-600">Todas nuestras sedes cuentan con la autorización oficial del Ministerio de Transportes y Comunicaciones.</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
                 <MapPin className="text-orange-500" size={28} />
               </div>
               <h3 className="text-xl font-bold mb-3">Cobertura Nacional</h3>
               <p className="content-text text-gray-600">Estamos presentes en puntos estratégicos de Lima y las principales provincias del Perú.</p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
               <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
                 <Clock className="text-orange-500" size={28} />
               </div>
@@ -161,16 +185,36 @@ function Sedes() {
               <p className="content-text text-gray-600">Horarios extendidos y procesos optimizados para que tu revisión técnica sea lo más rápida posible.</p>
             </div>
           </div>
+
+          {/* Flechas de navegación (solo móvil) */}
+          <div className="absolute inset-y-0 left-0 right-0 md:hidden pointer-events-none">
+            <button
+              type="button"
+              onClick={() => carouselRef.current?.scrollBy({ left: -300, behavior: 'smooth' })}
+              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-700 hover:bg-white hover:shadow-xl transition-all"
+              aria-label="Beneficio anterior"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <button
+              type="button"
+              onClick={() => carouselRef.current?.scrollBy({ left: 300, behavior: 'smooth' })}
+              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-700 hover:bg-white hover:shadow-xl transition-all"
+              aria-label="Siguiente beneficio"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Listado de sedes */}
-      <section className="py-20">
+      <section className="section">
         <div className="max-w-7xl mx-auto px-4">
 
           {/* LIMA */}
           {limaBranches.length > 0 && (
-            <div className="mb-20">
+            <div className="">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">Sedes en Lima</h2>
@@ -343,9 +387,9 @@ function Sedes() {
       </section>
 
       {/* Mapa Interactivo */}
-      <section id="mapa" className="bg-black py-24 overflow-hidden">
+      <section id="mapa" className="section bg-black overflow-hidden">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-16">
+          <div className="text-center mb-12">
             <RevealOnScroll>
               <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Mapa Interactivo de <span className="text-orange-500">Cobertura</span></h2>
               <p className="text-gray-400 max-w-2xl mx-auto">Ubica nuestra red nacional de plantas de revisión técnica y elige la que más te convenga.</p>
@@ -360,7 +404,7 @@ function Sedes() {
       </section>
 
       {/* Footer CTA */}
-      <section className="py-24 relative overflow-hidden bg-gray-50">
+      <section className="section relative overflow-hidden bg-gray-50">
         <div className="absolute top-0 right-0 w-1/3 h-full bg-orange-500/5 skew-x-12 translate-x-1/2" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <div className="max-w-3xl">
