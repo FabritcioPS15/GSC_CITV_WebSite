@@ -10,7 +10,7 @@ import { Branch } from '../../backend/data/branches';
 const RtvPinIcon = L.divIcon({
     className: 'custom-logo-pin-icon',
     html: `
-      <div class="map-pin-wrapper" style="transform: scale(1.2); transform-origin: top center;">
+      <div class="map-pin-wrapper">
         <div class="map-pin-body map-pin-body-branch">
           <div class="map-pin-logo">
             <img src="${rtvLogo}" alt="RTV Logo" style="width: 100%; height: 100%; object-fit: cover;" />
@@ -26,7 +26,7 @@ const RtvPinIcon = L.divIcon({
 const RtpPinIcon = L.divIcon({
     className: 'custom-logo-pin-icon',
     html: `
-      <div class="map-pin-wrapper" style="transform: scale(1.2); transform-origin: top center;">
+      <div class="map-pin-wrapper">
         <div class="map-pin-body map-pin-body-branch">
           <div class="map-pin-logo">
             <img src="${rtpLogo}" alt="RTP Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -64,12 +64,12 @@ export default function SimpleBranchMap({ branch }: SimpleBranchMapProps) {
     };
 
     return (
-        <div className="relative">
-            <div className="h-[200px] w-full rounded-xl overflow-hidden border border-gray-200">
+        <div className="relative h-full w-full">
+            <div className="h-full w-full overflow-hidden">
                 <MapContainer
                     center={branch.position}
                     zoom={15}
-                    scrollWheelZoom={false}
+                    scrollWheelZoom
                     zoomControl={false}
                     attributionControl={false}
                     className="w-full h-full"

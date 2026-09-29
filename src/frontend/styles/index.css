@@ -221,36 +221,51 @@ body.modal-open {
     animation: slideInFromRight 0.4s ease-out forwards;
   }
 
-  /* Botón Premium con efecto Reveal */
+  /* Botón Premium: relleno solido que se invierte a contorno al pasar el cursor.
+     El relleno se retira con un barrido hacia arriba y el texto se mantiene
+     legible en ambos estados. */
   .btn-premium-reveal {
-    @apply relative overflow-hidden transition-all duration-300;
-    background: transparent;
-    border: 1px solid #f97316;
-    color: #f97316;
+    @apply relative overflow-hidden border-2;
+    background-color: #f97316;
+    border-color: #f97316;
+    color: #fff;
     z-index: 1;
+    transition:
+      background-color 0.35s ease,
+      color 0.35s ease,
+      border-color 0.35s ease,
+      box-shadow 0.35s ease;
   }
 
   .btn-premium-reveal::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: #f97316;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    transition: width 0.6s ease-out, height 0.6s ease-out;
+    inset: 0;
+    background-color: #f97316;
+    border-radius: inherit;
+    transform: translateY(0);
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
     z-index: -1;
   }
 
-  .btn-premium-reveal:hover {
-    color: #fff !important;
+  .btn-premium-reveal:hover:not(:disabled) {
+    background-color: transparent;
+    color: #f97316;
+    border-color: #f97316;
   }
 
-  .btn-premium-reveal:hover::before {
-    width: 300%;
-    height: 500%;
+  .btn-premium-reveal:hover:not(:disabled)::before {
+    transform: translateY(-101%);
+  }
+
+  .btn-premium-reveal:focus-visible:not(:disabled) {
+    outline: 2px solid #f97316;
+    outline-offset: 3px;
+  }
+
+  /* Variante sin relleno, para botones con color propio (negro, blanco, etc.) */
+  .btn-premium-reveal-plain::before {
+    display: none;
   }
 
   /* Animaciones de entrada premium */
@@ -446,7 +461,14 @@ body.modal-open {
   position: relative;
   width: 48px;
   height: 70px;
-  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35));
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+  transition: transform 0.2s ease-out;
+}
+
+/* Resalte al pasar el cursor: el pin crece un poco */
+.map-pin-wrapper:hover {
+  transform: scale(1.12);
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.55));
 }
 
 /* Cuerpo principal del pin */
@@ -459,6 +481,8 @@ body.modal-open {
   border-radius: 50%;
   transform: translateX(-50%);
   z-index: 1;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
 }
 
 /* Punta del pin */
@@ -477,20 +501,20 @@ body.modal-open {
 
 /* PIN DE SEDES (naranja) */
 .map-pin-body-branch {
-  background: #ea580c;
+  background: #f97316;
 }
 
 .map-pin-body-branch::after {
-  border-top: 18px solid #ea580c;
+  border-top: 18px solid #f97316;
 }
 
 /* PIN DE USUARIO (negro) */
 .map-pin-body-user {
-  background: #1f2937;
+  background: #0a0f1a;
 }
 
 .map-pin-body-user::after {
-  border-top: 18px solid #1f2937;
+  border-top: 18px solid #0a0f1a;
 }
 
 /* CONTENEDOR DEL LOGO - centrado correctamente */
@@ -498,8 +522,8 @@ body.modal-open {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #ffffff;
   border: 2px solid #ffffff;
@@ -509,6 +533,71 @@ body.modal-open {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Tiles en escala de grises: el mapa pasa a ser fondo y los pines
+   naranjas pasan a ser lo único que destaca. */
+.leaflet-tile-pane {
+  filter: grayscale(1) contrast(1.05) brightness(1.02);
+}
+
+/* El marcador del usuario va en negro, así se mantiene legible
+   sobre el mapa ya desaturado. */
+.leaflet-marker-icon.custom-user-marker {
+  filter: none;
+}
+
+/* Popups: fondo blanco, borde negro, punta alineada al pin */
+.leaflet-popup-content-wrapper {
+  border-radius: 0;
+  border: 2px solid #0a0f1a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.leaflet-popup-tip {
+  border-radius: 0;
+  background: #0a0f1a;
+  box-shadow: none;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.leaflet-popup-close-button {
+  color: #6b7280;
+  padding: 6px 6px 0 0;
+}
+
+.leaflet-popup-close-button:hover {
+  color: #0a0f1a;
+}
+
+/* Controles de zoom: rectos, acorde al borde negro del contenedor */
+.leaflet-bar {
+  border-radius: 0;
+  border: 2px solid #0a0f1a;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.leaflet-bar a {
+  border-radius: 0;
+  color: #0a0f1a;
+  font-weight: 700;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.leaflet-bar a:hover {
+  background: #f97316;
+  color: #ffffff;
+  border-bottom-color: #f97316;
+}
+
+.leaflet-bar a:last-child {
+  border-bottom: none;
 }
 
 /* Page Transition Animations */
@@ -573,7 +662,7 @@ body.modal-open {
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(234, 88, 12, 0.4);
+  background: rgba(10, 15, 26, 0.35);
   border-radius: 50%;
   animation: user-pulse 2s infinite;
 }
@@ -582,11 +671,11 @@ body.modal-open {
   position: relative;
   width: 32px;
   height: 32px;
-  background: #ea580c;
+  background: #0a0f1a;
   border: 2px solid white;
   border-radius: 50%;
   padding: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -1,5 +1,4 @@
 import { useCallback, useState } from 'react';
-import { MessageCircle } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import {
     categorias,
@@ -68,7 +67,7 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
             <div className="bg-white border border-gray-200 lg:grid lg:grid-cols-[230px_1fr] lg:flex-1 lg:min-h-0">
                 {/* Columna izquierda: categorías */}
                 <nav className="border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50">
-                    <p className="hidden lg:block px-5 py-3.5 text-[9px] font-black text-gray-500 uppercase tracking-widest border-b border-gray-200">
+                    <p className="hidden lg:block px-5 py-3.5 text-[11px] font-black text-gray-500 uppercase tracking-widest border-b border-gray-200">
                         Categoría
                     </p>
 
@@ -116,22 +115,13 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
 
                 {/* Columna derecha: tabla de tarifas */}
                 <div className="lg:flex lg:flex-col lg:min-h-0">
-                    {categoria && (
-                        <div className="lg:shrink-0 flex items-start gap-3 px-5 py-4 border-b border-gray-200 bg-orange-50/60">
-                            <div className="w-1 h-full min-h-[2.5rem] bg-[#f97316] shrink-0" />
-                            <p className="text-sm text-gray-700 leading-relaxed">
-                                {categoria.descripcion}
-                            </p>
-                        </div>
-                    )}
-
                     {/* Cabecera de columnas. Debe compartir el mismo grid-cols que las filas
                         para que cada rótulo caiga sobre su columna. */}
                     <div className="hidden lg:grid lg:shrink-0 grid-cols-[1fr_8.5rem_9.5rem] bg-gray-900 text-white">
-                        <span className="px-5 py-2.5 text-[9px] font-black uppercase tracking-widest">
+                        <span className="px-5 py-2.5 text-[11px] font-black uppercase tracking-widest">
                             Vehículo
                         </span>
-                        <span className="px-5 py-2.5 text-[9px] font-black uppercase tracking-widest text-right">
+                        <span className="px-5 py-2.5 text-[11px] font-black uppercase tracking-widest text-right">
                             Tarifa
                         </span>
                         <span className="px-5 py-2.5" />
@@ -212,7 +202,7 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
                     }}
                     className="inline-flex shrink-0 items-center justify-center gap-2 bg-[#25D366] hover:bg-[#1eb85a] text-white text-xs font-black uppercase tracking-widest px-5 py-3 transition-colors duration-200 active:opacity-90"
                 >
-                    <MessageCircle size={16} />
+                    <FaWhatsapp size={16} />
                     Consultar por WhatsApp
                 </button>
             </div>

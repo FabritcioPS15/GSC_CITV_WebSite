@@ -1,14 +1,15 @@
 import React from 'react';
-import { Mail, Phone, Clock, Facebook, Instagram, Music2 } from 'lucide-react';
+import { FaFacebook, FaInstagram, FaTiktok, FaPhoneAlt, FaEnvelope, FaClock } from 'react-icons/fa';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { Helmet } from 'react-helmet-async';
 import PremiumButton from '../components/PremiumButton';
 import { socialLinks } from '../../backend/data/social';
+import { EMAIL_CONTACTO, TELEFONO_CONTACTO } from '../../backend/data/contacto';
 
 const socialIcons: Record<string, React.ReactNode> = {
-    Facebook: <Facebook size={20} />,
-    Instagram: <Instagram size={20} />,
-    TikTok: <Music2 size={20} />,
+    Facebook: <FaFacebook size={20} />,
+    Instagram: <FaInstagram size={20} />,
+    TikTok: <FaTiktok size={20} />,
 };
 
 function Contacto() {
@@ -65,27 +66,31 @@ function Contacto() {
                             <div className="space-y-6">
                                 <div className="flex items-start space-x-4">
                                     <div className="bg-black text-white p-3">
-                                        <Phone size={24} />
+                                        <FaPhoneAlt size={24} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-lg">Teléfono</h3>
-                                        <p className="content-text text-gray-600">+51 1 234 5678</p>
+                                        <a href={`tel:${TELEFONO_CONTACTO.replace(/\s/g, '')}`} className="content-text text-gray-600 hover:text-orange-600 transition-colors">
+                                            {TELEFONO_CONTACTO}
+                                        </a>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start space-x-4">
                                     <div className="bg-black text-white p-3">
-                                        <Mail size={24} />
+                                        <FaEnvelope size={24} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-lg">Email</h3>
-                                        <p className="content-text text-gray-600">contacto@gruposancristobal.com</p>
+                                        <a href={`mailto:${EMAIL_CONTACTO}`} className="content-text text-gray-600 hover:text-orange-600 transition-colors break-words">
+                                            {EMAIL_CONTACTO}
+                                        </a>
                                     </div>
                                 </div>
 
                                 <div className="flex items-start space-x-4">
                                     <div className="bg-black text-white p-3">
-                                        <Clock size={24} />
+                                        <FaClock size={24} />
                                     </div>
                                     <div>
                                         <h3 className="font-bold text-lg">Horario de Atención</h3>

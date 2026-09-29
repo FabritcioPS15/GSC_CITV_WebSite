@@ -29,7 +29,7 @@ export const WHATSAPP_INSPECCION = '51958077827';
 
 /**
  * Normaliza un número al formato que exige wa.me (solo dígitos, con código de país).
- * Los móviles peruanos son 9 dígitos y empiezan con 9. Cualquier valor que no
+ * Los móviles peruanos son 9 dígitos y empiezan por 9. Cualquier valor que no
  * cumpla ese formato (fijos, garbage, vacío) cae al número central.
  */
 export function normalizeWhatsapp(phone?: string | null): string {
@@ -49,119 +49,113 @@ export function whatsappUrl(phone: string | null | undefined, mensaje: string): 
     return `https://wa.me/${normalizeWhatsapp(phone)}?text=${encodeURIComponent(mensaje)}`;
 }
 
-export const branches: Branch[] = [
-    // Lima Branches
+/** Enlace de búsqueda en Google Maps a partir de la dirección (no inventamos un pin). */
+function mapsUrl(address: string): string {
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+}
+
+/** Enlace de navegación de Waze a partir de las coordenadas. */
+function wazeUrl(position: [number, number]): string {
+    const [lat, lng] = position;
+    return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
+}
+
+/**
+ * Sede de la red.
+ *
+ * `position` fue geocodificado con Nominatim (OpenStreetMap) a partir de la
+ * dirección y de las referencias de cada sede (restaurante, grifo, barrio).
+ * Antes los datos tenían errores groseros: Ica apuntaba a Arequipa y tres sedes
+ * apuntaban al mismo punto en Trujillo.
+ *
+ * PENDIENTE: las sedes 6 y 7 (Av. Cusco, Ayacucho) están a nivel de avenida,
+ * porque OSM no registra los números de puerta ni los grifos de referencia.
+ * Ambas comparten calle, así que están separadas a mano unos 200 m para que los
+ * pines no se superpongan. Requieren confirmación.
+ */
+const BRANCHES: Branch[] = [
     {
         id: 1,
-        name: 'Sede RTP Callao',
-        position: [-11.984339249713159, -77.12509328775818],
-        address: 'Av. Nestor Gambeta cdra 1,2 y 3, Callao',
+        name: 'Sede Callao',
+        // OSM: Avenida de la Alameda, Gambetta Baja, Callao
+        position: [-12.0426373, -77.1164993],
+        address: 'Av. Néstor Gambeta Mz. A Lt. 2 Alt. Paradero Zeta Gas, a una cuadra del Terminal Pesquero',
         region: 'lima',
         type: 'RTP',
-        googleMapsUrl: 'https://maps.app.goo.gl/2khduJ8CDpCo8Bbr8',
-        wazeUrl: 'https://waze.com/ul?ll=-11.984339249713159,-77.12509328775818&navigate=yes',
-        placeId: 'ChIJN8tD5K5bZFIRRMjJ3jwLmAA', // Reemplazar con el placeId real
-        phone: '(01) 123-4567',
-        schedule: 'Lun - Sab: 7:00 - 20:00',
-        image: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-        tarifario: {
-            'part-automovil': 55,
-            'pub-taxi': 75,
-            'mer-liviano': 80,
-            'mer-camion': 120,
-            'pub-colectivo': 130,
-        }
+        phone: '975759712',
+        whatsapp: '51975759712',
     },
     {
         id: 2,
-        name: 'Sede RTP Canta Callao',
-        position: [-11.96993651592964, -77.08508058845739],
-        address: 'Av. Canta Callao 164, Los Olivos 15113',
+        name: 'Sede Canta Callao',
+        // OSM: Avenida Canta Callao, Santa Rosa, San Martín de Porres
+        position: [-11.9843640, -77.1004699],
+        address: 'Av. Canta Callao 164 - SMP, al lado de ESSALUD Bicentenario, entre la Av. Marañón y la Av. Canta Callao',
         region: 'lima',
-        type: 'RTV',
-        googleMapsUrl: 'https://maps.app.goo.gl/7F72yS6adsvrjVoa7',
-        wazeUrl: 'https://waze.com/ul?ll=-11.96993651592964,-77.08508058845739&navigate=yes',
-        placeId: 'ChIJ4Y6uZj5bZFIRRMjJ3jwLmAA', // Reemplazar con el placeId real
-        phone: '(01) 987-6543',
-        schedule: 'Lun - Sab: 7:00 - 20:00',
-        image: 'https://images.unsplash.com/photo-1632733711679-5292d6863f12?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-        tarifario: {
-            'part-automovil': 70,
-            'pub-taxi': 80,
-            'esp-motocicleta': 45,
-        }
+        type: 'RTP',
+        phone: '933697419',
+        whatsapp: '51933697419',
     },
-
-    // Provincia Branches
     {
         id: 3,
-        name: 'Sede RTP ICA',
-        position: [-16.409047, -71.537451],
-        address: 'Calle Mercaderes 101, Arequipa',
+        name: 'Sede Ica',
+        // OSM: "Donde Come El Rey", Subtanjalla (coincide con la referencia del local)
+        position: [-14.0358645, -75.7545937],
+        address: 'Panamericana Sur km 299, frente al Grifo PECSA, al lado del restaurante "Donde Come el Rey", Subtanjalla',
         region: 'provincia',
         type: 'RTP',
-        phone: '(054) 123-456',
-        schedule: 'Lun - Sab: 8:00 - 18:00',
-        tarifario: {
-            'part-automovil': 60,
-            'pub-taxi': 70,
-            'mer-camion': 110,
-        }
+        phone: '955403509',
+        whatsapp: '51955403509',
     },
     {
         id: 4,
-        name: 'Sede RTP Ayacucho',
-        position: [-13.531950, -71.967463],
-        address: 'Av. El Sol 202, Cusco',
+        name: 'Sede Andahuaylas',
+        // OSM: Avenida Sesquicentenario, Cuncataca, Andahuaylas
+        position: [-13.6607055, -73.4219941],
+        address: 'Av. Sesquicentenario S/N, Predio Cuncataca - Valle Chumbao - Andahuaylas',
         region: 'provincia',
         type: 'RTP',
-        phone: '(084) 123-456',
-        schedule: 'Lun - Sab: 8:00 - 17:00',
-        tarifario: {
-            'part-automovil': 60,
-            'mer-camion': 115,
-        }
+        phone: '990906999',
+        whatsapp: '51990906999',
     },
     {
         id: 5,
-        name: 'Sede RTV Ayacucho',
-        position: [-8.115990, -79.029980],
-        address: 'Jr. Pizarro 303, Trujillo',
+        name: 'Sede Huancavelica',
+        // OSM: Malecón Fray Martín, Yananaco, San Cristobal, Huancavelica
+        position: [-12.7844644, -74.9841287],
+        address: 'Malecón Fray Martín 119, barrio de Yanacancha - Huancavelica',
         region: 'provincia',
-        type: 'RTV',
-        phone: '(044) 123-456',
-        schedule: 'Lun - Sab: 8:00 - 18:00',
-        tarifario: {
-            'esp-motocicleta': 40,
-            'esp-menor': 35,
-        }
+        type: 'RTP',
+        phone: '939063929',
+        whatsapp: '51939063929',
     },
     {
         id: 6,
-        name: 'Sede RTV Andahuaylas',
-        position: [-8.115990, -79.029980],
-        address: 'Jr. Pizarro 303, Trujillo',
+        name: 'Sede Ayacucho - Av. Cusco',
+        // OSM: Avenida Cusco, San Juan Bautista. Número de puerta no disponible.
+        position: [-13.1771520, -74.2002780],
+        address: 'Av. Cusco 1633-1639, San Juan Bautista - Ayacucho, referencia curva Llama Gas',
         region: 'provincia',
-        type: 'RTV',
-        phone: '(044) 123-456',
-        schedule: 'Lun - Sab: 8:00 - 18:00',
-        tarifario: {
-            'esp-motocicleta': 40,
-            'esp-menor': 35,
-        }
+        type: 'RTP',
+        phone: '943431908',
+        whatsapp: '51943431908',
     },
     {
         id: 7,
-        name: 'Sede RTP Huancavelica',
-        position: [-8.115990, -79.029980],
-        address: 'Jr. Pizarro 303, Trujillo',
+        name: 'Sede Ayacucho - Grifo Fénix',
+        // OSM: Avenida Cusco, San Juan Bautista. Separada ~200 m de la sede 6.
+        position: [-13.1761990, -74.2020590],
+        address: 'Av. Cusco Nº 1250, a una cuadra del Grifo Fénix y al frente del Grifo San Miguelito - Ayacucho',
         region: 'provincia',
         type: 'RTP',
-        phone: '(044) 123-456',
-        schedule: 'Lun - Sab: 8:00 - 18:00',
-        tarifario: {
-            'part-automovil': 60,
-            'mer-camion': 110,
-        }
-    }
+        phone: '908801161',
+        whatsapp: '51908801161',
+    },
 ];
+
+/** Links de navegación derivados de dirección y coordenadas. */
+export const branches: Branch[] = BRANCHES.map((b) => ({
+    ...b,
+    googleMapsUrl: mapsUrl(`${b.address}, Peru`),
+    wazeUrl: wazeUrl(b.position),
+}));

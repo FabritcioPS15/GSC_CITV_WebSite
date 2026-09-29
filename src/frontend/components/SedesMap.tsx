@@ -1,20 +1,20 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, Circle, AttributionControl } from 'react-leaflet';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap, AttributionControl } from 'react-leaflet';
 import { SiGooglemaps, SiWaze } from 'react-icons/si';
-import { FaMapMarkerAlt, FaChevronRight, FaChevronLeft } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaChevronRight, FaChevronLeft, FaWhatsapp, FaSearch, FaTimes, FaPhoneAlt, FaClock, FaDirections } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import rtvLogo from '../../resources/logos/RTV LOGO CIRCULAR.png';
 import rtpLogo from '../../resources/logos/RTP LOGO CIRCULAR.png';
-import { branches, Branch } from '../../backend/data/branches';
-
-// Iconos personalizados: pin con área circular para logo / marca
+import { branches, Branch, whatsappUrl } from '../../backend/data/branches';
+import { getConsent } from '../utils/consent';
 
 // Pin para sedes RTV
 const RtvPinIcon = L.divIcon({
     className: 'custom-logo-pin-icon',
     html: `
-      <div class="map-pin-wrapper" style="transform: scale(1.2); transform-origin: top center;">
+      <div class="map-pin-wrapper">
         <div class="map-pin-body map-pin-body-branch">
           <div class="map-pin-logo">
             <img src="${rtvLogo}" alt="RTV Logo" style="width: 100%; height: 100%; object-fit: cover;" />
@@ -22,15 +22,15 @@ const RtvPinIcon = L.divIcon({
         </div>
       </div>
     `,
-    iconSize: [60, 80],
-    iconAnchor: [30, 80]
+    iconSize: [54, 72],
+    iconAnchor: [27, 72]
 });
 
 // Pin para sedes RTP
 const RtpPinIcon = L.divIcon({
     className: 'custom-logo-pin-icon',
     html: `
-      <div class="map-pin-wrapper" style="transform: scale(1.2); transform-origin: top center;">
+      <div class="map-pin-wrapper">
         <div class="map-pin-body map-pin-body-branch">
           <div class="map-pin-logo">
             <img src="${rtpLogo}" alt="RTP Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
@@ -38,32 +38,48 @@ const RtpPinIcon = L.divIcon({
         </div>
       </div>
     `,
-    iconSize: [60, 80],
-    iconAnchor: [30, 80]
+    iconSize: [54, 72],
+    iconAnchor: [27, 72]
 });
 
-// Pin para la ubicación del usuario (Personita Premium)
+// Pin destacado activo cuando se selecciona una sede
+const createActivePinIcon = (type: 'RTP' | 'RTV') => L.divIcon({
+    className: 'custom-logo-pin-icon active-pin-highlight',
+    html: `
+      <div class="map-pin-wrapper" style="transform: scale(1.18); z-index: 1000;">
+        <div class="map-pin-body map-pin-body-branch" style="box-shadow: 0 0 25px rgba(249, 115, 22, 0.9), 0 0 0 4px #f97316; border-color: #f97316;">
+          <div class="map-pin-logo">
+            <img src="${type === 'RTP' ? rtpLogo : rtvLogo}" alt="${type} Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;" />
+          </div>
+        </div>
+      </div>
+    `,
+    iconSize: [64, 84],
+    iconAnchor: [32, 84]
+});
+
+// Pin para la ubicación del usuario
 const UserPinIcon = L.divIcon({
     className: 'custom-user-marker',
     html: `
       <div class="user-marker-container">
         <div class="user-marker-pulse"></div>
-        <div class="user-marker-icon">
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <div class="user-marker-icon" style="background: #ea580c; border: 2px solid white; box-shadow: 0 0 15px rgba(234, 88, 12, 0.9);">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 18px; height: 18px;">
             <path d="M12 12C14.2091 12 16 10.2091 16 8C16 5.79086 14.2091 4 12 4C9.79086 4 8 5.79086 8 8C8 10.2091 9.79086 12 12 12Z" fill="white"/>
             <path d="M12 14C8.13401 14 5 17.134 5 21H19C19 17.134 15.866 14 12 14Z" fill="white"/>
           </svg>
         </div>
       </div>
     `,
-    iconSize: [40, 40],
-    iconAnchor: [20, 20]
+    iconSize: [44, 44],
+    iconAnchor: [22, 22]
 });
 
-// Calcula la distancia entre dos puntos (lat, lng) usando la fórmula de Haversine
+// Calcula la distancia en km
 function getDistanceKm(a: [number, number], b: [number, number]): number {
     const toRad = (value: number) => (value * Math.PI) / 180;
-    const R = 6371; // Radio de la Tierra en km
+    const R = 6371;
     const dLat = toRad(b[0] - a[0]);
     const dLng = toRad(b[1] - a[1]);
     const lat1 = toRad(a[0]);
@@ -80,166 +96,167 @@ function getDistanceKm(a: [number, number], b: [number, number]): number {
     return R * d;
 }
 
-function MapController({ center, zoom, isSidebarOpen }: { center: [number, number], zoom: number, isSidebarOpen?: boolean }) {
+// Controlador unificado de cámara para evitar conflictos de animación
+function UnifiedMapController({
+    center,
+    zoom,
+    bounds,
+    isSidebarOpen
+}: {
+    center: [number, number],
+    zoom: number,
+    bounds: [number, number][] | null,
+    isSidebarOpen?: boolean
+}) {
     const map = useMap();
+    const prevActionRef = useRef<string>('');
 
-    // Update view when center/zoom changes
     useEffect(() => {
-        map.setView(center, zoom);
-    }, [center, zoom, map]);
-
-    // Invalidate size when sidebar toggles to ensure map fills space and centers correctly
-    useEffect(() => {
-        // Immediate invalidation
-        map.invalidateSize();
-
-        // Repeated invalidation during transition (for 300ms)
-        const start = Date.now();
-        const duration = 350; // slightly longer than CSS transition
-
-        const animate = () => {
-            const now = Date.now();
-            if (now - start < duration) {
-                map.invalidateSize();
-                requestAnimationFrame(animate);
-            } else {
-                map.invalidateSize(); // Final check
+        if (bounds && bounds.length >= 2) {
+            const boundsKey = JSON.stringify(bounds);
+            if (prevActionRef.current !== boundsKey) {
+                prevActionRef.current = boundsKey;
+                const isMobile = window.innerWidth < 768;
+                const padding: [number, number] = isMobile ? [40, 40] : [70, 70];
+                map.fitBounds(bounds as any, {
+                    padding,
+                    maxZoom: 15,
+                    animate: true,
+                    duration: 1.2
+                });
             }
-        };
+        } else {
+            const centerKey = `${center[0]},${center[1]},${zoom}`;
+            if (prevActionRef.current !== centerKey) {
+                prevActionRef.current = centerKey;
+                map.flyTo(center, zoom, {
+                    duration: 1.2,
+                    easeLinearity: 0.25,
+                    animate: true
+                });
+            }
+        }
+    }, [center, zoom, bounds, map]);
 
-        requestAnimationFrame(animate);
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            map.invalidateSize({ animate: false });
+        }, 320);
+        return () => clearTimeout(timer);
     }, [isSidebarOpen, map]);
 
     return null;
 }
 
-interface FitBoundsProps {
-    bounds: [number, number][] | null;
-}
-
-function FitBounds({ bounds }: FitBoundsProps) {
-    const map = useMap();
-
-    useEffect(() => {
-        if (!bounds || bounds.length < 2) return;
-        // Adjust padding based on screen width
-        const padding: [number, number] = window.innerWidth < 768 ? [20, 20] : [50, 50];
-        map.fitBounds(bounds as any, { padding });
-    }, [bounds, map]);
-
-    return null;
-}
-
 export default function SedesMap({ selectedBranchId }: { selectedBranchId?: number }) {
-    const [filter, setFilter] = useState<'lima' | 'provincia'>('lima');
+    const [filter, setFilter] = useState<'all' | 'lima' | 'provincia'>('lima');
+    const [searchQuery, setSearchQuery] = useState('');
     const [mapState, setMapState] = useState<{ center: [number, number], zoom: number }>({
         center: [-12.046374, -77.042793],
         zoom: 12
     });
 
     const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-    const [nearestBranches, setNearestBranches] = useState<{ branch: Branch; distance: number; duration?: number }[]>([]);
     const [geoError, setGeoError] = useState<string | null>(null);
     const [isLocating, setIsLocating] = useState(false);
-    const [fitBounds, setFitBounds] = useState<[number, number][] | null>(null);
+    const [activeBounds, setActiveBounds] = useState<[number, number][] | null>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [pickedBranchId, setPickedBranchId] = useState<number | null>(null);
+
+    const markerRefs = useRef<Record<number, L.Marker | null>>({});
 
     const isBranchDetailView = !!selectedBranchId;
+    const activeBranchId = selectedBranchId ?? pickedBranchId;
+    const selectedBranch = useMemo(() => branches.find((b: Branch) => b.id === activeBranchId), [activeBranchId]);
 
-    // Función para obtener datos de ruta de OSRM
-    const fetchRouteData = async (start: [number, number], end: [number, number]) => {
-        try {
-            // OSRM espera longitud,latitud
-            const startStr = `${start[1]},${start[0]}`;
-            const endStr = `${end[1]},${end[0]}`;
-            const url = `https://router.project-osrm.org/route/v1/driving/${startStr};${endStr}?overview=false`;
+    // Filtrar sedes para la lista interactiva
+    const displayBranches = useMemo(() => {
+        let list = branches;
+        if (filter !== 'all') {
+            list = list.filter(b => b.region === filter);
+        }
+        if (searchQuery.trim()) {
+            const q = searchQuery.toLowerCase();
+            list = list.filter(b => b.name.toLowerCase().includes(q) || b.address.toLowerCase().includes(q));
+        }
+        return list;
+    }, [filter, searchQuery]);
 
-            const response = await fetch(url);
-            const data = await response.json();
-
-            if (data.code === 'Ok' && data.routes && data.routes.length > 0) {
-                return {
-                    distance: data.routes[0].distance / 1000, // metros a km
-                    duration: data.routes[0].duration / 60 // segundos a minutos
-                };
+    // Calcular distancias si la ubicación está disponible
+    const branchesWithDistances = useMemo(() => {
+        return displayBranches.map(b => {
+            const distance = userLocation ? getDistanceKm(userLocation, b.position) : null;
+            return { ...b, distance };
+        }).sort((a, b) => {
+            if (a.distance !== null && b.distance !== null) {
+                return a.distance - b.distance;
             }
-            return null;
-        } catch (error) {
-            console.error("Error fetching route:", error);
-            return null;
+            return 0;
+        });
+    }, [displayBranches, userLocation]);
+
+    // Inicializar mapa si viene prop
+    useEffect(() => {
+        if (activeBranchId && !activeBounds) {
+            const branch = branches.find((b: Branch) => b.id === activeBranchId);
+            if (branch) {
+                setMapState({ center: branch.position, zoom: 16 });
+                setFilter(branch.region);
+                setTimeout(() => {
+                    markerRefs.current[branch.id]?.openPopup();
+                }, 500);
+            }
+        }
+    }, [activeBranchId]);
+
+    // Al seleccionar una sede con animación fluida
+    const handleSelectBranch = (branch: Branch) => {
+        setActiveBounds(null);
+        setPickedBranchId(branch.id);
+        setMapState({ center: branch.position, zoom: 16 });
+        setIsSidebarOpen(true);
+
+        setTimeout(() => {
+            markerRefs.current[branch.id]?.openPopup();
+        }, 400);
+    };
+
+    const handleClearSelection = () => {
+        setActiveBounds(null);
+        setPickedBranchId(null);
+        if (filter === 'lima') {
+            setMapState({ center: [-12.046374, -77.042793], zoom: 12 });
+        } else if (filter === 'provincia') {
+            setMapState({ center: [-12.046374, -75.042793], zoom: 6 });
+        } else {
+            setMapState({ center: [-12.046374, -77.042793], zoom: 11 });
         }
     };
 
-    // Si hay una sede seleccionada, inicializar el mapa centrado en ella
-    useEffect(() => {
-        if (selectedBranchId) {
-            const branch = branches.find((b: Branch) => b.id === selectedBranchId);
-            if (branch) {
-                setMapState({ center: branch.position, zoom: 15 });
-                setFilter(branch.region);
-            }
-        }
-    }, [selectedBranchId]);
-
-    // Efecto para actualizar las sedes cercanas cuando cambia el filtro o la ubicación del usuario
-    useEffect(() => {
-        const updateBranches = async () => {
-            if (userLocation) {
-                // Filtrar sedes según el filtro actual
-                const currentBranches = selectedBranchId
-                    ? branches.filter((b: Branch) => b.id === selectedBranchId)
-                    : branches.filter((b: Branch) => b.region === filter);
-
-                // Calcular distancias y tiempos de ruta
-                const branchesWithDistances = await Promise.all(
-                    currentBranches.map(async (branch: Branch) => {
-                        const distance = getDistanceKm(userLocation, branch.position);
-
-                        // Obtener datos de ruta si hay una sede seleccionada
-                        let routeData = null;
-                        if (selectedBranchId) {
-                            routeData = await fetchRouteData(userLocation, branch.position);
-                        }
-
-                        return {
-                            branch,
-                            distance,
-                            duration: routeData?.duration
-                        };
-                    })
-                );
-
-                // Ordenar por distancia
-                const sortedBranches = branchesWithDistances.sort((a, b) => a.distance - b.distance);
-
-                // Tomar las 3 más cercanas o solo la seleccionada
-                const result = selectedBranchId ? sortedBranches : sortedBranches.slice(0, 3);
-                setNearestBranches(result);
-            }
-        };
-
-        updateBranches();
-    }, [filter, userLocation, selectedBranchId]);
-
-    const handleFilterChange = (newFilter: 'lima' | 'provincia') => {
-        if (selectedBranchId) return; // Deshabilitar filtro si hay sede seleccionada
+    const handleFilterChange = (newFilter: 'all' | 'lima' | 'provincia') => {
+        if (isBranchDetailView) return;
+        setActiveBounds(null);
+        setPickedBranchId(null);
         setFilter(newFilter);
-        setFitBounds(null);
         if (newFilter === 'lima') {
             setMapState({ center: [-12.046374, -77.042793], zoom: 12 });
+        } else if (newFilter === 'provincia') {
+            setMapState({ center: [-12.046374, -75.042793], zoom: 6 });
         } else {
-            setMapState({ center: [-12.046374, -75.042793], zoom: 6 }); // Zoom out to see más de Perú
+            setMapState({ center: [-12.046374, -77.042793], zoom: 11 });
         }
     };
 
-    const filteredBranches: Branch[] = selectedBranchId
-        ? branches.filter((b: Branch) => b.id === selectedBranchId)
-        : branches.filter((b: Branch) => b.region === filter);
-
-    const handleUseMyLocation = () => {
+    const handleUseMyLocation = (manual = false) => {
         if (!navigator.geolocation) {
-            setGeoError('La geolocalización no es soportada en este navegador.');
+            setGeoError('La geolocalización no es soportada en este dispositivo.');
             return;
+        }
+
+        // Si es automático, respetar consentimiento previo
+        if (!manual) {
+            const consent = getConsent();
+            if (!consent.location) return;
         }
 
         setIsLocating(true);
@@ -253,317 +270,453 @@ export default function SedesMap({ selectedBranchId }: { selectedBranchId?: numb
                 ];
                 setUserLocation(coords);
 
-                // Auto-filtrado: Detectar si el usuario está en Lima o Provincia
-                // Un rango aproximado para Lima Metropolitana
-                const isNearLima = (
-                    coords[0] > -12.5 && coords[0] < -11.5 && 
-                    coords[1] > -77.5 && coords[1] < -76.5
-                );
+                // Encontrar la sede más cercana entre todas las disponibles
+                let closestBranch: Branch | null = null;
+                let minDistance = Infinity;
 
-                if (!selectedBranchId) {
-                    const newFilter = isNearLima ? 'lima' : 'provincia';
-                    setFilter(newFilter);
-                    setMapState({ center: coords, zoom: 13 });
-                } else {
-                    const branch = branches.find((b: Branch) => b.id === selectedBranchId);
-                    if (branch) {
-                        setFitBounds([coords, branch.position]);
+                branches.forEach((branch) => {
+                    const dist = getDistanceKm(coords, branch.position);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        closestBranch = branch;
                     }
+                });
+
+                if (closestBranch) {
+                    const foundBranch: Branch = closestBranch;
+                    setFilter(foundBranch.region);
+                    setPickedBranchId(foundBranch.id);
+                    // Encuadrar la ubicación del usuario y la sede más cercana
+                    setActiveBounds([coords, foundBranch.position]);
+                    setIsSidebarOpen(true);
+
+                    setTimeout(() => {
+                        markerRefs.current[foundBranch.id]?.openPopup();
+                    }, 600);
                 }
 
                 setIsLocating(false);
             },
             (error) => {
-                // Solo mostrar error si fue provocado por el usuario, no en el auto-load
-                console.warn("Geolocation auto-load failed:", error.message);
-                setGeoError('No se pudo obtener tu ubicación. Verifica los permisos del navegador.');
+                console.warn("Geolocation error:", error.message);
+                if (manual) {
+                    setGeoError('Por favor permite el acceso a tu ubicación en el navegador para ubicar la sede más cercana.');
+                }
                 setIsLocating(false);
             },
-            { enableHighAccuracy: true, timeout: 5000 }
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
         );
     };
 
-    // Trigger automatic location detection on mount
     useEffect(() => {
-        // We try to locate automatically if the permission was previously granted
-        // or just trigger the prompt immediately for a better UX as requested
-        handleUseMyLocation();
+        if (getConsent().location) {
+            handleUseMyLocation(false);
+        }
     }, []);
 
-    // Formatear duración
-    const formatDuration = (minutes: number) => {
-        const roundedMins = Math.round(minutes);
-        if (roundedMins < 60) {
-            return `${roundedMins} min`;
-        } else {
-            const hours = Math.floor(roundedMins / 60);
-            const mins = roundedMins % 60;
-            return `${hours} h ${mins} min`;
+    const mapMarkersBranches = useMemo(() => {
+        if (isBranchDetailView) {
+            return branches.filter((b: Branch) => b.id === selectedBranchId);
         }
-    };
+        if (filter === 'all') return branches;
+        // Si hay una sede activa seleccionada fuera del filtro actual, mantenerla visible en el mapa
+        const filtered = branches.filter((b: Branch) => b.region === filter);
+        if (activeBranchId && !filtered.some(b => b.id === activeBranchId)) {
+            const activeB = branches.find(b => b.id === activeBranchId);
+            if (activeB) return [...filtered, activeB];
+        }
+        return filtered;
+    }, [filter, isBranchDetailView, selectedBranchId, activeBranchId]);
 
     return (
-        <div className={`w-full ${isBranchDetailView ? 'h-[70vh] md:h-[522px]' : 'h-[500px] md:h-[500px]'} border-2 border-black rounded-xl overflow-hidden shadow-xl bg-white flex flex-col md:flex-row`}>
-            {/* Contenedor del mapa */}
-            <div className="relative flex-1 h-full">
+        <div className={`w-full ${isBranchDetailView ? 'h-[75vh] md:h-[540px]' : 'h-[640px] md:h-[560px]'} border-2 border-gray-900 rounded-3xl overflow-hidden shadow-2xl bg-white flex flex-col md:flex-row relative transition-all duration-300`}>
+            
+            {/* Contenedor del Mapa */}
+            <div className="relative flex-1 h-[320px] sm:h-[380px] md:h-full z-10">
                 {/* Botón para colapsar sidebar (Desktop) */}
                 <button
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="hidden md:flex absolute top-1/2 right-0 z-[2000] -translate-y-1/2 translate-x-1/2 bg-white border border-gray-300 rounded-full p-2 shadow-md items-center justify-center hover:bg-gray-50 transition-transform hover:scale-110"
-                    aria-label={isSidebarOpen ? "Cerrar panel" : "Abrir panel"}
+                    className="hidden md:flex absolute top-1/2 right-0 z-[1000] -translate-y-1/2 translate-x-1/2 bg-white border-2 border-gray-900 rounded-full p-2 shadow-xl items-center justify-center hover:bg-orange-500 hover:text-white transition-all hover:scale-110"
+                    aria-label={isSidebarOpen ? "Ocultar panel" : "Mostrar panel"}
+                    title={isSidebarOpen ? "Ocultar panel" : "Mostrar panel"}
                 >
-                    {isSidebarOpen ? <FaChevronRight className="text-gray-600" /> : <FaChevronLeft className="text-gray-600" />}
+                    {isSidebarOpen ? <FaChevronRight size={13} /> : <FaChevronLeft size={13} />}
                 </button>
 
-                {/* Filtro Lima / Provincias (esquina superior derecha) - Solo si no hay sede seleccionada */}
-                {!selectedBranchId && (
-                    <div className="absolute top-4 right-4 z-[1000] bg-white p-2 rounded shadow-md border border-black">
-                        <div className="flex space-x-2">
-                            <button
-                                onClick={() => {
-                                    // Recentra el mapa según el filtro actual
-                                    setFitBounds(null);
-                                    if (filter === 'lima') {
-                                        setMapState({ center: [-12.046374, -77.042793], zoom: 12 });
-                                    } else {
-                                        setMapState({ center: [-12.046374, -75.042793], zoom: 6 });
-                                    }
-                                }}
-                                className="px-2 py-2 rounded bg-gray-200 text-black hover:bg-gray-300 transition-colors flex items-center justify-center"
-                                aria-label="Recentrar mapa"
-                                title="Recentrar mapa"
-                            >
-                                <FaMapMarkerAlt />
-                            </button>
+                {/* Barra de Filtros Flotante sobre el Mapa */}
+                {!isBranchDetailView && (
+                    <div className="absolute top-3 right-3 z-[1000] flex items-center gap-1.5 bg-white/95 backdrop-blur-md p-1 rounded-2xl shadow-lg border border-gray-200">
+                        <button
+                            onClick={handleClearSelection}
+                            className="p-2 rounded-xl text-gray-700 hover:bg-orange-500 hover:text-white transition-colors"
+                            title="Recentrar vista"
+                            aria-label="Recentrar vista"
+                        >
+                            <FaMapMarkerAlt size={13} />
+                        </button>
+                        <div className="flex bg-gray-100 p-0.5 rounded-xl text-xs font-bold">
                             <button
                                 onClick={() => handleFilterChange('lima')}
-                                className={`px-4 py-2 rounded ${filter === 'lima' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-black'}`}
+                                className={`px-2.5 py-1.5 rounded-lg text-[11px] transition-all ${filter === 'lima' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'}`}
                             >
-                                Solo Lima
+                                Lima
                             </button>
                             <button
                                 onClick={() => handleFilterChange('provincia')}
-                                className={`px-4 py-2 rounded ${filter === 'provincia' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-black'}`}
+                                className={`px-2.5 py-1.5 rounded-lg text-[11px] transition-all ${filter === 'provincia' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'}`}
                             >
                                 Provincias
+                            </button>
+                            <button
+                                onClick={() => handleFilterChange('all')}
+                                className={`px-2.5 py-1.5 rounded-lg text-[11px] transition-all ${filter === 'all' ? 'bg-orange-500 text-white shadow-xs' : 'text-gray-600 hover:text-gray-900'}`}
+                            >
+                                Todas
                             </button>
                         </div>
                     </div>
                 )}
 
+                {/* Mapa Leaflet */}
                 <MapContainer
                     center={mapState.center}
                     zoom={mapState.zoom}
-                    scrollWheelZoom={false}
+                    scrollWheelZoom
                     zoomControl={true}
                     attributionControl={false}
                     className="w-full h-full"
                 >
                     <AttributionControl position="bottomright" prefix={false} />
                     <TileLayer
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <MapController center={mapState.center} zoom={mapState.zoom} isSidebarOpen={isSidebarOpen} />
-                    <FitBounds bounds={fitBounds} />
-                    {filteredBranches.map(branch => (
-                        <Marker
-                            key={branch.id}
-                            position={branch.position}
-                            icon={branch.type === 'RTP' ? RtpPinIcon : RtvPinIcon}
-                        >
-                            <Popup offset={[-6, -50]} className="custom-popup">
-                                <div className="space-y-0.5 text-[10px] leading-tight min-w-[120px]">
-                                    <p className="text-[8px] uppercase tracking-wide text-gray-500 mb-0.5 font-bold">
-                                        {branch.type}
-                                    </p>
-                                    <p className="font-bold text-gray-900 text-[11px] leading-tight">
-                                        {branch.name}
-                                    </p>
-                                    <p className="text-gray-600 leading-tight text-[9px]">
-                                        {branch.address}
-                                    </p>
-                                    <p className="text-[8px] text-gray-400 mt-0.5 italic">
-                                        Ubicación aproximada
-                                    </p>
+                    <UnifiedMapController
+                        center={mapState.center}
+                        zoom={mapState.zoom}
+                        bounds={activeBounds}
+                        isSidebarOpen={isSidebarOpen}
+                    />
+
+                    {mapMarkersBranches.map(branch => {
+                        const isSelected = activeBranchId === branch.id;
+                        const icon = isSelected
+                            ? createActivePinIcon(branch.type)
+                            : (branch.type === 'RTP' ? RtpPinIcon : RtvPinIcon);
+
+                        return (
+                            <Marker
+                                key={branch.id}
+                                position={branch.position}
+                                icon={icon}
+                                ref={(ref) => { markerRefs.current[branch.id] = ref; }}
+                                eventHandlers={{
+                                    click: () => handleSelectBranch(branch),
+                                }}
+                            >
+                                <Popup offset={[-4, -55]} className="custom-popup" closeButton={false}>
+                                    <div className="p-1 space-y-1 text-left min-w-[140px]">
+                                        <div className="flex items-center justify-between gap-1.5">
+                                            <span className="text-[8.5px] font-bold px-1.5 py-0.5 rounded bg-orange-500 text-white">
+                                                {branch.type}
+                                            </span>
+                                            <span className="text-[8.5px] font-semibold text-gray-500 uppercase">
+                                                {branch.region}
+                                            </span>
+                                        </div>
+                                        <p className="font-bold text-gray-900 text-[11px] leading-snug">
+                                            {branch.name}
+                                        </p>
+                                        <p className="text-gray-600 text-[9.5px] leading-tight line-clamp-2">
+                                            {branch.address}
+                                        </p>
+                                        {branch.phone && (
+                                            <p className="text-[9.5px] font-bold text-orange-600">
+                                                📞 {branch.phone}
+                                            </p>
+                                        )}
+                                    </div>
+                                </Popup>
+                            </Marker>
+                        );
+                    })}
+
+                    {/* Marcador del Usuario */}
+                    {userLocation && (
+                        <Marker position={userLocation} icon={UserPinIcon}>
+                            <Popup offset={[0, -25]} closeButton={false}>
+                                <div className="p-1 text-center font-bold text-[11px] text-orange-600">
+                                    📍 Estás aquí
                                 </div>
                             </Popup>
                         </Marker>
-                    ))}
-                    {userLocation && (
-                        <>
-                            <Circle
-                                center={userLocation}
-                                radius={nearestBranches.length > 0 ? Math.max(nearestBranches[0].distance * 1000 * 1.1, 1500) : 2500}
-                                // Radio dinámico: siempre cubre al menos la sede más cercana, con un pequeño margen
-                                pathOptions={{ color: '#ea580c', fillColor: '#ea580c', fillOpacity: 0.12 }}
-                            />
-                            <Marker position={userLocation} icon={UserPinIcon}>
-                                <Popup
-                                    offset={[8, -30]}
-                                    className="z-[1000]"
-                                    closeButton={false}
-                                >
-                                    <div className="font-bold text-sm">Estás aquí</div>
-                                </Popup>
-                            </Marker>
-                        </>
                     )}
                 </MapContainer>
             </div>
 
+            {/* Panel Lateral Interactivo (Lista de Sedes & Detalles) */}
             <aside className={`
-                ${isSidebarOpen ? 'w-full md:w-1/3 md:basis-1/3' : 'md:w-0 md:basis-0 md:p-0 md:border-l-0'}
-                border-t md:border-t-0 md:border-l border-black bg-white 
-                flex flex-col text-sm 
-                overflow-hidden
-                h-40 md:h-full
-                transition-all duration-300 ease-in-out
+                ${isSidebarOpen ? 'w-full md:w-[360px] lg:w-[400px]' : 'md:w-0 md:p-0 md:border-l-0'}
+                border-t-2 md:border-t-0 md:border-l-2 border-gray-900 bg-white
+                flex flex-col flex-1 md:flex-initial
+                overflow-hidden h-full
+                transition-all duration-300 ease-in-out z-20
             `}>
-                <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-4 pt-3 pb-2 shadow-sm">
-                    <h3 className="text-base font-semibold">
-                        {selectedBranchId ? 'Información de ruta' : 'Ubicación y sedes cercanas'}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                        {/* Texto eliminado */}
+                {/* Cabecera del Panel */}
+                <div className="p-3 border-b border-gray-100 bg-gradient-to-r from-gray-50 via-white to-gray-50">
+                    <div className="flex items-center justify-between gap-2 mb-1.5">
+                        <div className="flex items-center gap-1.5">
+                            <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                            <h3 className="text-xs font-bold text-gray-900">
+                                {selectedBranch ? 'Detalles de la Sede' : 'Explorar Sedes'}
+                            </h3>
+                        </div>
+
+                        {selectedBranch && !isBranchDetailView && (
+                            <button
+                                onClick={handleClearSelection}
+                                className="flex items-center gap-1 text-[11px] font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-0.5 rounded-lg transition-colors"
+                            >
+                                <FaTimes size={9} />
+                                <span>Ver lista</span>
+                            </button>
+                        )}
                     </div>
+
+                    {/* Barra de búsqueda y GPS (cuando se muestra la lista) */}
+                    {!selectedBranch && (
+                        <div className="space-y-1.5">
+                            <div className="relative">
+                                <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar sede, distrito o calle..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-7 pr-3 py-1 text-[11px] rounded-lg bg-gray-100/80 border border-transparent focus:border-orange-500 focus:bg-white focus:outline-none transition-all"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        onClick={() => setSearchQuery('')}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                                    >
+                                        <FaTimes size={10} />
+                                    </button>
+                                )}
+                            </div>
+
+                            <button
+                                onClick={() => handleUseMyLocation(true)}
+                                disabled={isLocating}
+                                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold shadow-md shadow-orange-500/20 transition-all active:scale-[0.98]"
+                            >
+                                <FaDirections size={13} />
+                                <span>{isLocating ? 'Calculando sede más cercana...' : 'Ubicar la sede más cercana a mí'}</span>
+                            </button>
+                            {geoError && <p className="text-[9.5px] text-red-500 text-center leading-tight">{geoError}</p>}
+                        </div>
+                    )}
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-4 pt-2">
-                    <button
-                        onClick={handleUseMyLocation}
-                        className="px-3 py-1.5 rounded border border-black bg-black text-white hover:bg-gray-900 transition-colors text-[10px] font-medium w-fit mb-2"
-                        disabled={isLocating}
-                    >
-                        {isLocating ? 'Detectando ubicación…' : 'Usar mi ubicación'}
-                    </button>
-
-                    {geoError && (
-                        <p className="text-xs text-red-600 mt-1">
-                            {geoError}
-                        </p>
-                    )}
-
-                    {userLocation ? (
-                        <div className="mt-1 space-y-2">
-                            {/* Tu ubicación */}
-                            <div className="group relative overflow-hidden rounded-lg border border-gray-200 bg-white p-2 shadow-sm transition-all hover:shadow-md">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-orange-50 text-orange-600">
-                                        <FaMapMarkerAlt className="h-4 w-4" />
+                {/* Contenido del Panel */}
+                <div className="flex-1 overflow-y-auto p-2.5 space-y-2">
+                    {/* CASO A: SEDE SELECCIONADA -> MOSTRAR FICHA DETALLADA */}
+                    {selectedBranch ? (
+                        <div className="space-y-2.5 animate-fade-in">
+                            {/* Tarjeta Principal de la Sede Seleccionada */}
+                            <div className="p-3 rounded-2xl bg-gradient-to-br from-orange-50/80 via-white to-orange-50/40 border border-orange-400 shadow-sm space-y-2.5">
+                                <div className="flex items-start justify-between gap-2">
+                                    <div>
+                                        <span className="inline-block px-1.5 py-0.5 rounded bg-orange-500 text-white text-[9px] font-bold uppercase tracking-wider mb-0.5">
+                                            {selectedBranch.type} San Cristóbal
+                                        </span>
+                                        <h4 className="text-sm font-extrabold text-gray-900 leading-tight">
+                                            {selectedBranch.name}
+                                        </h4>
                                     </div>
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex items-center justify-between">
-                                            <h4 className="font-bold text-gray-900 text-[10px] truncate">Tu ubicación</h4>
-                                            <span className="rounded-full bg-orange-100 px-1.5 py-0.5 text-[9px] font-medium text-orange-700 flex-shrink-0">
-                                                Actual
-                                            </span>
-                                        </div>
-                                        <div className="mt-0.5 flex gap-2 text-[9px] font-medium text-gray-500 truncate">
-                                            <span>Lat: {userLocation[0].toFixed(4)}</span>
-                                            <span>Lng: {userLocation[1].toFixed(4)}</span>
-                                        </div>
+                                    <div className="w-8 h-8 rounded-full border border-orange-200 bg-white p-0.5 shrink-0 overflow-hidden shadow-xs">
+                                        <img
+                                            src={selectedBranch.type === 'RTP' ? rtpLogo : rtvLogo}
+                                            alt={selectedBranch.name}
+                                            className="w-full h-full object-cover rounded-full"
+                                        />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* Sedes más cercanas (Top 3) */}
-                            {nearestBranches.length > 0 && (
-                                <div className="space-y-2">
-                                    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
-                                        {selectedBranchId ? 'Destino' : `${nearestBranches.length} Sedes más cercanas`}
-                                    </p>
-                                    {nearestBranches.map((item, index) => (
-                                        <div key={item.branch.id} className="group relative overflow-hidden rounded-xl border-2 border-orange-500 bg-white p-2 shadow-md transition-all hover:shadow-lg">
-                                            {index === 0 && (
-                                                <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-orange-50 opacity-50 transition-transform group-hover:scale-110"></div>
-                                            )}
+                                {/* Ubicación con la misma caja de ícono w-7 h-7 y tipografía nivelada */}
+                                <div className="flex items-center gap-2 p-2 rounded-xl bg-white/95 border border-orange-100 shadow-2xs">
+                                    <div className="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/80 flex items-center justify-center shrink-0 text-orange-500">
+                                        <FaMapMarkerAlt size={12} />
+                                    </div>
+                                    <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider leading-tight">Ubicación</span>
+                                        <p className="font-bold text-gray-800 text-[10.5px] leading-tight line-clamp-2">{selectedBranch.address}</p>
+                                    </div>
+                                </div>
 
-                                            <div className="relative flex items-start gap-3">
-                                                <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded-full border-2 border-orange-100 bg-white shadow-sm">
-                                                    <img
-                                                        src={item.branch.type === 'RTP' ? rtpLogo : rtvLogo}
-                                                        alt={`Logo ${item.branch.type}`}
-                                                        className="h-full w-full object-cover"
-                                                    />
-                                                </div>
+                                {/* Horario y Teléfono con íconos perfectamente alineados */}
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center gap-2 p-2 rounded-xl bg-white/95 border border-orange-100 shadow-2xs">
+                                        <div className="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/80 flex items-center justify-center shrink-0 text-orange-500">
+                                            <FaClock size={12} />
+                                        </div>
+                                        <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                            <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider leading-tight">Horario</span>
+                                            <span className="font-bold text-gray-800 text-[10.5px] leading-tight">7am - 6pm</span>
+                                        </div>
+                                    </div>
 
-                                                <div className="flex-1">
-                                                    <div className="flex items-center justify-between">
-                                                        <h4 className="font-bold text-gray-900 text-xs">{item.branch.name}</h4>
-                                                        <span className="whitespace-nowrap rounded-full bg-orange-100 px-2 py-0.5 text-[10px] font-bold text-orange-700">
-                                                            {item.distance < 1
-                                                                ? `${Math.round(item.distance * 1000)} m`
-                                                                : `${item.distance.toFixed(1)} km`
-                                                            }
-                                                        </span>
-                                                    </div>
-
-                                                    <p className="mt-1 text-[10px] text-gray-600 leading-relaxed">
-                                                        {item.branch.address}
-                                                    </p>
-
-                                                    {/* Estimated Time Display */}
-                                                    <div className="mt-1.5 flex items-center gap-1 text-[10px] font-medium text-gray-700">
-                                                        <span className="text-orange-600">⏱️ Tiempo aprox:</span>
-                                                        <span>
-                                                            {item.duration
-                                                                ? formatDuration(item.duration)
-                                                                : 'Calculando...'}
-                                                        </span>
-                                                    </div>
-
-                                                    <div className="mt-2 grid grid-cols-2 gap-2">
-                                                        <button
-                                                            onClick={() => {
-                                                                if (item.branch.googleMapsUrl) {
-                                                                    window.open(item.branch.googleMapsUrl, '_blank', 'noopener,noreferrer');
-                                                                } else {
-                                                                    const [lat, lng] = item.branch.position;
-                                                                    const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
-                                                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                                                }
-                                                            }}
-                                                            className="inline-flex items-center justify-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-[10px] font-semibold text-gray-700 transition-colors hover:bg-gray-200 hover:text-black"
-                                                        >
-                                                            <SiGooglemaps className="text-sm text-gray-600" />
-                                                            Google Maps
-                                                        </button>
-
-                                                        <button
-                                                            onClick={() => {
-                                                                if (item.branch.wazeUrl) {
-                                                                    window.open(item.branch.wazeUrl, '_blank', 'noopener,noreferrer');
-                                                                } else {
-                                                                    const [lat, lng] = item.branch.position;
-                                                                    const url = `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
-                                                                    window.open(url, '_blank', 'noopener,noreferrer');
-                                                                }
-                                                            }}
-                                                            className="inline-flex items-center justify-center gap-1 rounded-lg bg-gray-100 px-2 py-1.5 text-[10px] font-semibold text-gray-700 transition-colors hover:bg-gray-200 hover:text-black"
-                                                        >
-                                                            <SiWaze className="text-sm text-[#33ccff]" />
-                                                            Waze
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                    {selectedBranch.phone ? (
+                                        <a
+                                            href={`tel:${selectedBranch.phone}`}
+                                            className="flex items-center gap-2 p-2 rounded-xl bg-white/95 border border-orange-100 hover:border-orange-300 hover:bg-orange-50/40 transition-all shadow-2xs group/phone"
+                                        >
+                                            <div className="w-7 h-7 rounded-lg bg-orange-50 group-hover/phone:bg-orange-500 group-hover/phone:text-white border border-orange-200/80 group-hover/phone:border-orange-500 flex items-center justify-center shrink-0 text-orange-500 transition-colors">
+                                                <FaPhoneAlt size={11} />
+                                            </div>
+                                            <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider leading-tight">Llamar</span>
+                                                <span className="font-bold text-gray-800 group-hover/phone:text-orange-600 text-[10.5px] leading-tight truncate">{selectedBranch.phone}</span>
+                                            </div>
+                                        </a>
+                                    ) : (
+                                        <div className="flex items-center gap-2 p-2 rounded-xl bg-white/95 border border-orange-100 shadow-2xs opacity-80">
+                                            <div className="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/80 flex items-center justify-center shrink-0 text-orange-500">
+                                                <FaPhoneAlt size={11} />
+                                            </div>
+                                            <div className="min-w-0 flex-1 flex flex-col justify-center">
+                                                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-wider leading-tight">Atención</span>
+                                                <span className="font-bold text-gray-800 text-[10.5px] leading-tight">Presencial</span>
                                             </div>
                                         </div>
+                                    )}
+                                </div>
+
+                                {/* Botones de Navegación GPS */}
+                                <div className="space-y-1.5 pt-0.5">
+                                    <p className="text-[9.5px] font-bold uppercase tracking-wider text-gray-500">¿Cómo llegar?</p>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        <button
+                                            onClick={() => {
+                                                if (selectedBranch.googleMapsUrl) {
+                                                    window.open(selectedBranch.googleMapsUrl, '_blank', 'noopener,noreferrer');
+                                                } else {
+                                                    const [lat, lng] = selectedBranch.position;
+                                                    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank', 'noopener,noreferrer');
+                                                }
+                                            }}
+                                            className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-semibold text-gray-800 shadow-xs transition-all active:scale-95"
+                                        >
+                                            <SiGooglemaps className="text-red-500" size={12} />
+                                            <span>Google Maps</span>
+                                        </button>
+
+                                        <button
+                                            onClick={() => {
+                                                if (selectedBranch.wazeUrl) {
+                                                    window.open(selectedBranch.wazeUrl, '_blank', 'noopener,noreferrer');
+                                                } else {
+                                                    const [lat, lng] = selectedBranch.position;
+                                                    window.open(`https://waze.com/ul?ll=${lat},${lng}&navigate=yes`, '_blank', 'noopener,noreferrer');
+                                                }
+                                            }}
+                                            className="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg bg-white hover:bg-gray-50 border border-gray-200 text-[11px] font-semibold text-gray-800 shadow-xs transition-all active:scale-95"
+                                        >
+                                            <SiWaze className="text-[#33ccff]" size={12} />
+                                            <span>Waze</span>
+                                        </button>
+                                    </div>
+
+                                    {/* Botón WhatsApp */}
+                                    <a
+                                        href={whatsappUrl(selectedBranch.whatsapp ?? selectedBranch.phone, `Hola, quisiera información sobre la sede de ${selectedBranch.name}.`)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-[#25D366] hover:bg-[#20bd5a] text-white text-[11px] font-bold shadow-sm transition-all active:scale-[0.98]"
+                                    >
+                                        <FaWhatsapp size={13} />
+                                        <span>WhatsApp directo de la sede</span>
+                                    </a>
+
+                                    {/* Enlace para ver Ficha Completa */}
+                                    <Link
+                                        to={`/sedes/${selectedBranch.id}`}
+                                        className="w-full flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-gray-900 hover:bg-black text-white text-[10px] font-bold transition-all shadow-xs"
+                                    >
+                                        <span>Ver fotos y tarifas de la sede</span>
+                                        <FaChevronRight size={9} />
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Selector rápido para cambiar a otra sede */}
+                            <div className="pt-1">
+                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Otras sedes</p>
+                                <div className="space-y-1 max-h-40 overflow-y-auto pr-1">
+                                    {branches.filter(b => b.id !== selectedBranch.id).map(b => (
+                                        <button
+                                            key={b.id}
+                                            onClick={() => handleSelectBranch(b)}
+                                            className="w-full flex items-center justify-between p-1.5 rounded-lg bg-gray-50 hover:bg-orange-50 border border-gray-100 text-left transition-colors group"
+                                        >
+                                            <div className="min-w-0 pr-1.5">
+                                                <p className="text-[11px] font-semibold text-gray-800 group-hover:text-orange-600 truncate">{b.name}</p>
+                                                <p className="text-[9.5px] text-gray-400 truncate">{b.address}</p>
+                                            </div>
+                                            <span className="text-[9.5px] text-orange-500 font-bold shrink-0">Ver →</span>
+                                        </button>
                                     ))}
                                 </div>
-                            )}
+                            </div>
                         </div>
                     ) : (
-                        <div className="mt-2 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 text-center">
-                            <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-400">
-                                <FaMapMarkerAlt className="h-4 w-4" />
-                            </div>
-                            <p className="text-[10px] text-gray-500">
-                                {selectedBranchId
-                                    ? "Activa tu ubicación para ver la distancia y tiempo estimado de llegada."
-                                    : "Activa tu ubicación para ver las sedes más cercanas a ti."
-                                }
-                            </p>
+                        /* CASO B: LISTADO COMPLETO DE SEDES PARA SELECCIONAR */
+                        <div className="space-y-1.5">
+                            {branchesWithDistances.length === 0 ? (
+                                <div className="p-4 text-center text-gray-500">
+                                    <p className="text-xs">No se encontraron sedes.</p>
+                                </div>
+                            ) : (
+                                branchesWithDistances.map(branch => (
+                                    <div
+                                        key={branch.id}
+                                        onClick={() => handleSelectBranch(branch)}
+                                        className="p-2.5 rounded-xl border border-gray-200 hover:border-orange-500 bg-white hover:bg-orange-50/40 shadow-2xs cursor-pointer transition-all duration-200 group"
+                                    >
+                                        <div className="flex items-start justify-between gap-1.5">
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex items-center gap-1.5 mb-0.5">
+                                                    <span className="text-[8.5px] font-bold px-1.5 py-0.2 rounded bg-orange-500 text-white">
+                                                        {branch.type}
+                                                    </span>
+                                                    <h4 className="font-bold text-gray-900 text-[11px] group-hover:text-orange-600 transition-colors truncate">
+                                                        {branch.name}
+                                                    </h4>
+                                                </div>
+                                                <p className="text-[9.5px] text-gray-500 line-clamp-1 leading-snug">
+                                                    {branch.address}
+                                                </p>
+                                            </div>
+
+                                            {branch.distance !== null && (
+                                                <span className="shrink-0 text-[9px] font-bold bg-orange-100 text-orange-700 px-1.5 py-0.5 rounded-full">
+                                                    {branch.distance < 1
+                                                        ? `${Math.round(branch.distance * 1000)} m`
+                                                        : `${branch.distance.toFixed(1)} km`}
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <div className="mt-1.5 pt-1 border-t border-gray-100 flex items-center justify-between text-[9.5px]">
+                                            <span className="text-gray-400 font-medium">Lun - Sáb: 7am - 6pm</span>
+                                            <span className="font-bold text-orange-500 group-hover:translate-x-0.5 transition-transform flex items-center gap-0.5">
+                                                <span>Ver en mapa</span>
+                                                <FaChevronRight size={8} />
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
                         </div>
                     )}
                 </div>

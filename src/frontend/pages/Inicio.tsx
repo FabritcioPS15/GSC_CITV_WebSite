@@ -57,7 +57,7 @@ function Inicio() {
               </p>
               
                <div className="pt-6">
-                  <PremiumButton to="/nosotros" className="bg-black text-white hover:bg-orange-500 gap-2 group">
+                  <PremiumButton to="/nosotros" plain className="bg-black text-white hover:bg-orange-500 gap-2 group">
                       Conoce nuestra historia
                       <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                   </PremiumButton>
@@ -194,10 +194,8 @@ function Inicio() {
               <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-3">Red Nacional</h4>
               <h2 className="text-4xl font-black text-gray-900 tracking-tight">Encuentra tu Sede más Cercana</h2>
           </div>
-          <div className="rounded-[40px] overflow-hidden shadow-2xl border border-gray-100">
-            <div className="h-[600px]">
-                <SedesMap />
-            </div>
+          <div className="shadow-2xl">
+            <SedesMap />
           </div>
         </section>
       </RevealOnScroll>

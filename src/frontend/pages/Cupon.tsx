@@ -181,10 +181,10 @@ const CuponPage: React.FC = () => {
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <PremiumButton href="/" className="bg-black hover:bg-gray-800 text-white py-5 !rounded-2xl shadow-xl">
+                                            <PremiumButton href="/" plain className="bg-black hover:bg-gray-800 text-white py-5 !rounded-2xl shadow-xl">
                                                 Ir al Inicio
                                             </PremiumButton>
-                                            <PremiumButton href="/sedes" className="bg-white border-2 border-orange-500 !text-orange-500 py-5 !rounded-2xl shadow-xl hover:bg-orange-50 transition-colors">
+                                            <PremiumButton href="/sedes" plain className="bg-white border-2 border-orange-500 !text-orange-500 py-5 !rounded-2xl shadow-xl hover:bg-orange-50 transition-colors">
                                                 Ver Sedes
                                             </PremiumButton>
                                         </div>

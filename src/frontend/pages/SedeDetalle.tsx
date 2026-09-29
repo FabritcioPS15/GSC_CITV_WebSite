@@ -1,6 +1,7 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { branches } from '../../backend/data/branches';
 import { MapPin, Phone, ArrowRight, Mail } from 'lucide-react';
+import { SiGooglemaps, SiWaze } from 'react-icons/si';
 import SimpleBranchMap from '../components/SimpleBranchMap';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { useEffect } from 'react';
@@ -8,6 +9,7 @@ import { scrollToTop } from '../components/SmoothScroll';
 import Tarifico from '../components/Tarifico';
 import GalleryCarousel from '../components/GalleryCarousel';
 import { getGaleria } from '../../backend/data/galeria';
+import { EMAIL_CONTACTO } from '../../backend/data/contacto';
 
 function SedeDetalle() {
     const { id } = useParams<{ id: string }>();
@@ -21,7 +23,7 @@ function SedeDetalle() {
         return <Navigate to="/sedes" replace />;
     }
 
-    const emailContacto = `contacto@gruposancristobal.pe`;
+    const emailContacto = EMAIL_CONTACTO;
 
     return (
         <div className="min-h-screen bg-white">
@@ -100,7 +102,7 @@ function SedeDetalle() {
 
             {/* SERVICIOS SECTION */}
             <section className="section max-w-7xl mx-auto px-4">
-                    <div className="flex items-start gap-6 mb-14">
+                <div className="flex items-start gap-6 mb-14">
                     <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
                     <div>
                         <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
@@ -236,7 +238,7 @@ function SedeDetalle() {
                                         <Phone size={18} />
                                     </div>
                                     <div>
-                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">TELÉFONO DIRECTO</p>
+                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">CELULAR</p>
                                         <p className="text-sm font-black text-gray-900">{branch.phone || '(024) 123-456'}</p>
                                     </div>
                                 </div>
@@ -244,9 +246,14 @@ function SedeDetalle() {
                                     <div className="bg-white p-2.5 rounded-lg text-orange-600 shadow-sm group-hover:bg-orange-500 group-hover:text-white transition-all">
                                         <Mail size={18} />
                                     </div>
-                                    <div>
+                                    <div className="min-w-0">
                                         <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">EMAIL CONSULTAS</p>
-                                        <p className="text-sm font-black text-gray-900 truncate max-w-[200px]">{emailContacto}</p>
+                                        <a
+                                            href={`mailto:${emailContacto}`}
+                                            className="block text-sm font-black text-gray-900 break-words hover:text-orange-600 transition-colors"
+                                        >
+                                            {emailContacto}
+                                        </a>
                                     </div>
                                 </div>
                             </div>
@@ -262,9 +269,8 @@ function SedeDetalle() {
                                     Ubicación y <span className="text-[#f97316]">Contacto</span>
                                 </h3>
                             </div>
-                            <div className="rounded-[40px] overflow-hidden border border-gray-100 shadow-xl shadow-black/5 h-[180px] mb-6 relative group">
+                            <div className="overflow-hidden h-[180px] mb-6">
                                 <SimpleBranchMap branch={branch} />
-                                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-all pointer-events-none" />
                             </div>
                             <div className="flex items-start gap-3">
                                 <div className="bg-orange-100 p-2 rounded-lg text-orange-600 mt-0.5">
@@ -273,9 +279,26 @@ function SedeDetalle() {
                                 <div>
                                     <p className="text-sm font-black text-gray-900 mb-1">{branch.name}</p>
                                     <p className="text-sm text-gray-500 leading-relaxed">{branch.address}</p>
-                                    <button className="text-orange-600 font-black text-[10px] uppercase tracking-widest mt-4 flex items-center gap-2 hover:gap-3 transition-all">
-                                        Ver en Google Maps <ArrowRight size={13} />
-                                    </button>
+                                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 mt-4">
+                                        <a
+                                            href={branch.googleMapsUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-orange-600 font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+                                        >
+                                            <SiGooglemaps className="text-sm" />
+                                            Ver en Google Maps
+                                        </a>
+                                        <a
+                                            href={branch.wazeUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-[#33ccff] hover:text-[#1a9fd4] font-black text-[10px] uppercase tracking-widest flex items-center gap-2 hover:gap-3 transition-all"
+                                        >
+                                            <SiWaze className="text-sm" />
+                                            Ver en Waze
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -9,6 +9,7 @@ interface PremiumButtonProps {
   className?: string;
   type?: 'button' | 'submit' | 'reset';
   disabled?: boolean;
+  plain?: boolean;
 }
 
 const PremiumButton: React.FC<PremiumButtonProps> = ({
@@ -19,8 +20,9 @@ const PremiumButton: React.FC<PremiumButtonProps> = ({
   className = '',
   type = 'button',
   disabled = false,
+  plain = false,
 }) => {
-  const baseClasses = `btn-premium-reveal inline-flex items-center justify-center px-8 py-4 rounded-xl font-bold transition-all duration-300 shadow-xl shadow-orange-500/10 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed ${className}`;
+  const baseClasses = `btn-premium-reveal ${plain ? 'btn-premium-reveal-plain' : ''} inline-flex items-center justify-center px-8 py-4 rounded-full font-bold shadow-xl shadow-orange-500/10 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed ${className}`;
 
   if (to) {
     return (

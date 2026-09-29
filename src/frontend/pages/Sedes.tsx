@@ -6,6 +6,7 @@ import { branches } from '../../backend/data/branches';
 import { MapPin, Phone, Clock, ArrowRight, ShieldCheck, Navigation, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PremiumButton from '../components/PremiumButton';
 import { Helmet } from 'react-helmet-async';
+import { getConsent } from '../utils/consent';
 
 function Sedes() {
   const [loadingLocation, setLoadingLocation] = useState(false);
@@ -50,6 +51,11 @@ function Sedes() {
   const findNearest = () => {
     if (!navigator.geolocation) {
       alert("Lo sentimos, tu navegador no soporta geolocalización.");
+      return;
+    }
+
+    if (!getConsent().location) {
+      window.dispatchEvent(new Event('open-cookie-settings'));
       return;
     }
 

@@ -1,4 +1,5 @@
-import { ShieldCheck, Target, Eye, Gauge, MapPin, X, MessageCircle, Navigation, Clock, Building2, Truck, CheckCircle2, ChevronDown } from 'lucide-react';
+import { ShieldCheck, Target, Eye, Gauge, MapPin, X, Navigation, Clock, Building2, Truck, CheckCircle2, ChevronDown } from 'lucide-react';
+import { FaWhatsapp } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
 import RevealOnScroll from '../components/RevealOnScroll';
 import { Helmet } from 'react-helmet-async';
@@ -26,9 +27,7 @@ function Milestone({ year, title, description, image, number, side, featured }: 
   return (
     <div className={`relative flex flex-col lg:flex-row gap-8 lg:gap-12 ${isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center`}>
       {/* Conector en la línea central (solo desktop) */}
-      <div className={`hidden lg:block lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:w-10 lg:h-10 lg:rounded-full lg:border-4 lg:shadow-lg lg:z-10 lg:flex lg:items-center lg:justify-center ${
-        isLeft ? 'lg:-translate-y-1/2' : 'lg:-translate-y-1/2'
-      } ${
+      <div className={`hidden lg:block lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-10 lg:h-10 lg:rounded-full lg:border-4 lg:shadow-lg lg:z-10 lg:flex lg:items-center lg:justify-center ${
         featured ? 'bg-gradient-to-br from-orange-400 to-orange-600 border-white/20' : 'bg-white border-orange-400'
       }`}>
         {featured ? (
@@ -68,7 +67,7 @@ function Milestone({ year, title, description, image, number, side, featured }: 
           }`} />
         </div>
         {/* Badge número decorativo */}
-        <div className={`absolute -bottom-4 -right-4 lg:-bottom-6 lg:-right-6 w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl font-black ${
+        <div className={`absolute -bottom-4 -left-4 lg:-bottom-6 lg:-left-6 w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl font-black ${
           featured ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-2 border-white/20 shadow-2xl shadow-orange-500/50' : 'bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400 border-2 border-orange-400'
         }`}>
           {number}
@@ -352,7 +351,7 @@ function Nosotros() {
             </div>
 
             {/* Card: Stats (Orange) */}
-            <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center mb-12 text-white shadow-xl shadow-orange-500/20 group">
+            <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center text-white shadow-xl shadow-orange-500/20 group">
               <h4 className="stat-num text-6xl font-black mb-2 tracking-tighter">
                 <Counter end={99.9} suffix="%" />
               </h4>
@@ -363,21 +362,21 @@ function Nosotros() {
             </div>
 
             {/* Card: Values */}
-            <div className="bg-[#e0e7ff] rounded-2xl p-8 flex flex-col space-y-8">
+            <div className="bg-[#e0e7ff] rounded-2xl p-8 flex flex-col justify-center gap-6">
               <h3 className="text-2xl font-bold text-gray-900">Valores Fundamentales</h3>
-              <ul className="space-y-6">
+              <ul className="space-y-5">
                 {[
                   { label: "Transparencia Radical", icon: Target, desc: "Resultados trazables e inalterables." },
                   { label: "Rigor Técnico", icon: Gauge, desc: "Cero margen de error en diagnósticos." },
                   { label: "Seguridad Humana", icon: ShieldCheck, desc: "Nuestra prioridad es la vida del conductor." }
                 ].map((val, i) => (
-                  <li key={i} className="flex gap-4 group">
-                    <div className="bg-white/50 p-2.5 rounded-lg text-orange-600 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
+                  <li key={i} className="flex gap-4 items-start group">
+                    <div className="bg-white/50 p-2.5 rounded-lg text-orange-600 flex items-center justify-center shrink-0 group-hover:bg-orange-500 group-hover:text-white transition-all duration-300">
                       <val.icon size={20} />
                     </div>
-                    <div>
+                    <div className="min-w-0">
                       <h5 className="font-bold text-gray-900 text-sm">{val.label}</h5>
-                      <p className="text-[11px] text-gray-500 uppercase tracking-wider mt-0.5">{val.desc}</p>
+                      <p className="text-[11px] text-gray-500 uppercase tracking-wider mt-0.5 leading-relaxed">{val.desc}</p>
                     </div>
                   </li>
                 ))}
@@ -418,9 +417,9 @@ function Nosotros() {
               </p>
             </div>
 
-            {/* Línea central vertical */}
-            <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 -translate-x-1/2 hidden lg:block" />
-            <div className="absolute left-1/2 top-0 bottom-0 w-[4px] bg-orange-500/30 -translate-x-1/2 lg:hidden" />
+            {/* Línea central vertical - dentro del contenedor para alinear con los conectores */}
+            <div className="absolute left-1/2 top-24 bottom-24 w-1 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 -translate-x-1/2 hidden lg:block" />
+            <div className="absolute left-1/2 top-24 bottom-24 w-[4px] bg-orange-500/30 -translate-x-1/2 lg:hidden" />
 
             <div className="space-y-16 lg:space-y-20">
               {/* Hito 1 - 2014 */}
@@ -810,7 +809,7 @@ function Nosotros() {
 
                     <div className="p-10 pt-4 grid grid-cols-2 gap-4 bg-gray-50 border-t border-gray-100">
                       <button onClick={() => openWhatsApp(selectedBranch)} className="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg shadow-green-500/20 transition-all active:scale-95">
-                        <MessageCircle size={18} /> WhatsApp
+                        <FaWhatsapp size={18} /> WhatsApp
                       </button>
                       <button onClick={() => openGoogleMaps(selectedBranch)} className="flex items-center justify-center gap-3 bg-black hover:bg-gray-800 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest shadow-lg active:scale-95 transition-all">
                         <Navigation size={18} /> Navegar

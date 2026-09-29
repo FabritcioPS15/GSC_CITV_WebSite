@@ -22,6 +22,10 @@ const PlacaConsultaPage = lazy(() => import('./frontend/pages/PlacaConsultaPage'
 const RevisionConsultaPage = lazy(() => import('./frontend/pages/RevisionConsultaPage'));
 const GasConsultaPage = lazy(() => import('./frontend/pages/GasConsultaPage'));
 const Cupon = lazy(() => import('./frontend/pages/Cupon'));
+const Privacidad = lazy(() => import('./frontend/pages/Privacidad'));
+const Cookies = lazy(() => import('./frontend/pages/Cookies'));
+const Terminos = lazy(() => import('./frontend/pages/Terminos'));
+const LibroReclamaciones = lazy(() => import('./frontend/pages/LibroReclamaciones'));
 const NotFound = lazy(() => import('./frontend/pages/NotFound'));
 
 function AppContent() {
@@ -48,6 +52,10 @@ function AppContent() {
                 <Route path="/consulta-revision" element={<RevisionConsultaPage />} />
                 <Route path="/consulta-gas" element={<GasConsultaPage />} />
                 <Route path="/cupon" element={<Cupon />} />
+                <Route path="/privacidad" element={<Privacidad />} />
+                <Route path="/cookies" element={<Cookies />} />
+                <Route path="/terminos" element={<Terminos />} />
+                <Route path="/libro-de-reclamaciones" element={<LibroReclamaciones />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

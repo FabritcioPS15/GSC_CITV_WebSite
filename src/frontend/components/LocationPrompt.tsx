@@ -1,20 +1,32 @@
 import { useState, useEffect } from 'react';
 import { MapPin, Navigation, X } from 'lucide-react';
+import { getConsent, onConsentChange } from '../utils/consent';
 
 const LocationPrompt = () => {
     const [isVisible, setIsVisible] = useState(false);
     const [status, setStatus] = useState<'idle' | 'requesting' | 'success' | 'error'>('idle');
 
     useEffect(() => {
-        // Only show if user hasn't made a choice
+        // Solo mostrar si no se ha respondido antes y si el usuario,autoriza geolocalización
         const hasAskedLocation = localStorage.getItem('hasAskedLocation');
 
-        if (!hasAskedLocation) {
-            const timer = setTimeout(() => {
-                setIsVisible(true);
-            }, 2000);
-            return () => clearTimeout(timer);
+        if (hasAskedLocation || !getConsent().location) {
+            return;
         }
+
+        const timer = setTimeout(() => {
+            setIsVisible(true);
+        }, 2000);
+        return () => clearTimeout(timer);
+    }, []);
+
+    // Si el usuario cambia sus preferencias y rechaza la geolocalización, cerrar el aviso
+    useEffect(() => {
+        return onConsentChange((consent) => {
+            if (!consent.location) {
+                setIsVisible(false);
+            }
+        });
     }, []);
 
     const handleAllow = () => {
