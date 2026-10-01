@@ -15,6 +15,19 @@ export function scrollToTop(): void {
   }
 }
 
+/** Alto del header fijo, para que el ancla no quede tapada al saltar. */
+const HEADER_OFFSET = -90;
+
+/** Desplaza hasta un ancla usando Lenis, con el offset del header fijo. */
+export function scrollToEl(el: HTMLElement): void {
+  if (lenisInstance) {
+    lenisInstance.scrollTo(el, { offset: HEADER_OFFSET, force: true });
+  } else {
+    const top = el.getBoundingClientRect().top + window.scrollY + HEADER_OFFSET;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+}
+
 export default function SmoothScroll() {
   useEffect(() => {
     const lenis = new Lenis({

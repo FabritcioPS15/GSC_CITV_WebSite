@@ -159,15 +159,17 @@ function Cronograma() {
                         <div className="space-y-6">
 
 
-                            {/* Nota importante */}
-                            <div className="bg-yellow-50 rounded-2xl p-6 border border-yellow-200">
+                            {/* Nota */}
+                            <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
                                 <div className="flex items-start gap-4">
-                                    <AlertCircle className="text-yellow-600 flex-shrink-0 mt-1" size={20} />
+                                    <AlertCircle className="text-gray-400 flex-shrink-0 mt-1" size={20} />
                                     <div>
-                                        <h4 className="font-bold text-gray-900 mb-2">Nota Importante</h4>
-                                        <p className="content-text text-gray-600">
-                                            Este cronograma es referenciales. Verifica siempre la fecha exacta en tu tarjeta de propiedad
-                                            o consulta directamente con el MTC. Las fechas pueden variar según disposiciones oficiales.
+                                        <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
+                                        <p className="text-gray-600 text-sm leading-relaxed">
+                                            Este cronograma es referencial. Verifica siempre la fecha exacta en tu tarjeta de propiedad
+                                            o consulta directamente con el MTC, ya que las fechas pueden variar según disposiciones oficiales.
+                                            El incumplimiento de la inspección en el mes asignado conlleva multas y recargos adicionales,
+                                            y las citas están sujetas a disponibilidad según la sede elegida.
                                         </p>
                                     </div>
                                 </div>

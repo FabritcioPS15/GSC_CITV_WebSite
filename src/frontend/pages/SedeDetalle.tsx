@@ -189,7 +189,7 @@ function SedeDetalle() {
                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:h-[32rem]">
                         <RevealOnScroll className="h-full">
                             <Tarifico
-                                overrides={branch.tarifario}
+                                sedeId={branch.id}
                                 sedeNombre={branch.name}
                                 whatsapp={branch.whatsapp}
                             />

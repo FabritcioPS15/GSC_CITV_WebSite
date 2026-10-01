@@ -10,6 +10,19 @@ import { useRef, useState, useEffect } from 'react';
 import escuelaLogo from '../../resources/assets/escuela_logo.png';
 import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
 
+/**
+ * Ancho de cada card del carrusel de planes.
+ * El carrusel usa `gap-6` (1.5rem), así que el ancho tiene que descontar la
+ * mitad del gap en cada lado para que N cards + N-1 gaps llenen el 100%:
+ *   2 cards -> (100% - 1.5rem) / 2 = calc(50% - 0.75rem)
+ *   3 cards -> (100% - 3rem)   / 3 = calc(33.3333% - 1rem)
+ * Estas clases van en el RevealOnScroll, que es el hijo flex real: si se
+ * dejan en el div interior, el ancho se resuelve contra el contenido y las
+ * cards se encogen de forma impredecible.
+ */
+const PLAN_CARD_WIDTH =
+  'shrink-0 snap-start w-[88%] sm:w-[62%] md:w-[calc(50%-0.75rem)] lg:w-[calc(33.3333%-1rem)]';
+
 /* Componente Milestone para la línea de tiempo */
 interface MilestoneProps {
   year: string;
@@ -500,8 +513,8 @@ function Nosotros() {
           <div className="relative">
             <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 -mx-4 px-4 scrollbar-hide">
               {/* Card 1: Flotas de Empresa */}
-              <RevealOnScroll>
-                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+              <RevealOnScroll className={PLAN_CARD_WIDTH}>
+                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
                   <div className="h-64 overflow-hidden relative">
                     <img
                       src="https://images.unsplash.com/photo-1586528116311-ad86d3ef37f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -535,8 +548,8 @@ function Nosotros() {
               </RevealOnScroll>
 
               {/* Card 2: Empresas de Transporte */}
-              <RevealOnScroll className="delay-200">
-                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+              <RevealOnScroll className={`delay-200 ${PLAN_CARD_WIDTH}`}>
+                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
                   <div className="h-64 overflow-hidden relative">
                     <img
                       src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
@@ -570,8 +583,8 @@ function Nosotros() {
               </RevealOnScroll>
 
               {/* Card 3: Aseguradoras */}
-              <RevealOnScroll className="delay-400">
-                <div className="shrink-0 snap-start w-full md:w-[calc(50%-3rem)] lg:w-[calc(33.333%-4rem)] bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+              <RevealOnScroll className={`delay-400 ${PLAN_CARD_WIDTH}`}>
+                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
                   <div className="h-64 overflow-hidden relative">
                     <img
                       src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"

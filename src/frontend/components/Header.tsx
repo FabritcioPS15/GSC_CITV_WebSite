@@ -1,19 +1,41 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { X, ChevronDown, ChevronRight, MapPin, Home, Users, FileText, Phone, Calendar, MessageCircle, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react';
+import { X, Menu, ChevronDown, ChevronRight, MapPin, Home, Users, FileText, Phone, Calendar, Search, FileCheck, Fuel, Tag, ExternalLink, ArrowRight } from 'lucide-react';
 import PremiumButton from './PremiumButton';
 import { Link, useLocation } from 'react-router-dom';
-import { branches, WHATSAPP_INSPECCION, whatsappUrl } from '../../backend/data/branches';
+import { branches } from '../../backend/data/branches';
+import { getLenis } from './SmoothScroll';
+import { useMobileMenu } from '../context/MobileMenuContext';
+
+/**
+ * Una consulta puede ser un portal externo (el Estado lo tiene mejor mantido y
+ * actualizado que una copia local) o una ruta del propio sitio. Nunca las dos:
+ * si hay href gana el link externo.
+ *
+ * `portal` es el nombre que va en el aviso de "abriendo...", para que el usuario
+ * sepa a qué sitio está saltando.
+ */
+interface ConsultaLink {
+    label: string;
+    icon: ReactNode;
+    portal?: string;
+    href?: string;
+    path?: string;
+}
 
 export default function Header() {
-    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { isOpen: mobileMenuOpen, setOpen: setMobileMenuOpen, toggle: toggleMobileMenu } = useMobileMenu();
     const [sedesDropdownOpen, setSedesDropdownOpen] = useState(false);
     const [mobileSedesOpen, setMobileSedesOpen] = useState(false);
     const [mobileRegion, setMobileRegion] = useState<'lima' | 'provincia'>('lima');
     const [isScrolled, setIsScrolled] = useState(false);
+    const [portalAbierto, setPortalAbierto] = useState<string | null>(null);
+    const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const location = useLocation();
 
     const dropdownRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
+    const menuToggleRef = useRef<HTMLButtonElement | null>(null);
+    const drawerCloseRef = useRef<HTMLButtonElement | null>(null);
 
     // Scroll effect for header with glassmorphism
     useEffect(() => {
@@ -35,7 +57,7 @@ export default function Header() {
             // Mobile menu
             if (mobileMenuOpen && mobileMenuRef.current &&
                 !mobileMenuRef.current.contains(event.target as Node) &&
-                !(event.target as HTMLElement).closest('button[aria-label="Toggle menu"]')) {
+                !(event.target as HTMLElement).closest('[data-menu-toggle]')) {
                 setMobileMenuOpen(false);
             }
         };
@@ -51,17 +73,41 @@ export default function Header() {
         setMobileSedesOpen(false);
     }, [location.pathname]);
 
-    // Disable body scroll when mobile menu is open
+    // Bloquea el scroll con el menú abierto. El overflow hidden solo no alcanza:
+    // Lenis sigue con su loop de animación y sigue llamando a window.scrollTo
+    // por debajo, así que hay que detenerlo con su propia API. El valor previo
+    // se guarda y se restaura porque antes se ponía 'unset' en el cleanup y
+    // pisaba cualquier overflow que ya tuviera el body.
     useEffect(() => {
-        if (mobileMenuOpen) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = 'unset';
-        }
-
+        if (!mobileMenuOpen) return;
+        const lenis = getLenis();
+        const overflowPrevio = document.body.style.overflow;
+        lenis?.stop();
+        document.body.style.overflow = 'hidden';
         return () => {
-            document.body.style.overflow = 'unset';
+            lenis?.start();
+            document.body.style.overflow = overflowPrevio;
         };
+    }, [mobileMenuOpen]);
+
+    // Escape cierra el menú y devuelve el foco al botón, para que quien navega
+    // con teclado no quede perdido. Al abrir, el foco entra al drawer.
+    useEffect(() => {
+        if (!mobileMenuOpen) return;
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setMobileMenuOpen(false);
+                menuToggleRef.current?.focus();
+            }
+        };
+        document.addEventListener('keydown', onKeyDown);
+        drawerCloseRef.current?.focus();
+        return () => document.removeEventListener('keydown', onKeyDown);
+    }, [mobileMenuOpen, setMobileMenuOpen]);
+
+    // Al reabrir el menú el acordeón de sedes arranca cerrado.
+    useEffect(() => {
+        if (!mobileMenuOpen) setMobileSedesOpen(false);
     }, [mobileMenuOpen]);
 
     const navLinks = useMemo(() => [
@@ -74,12 +120,59 @@ export default function Header() {
     const limaBranches = useMemo(() => branches.filter(branch => branch.region === 'lima'), []);
     const provinciaBranches = useMemo(() => branches.filter(branch => branch.region === 'provincia'), []);
 
+    // Las consultas en linea solo vivian en el footer. Las de placa, revision y
+    // gas apuntan al portal oficial del Estado, asi que van como link externo y
+    // no como ruta interna. El cupon sí es del sitio.
+    const consultaLinks = useMemo<ConsultaLink[]>(() => [
+        {
+            label: 'Consulta por Placa',
+            icon: <Search size={17} />,
+            portal: 'el portal de SUNARP',
+            href: 'https://consultavehicular.sunarp.gob.pe/consulta-vehicular/inicio',
+        },
+        {
+            label: 'Consulta de Revisión',
+            icon: <FileCheck size={17} />,
+            portal: 'el portal del MTC',
+            href: 'https://rec.mtc.gob.pe/Citv/ArConsultaCitv',
+        },
+        {
+            label: 'Inspección GLP / GNV',
+            icon: <Fuel size={17} />,
+            portal: 'el portal de Infogas',
+            href: 'https://vh.infogas.com.pe/',
+        },
+        {
+            label: 'Cupón de Descuento',
+            icon: <Tag size={17} />,
+            path: '/cupon',
+        },
+    ], []);
+
     const isActive = (path: string) => {
         if (path === '/') return location.pathname === '/';
         return location.pathname.startsWith(path);
     };
 
+    /**
+     * Confirma la salida hacia un portal externo sin frenarla: el link se abre
+     * igual, solo aparece un aviso que se va solo. Un cartel de "¿segurás?" acá
+     * solo agregaria un paso, porque los portales son oficiales.
+     */
+    const avisarPortal = (nombre: string) => {
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+        setPortalAbierto(nombre);
+        toastTimer.current = setTimeout(() => setPortalAbierto(null), 3200);
+    };
+
+    // Si el Header se desmonta con el aviso en pantalla, el timer no debe
+    // intentar setear estado en un componente muerto.
+    useEffect(() => () => {
+        if (toastTimer.current) clearTimeout(toastTimer.current);
+    }, []);
+
     const isSedesActive = location.pathname.startsWith('/sedes');
+    const contactoActive = location.pathname.startsWith('/contacto');
 
     const handleMobileSedesClick = () => {
         setMobileSedesOpen(!mobileSedesOpen);
@@ -211,7 +304,7 @@ export default function Header() {
                                                 <p className="text-xs text-gray-600 mb-4 leading-relaxed">Ubica la sede autorizada más cercana, revisa tarifas, horarios y rutas de acceso.</p>
                                             </div>
                                             <Link
-                                                to="/sedes"
+                                                to="/sedes#mapa"
                                                 onClick={() => setSedesDropdownOpen(false)}
                                                 className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold transition-all duration-300 shadow-md shadow-orange-500/20"
                                             >
@@ -252,18 +345,14 @@ export default function Header() {
                         {/* Tablet & Mobile Menu Button */}
                         <div className="xl:hidden">
                             <button
-                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                                className={`p-2.5 rounded-xl transition-all duration-300 border flex items-center justify-center ${mobileMenuOpen
-                                    ? 'bg-orange-500 text-white border-orange-500 shadow-md shadow-orange-500/20'
-                                    : 'bg-orange-50 text-orange-600 border-orange-200/80 hover:bg-orange-100'
-                                    }`}
-                                aria-label="Toggle menu"
+                                ref={menuToggleRef}
+                                onClick={toggleMobileMenu}
+                                data-menu-toggle
+                                className="p-2 -mr-2 text-gray-700 hover:text-orange-600 transition-colors"
+                                aria-label={mobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                                aria-expanded={mobileMenuOpen}
                             >
-                                <div className="w-6 h-5 relative flex flex-col justify-between">
-                                    <span className={`h-0.5 w-full rounded-full transition-all duration-300 ${mobileMenuOpen ? 'bg-white rotate-45 translate-y-[9px]' : 'bg-orange-600'}`} />
-                                    <span className={`h-0.5 w-full rounded-full transition-all duration-200 ${mobileMenuOpen ? 'opacity-0' : 'bg-orange-600'}`} />
-                                    <span className={`h-0.5 w-full rounded-full transition-all duration-300 ${mobileMenuOpen ? 'bg-white -rotate-45 -translate-y-[9px]' : 'bg-orange-600'}`} />
-                                </div>
+                                {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
                             </button>
                         </div>
                     </div>
@@ -278,15 +367,20 @@ export default function Header() {
                     : 'opacity-0 invisible pointer-events-none'
                     }`}
             >
-                {/* Backdrop con desenfoque suave */}
+                {/* Backdrop con desenfoque suave. touch-action:none evita que al
+                    arrastrar sobre el área vacía el dedo se lleve la página en
+                    táctil; el drawer adentro sí scrollea porque es otro elemento. */}
                 <div
-                    className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+                    className={`absolute inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 touch-none ${mobileMenuOpen ? 'opacity-100' : 'opacity-0'
                         }`}
                     onClick={() => setMobileMenuOpen(false)}
                 />
 
                 {/* Mobile Drawer Panel */}
                 <div
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Menú de navegación"
                     className={`absolute right-0 top-0 h-full w-full max-w-sm sm:max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                         }`}
                 >
@@ -304,8 +398,9 @@ export default function Header() {
                             />
                         </Link>
                         <button
+                            ref={drawerCloseRef}
                             onClick={() => setMobileMenuOpen(false)}
-                            className="p-2 rounded-xl text-gray-500 hover:text-gray-900 bg-gray-100/80 hover:bg-gray-200/80 transition-colors"
+                            className="p-2 -mr-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
                             aria-label="Cerrar menú"
                         >
                             <X size={20} />
@@ -313,18 +408,7 @@ export default function Header() {
                     </div>
 
                     {/* Drawer Body - Con scroll suave */}
-                    <div className="flex-1 overflow-y-auto px-5 py-5 space-y-4">
-                        {/* Status de atención rápido */}
-                        <div className="flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-orange-50/70 border border-orange-100 text-xs">
-                            <div className="flex items-center gap-2 text-orange-950 font-medium">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span>Atención Lun a Sáb: 7am - 6pm</span>
-                            </div>
-                            <span className="text-[11px] font-semibold text-orange-600 bg-white px-2 py-0.5 rounded-full border border-orange-200 shadow-xs">
-                                12 Sedes
-                            </span>
-                        </div>
-
+                    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
                         {/* Enlaces Principales */}
                         <div className="space-y-1.5">
                             {navLinks.map((link) => {
@@ -334,37 +418,39 @@ export default function Header() {
                                         key={link.path}
                                         to={link.path}
                                         onClick={() => setMobileMenuOpen(false)}
-                                        className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ${active
-                                            ? 'bg-orange-500 text-white font-semibold shadow-md shadow-orange-500/20'
-                                            : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600 border border-gray-100/90'
+                                        className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-colors duration-200 ${active
+                                            ? 'bg-orange-500 text-white font-semibold'
+                                            : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600'
                                             }`}
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <div className={`p-1.5 rounded-lg ${active ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-600'}`}>
+                                        <span className="flex items-center gap-3 min-w-0">
+                                            <span className={active ? 'text-white' : 'text-orange-500'}>
                                                 {link.icon}
-                                            </div>
-                                            <span className="text-base font-medium">{link.label}</span>
-                                        </div>
-                                        <ChevronRight size={18} className={active ? 'text-white/80' : 'text-gray-400'} />
+                                            </span>
+                                            <span className="text-base font-medium truncate">{link.label}</span>
+                                        </span>
+                                        <ChevronRight size={18} className={active ? 'text-white/80' : 'text-gray-300'} />
                                     </Link>
                                 );
                             })}
 
                             {/* Sedes Accordion Interactivo */}
-                            <div className="pt-1">
+                            <div>
                                 <button
                                     onClick={handleMobileSedesClick}
-                                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-all duration-200 ${isSedesActive
-                                        ? 'bg-orange-500 text-white font-semibold shadow-md shadow-orange-500/20'
-                                        : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600 border border-gray-100/90'
+                                    aria-expanded={mobileSedesOpen}
+                                    aria-controls="mobile-sedes-panel"
+                                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl transition-colors duration-200 ${isSedesActive
+                                        ? 'bg-orange-500 text-white font-semibold'
+                                        : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600'
                                         }`}
                                 >
-                                    <div className="flex items-center gap-3">
-                                        <div className={`p-1.5 rounded-lg ${isSedesActive ? 'bg-white/20 text-white' : 'bg-orange-100 text-orange-600'}`}>
+                                    <span className="flex items-center gap-3">
+                                        <span className={isSedesActive ? 'text-white' : 'text-orange-500'}>
                                             <MapPin size={20} />
-                                        </div>
+                                        </span>
                                         <span className="text-base font-medium">Nuestras Sedes</span>
-                                    </div>
+                                    </span>
                                     <ChevronDown
                                         size={18}
                                         className={`transition-transform duration-200 ${mobileSedesOpen ? 'rotate-180' : ''} ${isSedesActive ? 'text-white' : 'text-gray-400'}`}
@@ -373,16 +459,18 @@ export default function Header() {
 
                                 {/* Contenido Sedes */}
                                 {mobileSedesOpen && (
-                                    <div className="mt-2 p-3 bg-gray-50/90 rounded-2xl border border-gray-200/80 space-y-3 animate-fade-in">
-                                        {/* Botón ver todas las sedes */}
+                                    <div id="mobile-sedes-panel" className="mt-1.5 p-2 bg-gray-50/90 rounded-xl border border-gray-200/80 space-y-2 animate-fade-in">
+                                        {/* Botón ver todas las sedes. Apunta al ancla del mapa
+                                            interactivo, no al inicio de la página, que arriba
+                                            tiene el listado de sedes en tarjetas. */}
                                         <Link
-                                            to="/sedes"
+                                            to="/sedes#mapa"
                                             onClick={() => setMobileMenuOpen(false)}
-                                            className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold shadow-sm transition-all"
+                                            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-semibold transition-colors"
                                         >
-                                            <MapPin size={14} />
-                                            <span>Ver mapa y las 12 sedes</span>
-                                            <ArrowRight size={14} />
+                                            <MapPin size={13} />
+                                            <span>Ver mapa y las {branches.length} sedes</span>
+                                            <ArrowRight size={13} />
                                         </Link>
 
                                         {/* Selector Lima / Provincias */}
@@ -410,13 +498,13 @@ export default function Header() {
                                         </div>
 
                                         {/* Lista de sedes por región seleccionada */}
-                                        <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+                                        <div className="space-y-1 max-h-52 overflow-y-auto pr-1">
                                             {(mobileRegion === 'lima' ? limaBranches : provinciaBranches).map((branch) => (
                                                 <Link
                                                     key={branch.id}
                                                     to={`/sedes/${branch.id}`}
                                                     onClick={() => setMobileMenuOpen(false)}
-                                                    className="flex items-center justify-between p-2.5 rounded-xl bg-white hover:bg-orange-50/80 border border-gray-200/60 transition-colors group"
+                                                    className="flex items-center justify-between p-2 rounded-lg bg-white hover:bg-orange-50/80 border border-gray-200/60 transition-colors group"
                                                 >
                                                     <div className="flex items-center gap-2 min-w-0">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500 flex-shrink-0 group-hover:scale-125 transition-transform" />
@@ -436,54 +524,112 @@ export default function Header() {
                                     </div>
                                 )}
                             </div>
-                        </div>
 
-                        {/* Botones de Acción Directa */}
-                        <div className="pt-2 space-y-2">
-                            {/* WhatsApp Directo */}
-                            <a
-                                href={whatsappUrl(WHATSAPP_INSPECCION, 'Hola, deseo realizar una consulta sobre la revisión técnica vehicular.')}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-md shadow-emerald-500/20 active:scale-[0.98] transition-all"
-                            >
-                                <MessageCircle size={18} />
-                                <span>Consultar por WhatsApp</span>
-                            </a>
-
-                            {/* Contacto */}
+                            {/* Contáctanos entra como opción más de la lista, no como
+                                botón aparte. El drawer se quedó sin el acceso a WhatsApp:
+                                el de cada sede vive en su página y el general en el
+                                botón flotante, que se oculta con el menú abierto. */}
                             <Link
                                 to="/contacto"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-semibold text-sm shadow-md shadow-orange-500/20 active:scale-[0.98] transition-all"
+                                className={`flex items-center justify-between px-4 py-3.5 rounded-xl transition-colors duration-200 ${contactoActive
+                                    ? 'bg-orange-500 text-white font-semibold'
+                                    : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600'
+                                    }`}
                             >
-                                <Phone size={18} />
-                                <span>Contáctanos</span>
+                                <span className="flex items-center gap-3">
+                                    <span className={contactoActive ? 'text-white' : 'text-orange-500'}>
+                                        <Phone size={20} />
+                                    </span>
+                                    <span className="text-base font-medium">Contáctanos</span>
+                                </span>
+                                <ChevronRight size={18} className={contactoActive ? 'text-white/80' : 'text-gray-300'} />
                             </Link>
-                        </div>
 
-                        {/* Tarjeta de Garantía / Requisitos rápidos */}
-                        <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/70 text-xs text-slate-600 space-y-2">
-                            <div className="flex items-center gap-1.5 font-bold text-slate-800">
-                                <ShieldCheck size={16} className="text-orange-500" />
-                                <span>Centro Autorizado MTC</span>
+                            {/* Consultas en línea, al final debajo de Contáctanos. Van en
+                                dos columnas para no alargar la lista: son servicios
+                                secundarios, no navegación principal. */}
+                            <div className="pt-2">
+                                <p className="px-1 pb-1.5 text-[10px] font-black uppercase tracking-widest text-gray-400">
+                                    Consultas en línea
+                                </p>
+                                <div className="grid grid-cols-2 gap-1.5">
+                                    {consultaLinks.map((link) => {
+                                        const externo = Boolean(link.href);
+                                        // Un link externo nunca queda "activo": el usuario
+                                        // sigue estando en este sitio, no en el portal.
+                                        const active = externo ? false : isActive(link.path ?? '');
+                                        const clases = `flex items-center gap-1.5 px-2.5 py-2.5 rounded-lg text-[11px] font-semibold leading-tight transition-colors ${active
+                                            ? 'bg-orange-500 text-white'
+                                            : 'bg-gray-50/80 text-gray-700 hover:bg-orange-50/60 hover:text-orange-600'
+                                            }`;
+                                        const contenido = (
+                                            <>
+                                                <span className={active ? 'text-white' : 'text-orange-500'}>
+                                                    {link.icon}
+                                                </span>
+                                                <span className="min-w-0">{link.label}</span>
+                                            </>
+                                        );
+
+                                        if (externo) {
+                                            return (
+                                                <a
+                                                    key={link.href}
+                                                    href={link.href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    onClick={() => link.portal && avisarPortal(link.portal)}
+                                                    className={clases}
+                                                >
+                                                    {contenido}
+                                                </a>
+                                            );
+                                        }
+
+                                        return (
+                                            <Link
+                                                key={link.path}
+                                                to={link.path ?? '/'}
+                                                onClick={() => setMobileMenuOpen(false)}
+                                                className={clases}
+                                            >
+                                                {contenido}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
                             </div>
-                            <p className="text-[11px] leading-relaxed text-slate-500">
-                                Certificado oficial con validez nacional e informe de inspección inmediato.
-                            </p>
                         </div>
+
                     </div>
 
-                    {/* Drawer Footer */}
-                    <div className="px-5 py-3.5 border-t border-gray-100 bg-gray-50/80 text-[11px] text-gray-500 flex items-center justify-between">
-                        <span className="flex items-center gap-1">
-                            <Clock size={12} className="text-orange-500" />
-                            <span>Lun - Sáb: 7am a 6pm</span>
-                        </span>
-                        <span className="font-medium text-gray-700">RTP & RTV San Cristóbal</span>
+                    {/* Drawer Footer. El banner reemplaza al texto de marca y también
+                        al horario, que ya está en la barra de arriba del drawer.
+                        Mide 10:1, así que a 160px de ancho queda en 16px de alto. */}
+                    <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/80 flex items-center justify-end">
+                        <img
+                            src="/bannermtc.png"
+                            alt="RTP & RTV San Cristóbal, autorizados por el MTC"
+                            className="w-40 h-auto block shrink-0"
+                        />
                     </div>
+
                 </div>
             </div>
+
+            {/* Aviso de salida a portal externo. Va por encima del drawer (z-60) y no
+                intercepta clics, asi que el link se abre igual. */}
+            {portalAbierto && (
+                <div
+                    role="status"
+                    aria-live="polite"
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] pointer-events-none flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-3 text-white text-[13px] font-medium shadow-2xl animate-fade-in"
+                >
+                    <ExternalLink size={15} className="text-orange-400 shrink-0" />
+                    <span className="whitespace-nowrap">Abriendo {portalAbierto}...</span>
+                </div>
+            )}
         </header>
     );
 }

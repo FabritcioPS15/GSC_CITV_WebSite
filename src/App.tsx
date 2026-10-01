@@ -9,6 +9,7 @@ import FloatingWhatsApp from './frontend/components/FloatingWhatsApp';
 import PageTransition from './frontend/components/PageTransition';
 import CookieConsent from './frontend/components/CookieConsent';
 import LocationPrompt from './frontend/components/LocationPrompt';
+import { MobileMenuProvider } from './frontend/context/MobileMenuContext';
 
 // Lazy load pages for better performance
 const Inicio = lazy(() => import('./frontend/pages/Inicio'));
@@ -74,7 +75,9 @@ function App() {
   return (
     <HelmetProvider>
       <Router>
-        <AppContent />
+        <MobileMenuProvider>
+          <AppContent />
+        </MobileMenuProvider>
       </Router>
     </HelmetProvider>
   );

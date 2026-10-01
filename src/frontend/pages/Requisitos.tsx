@@ -206,15 +206,23 @@ function Requisitos() {
         return () => clearInterval(id);
     }, [isPaused, steps.length]);
 
-    // En movil la pista es scrolleable: al cambiar de etapa hay que traerla
-    // a la vista, si no el usuario ve un punto que ya no corresponde.
+    // En movil la pista es scrolleable: al cambiar de etapa hay que traer el
+    // punto a la vista. Se mueve el scrollLeft de la pista a mano en vez de usar
+    // scrollIntoView, porque ese metodo tambien desplaza la pagina y el usuario
+    // ve un salto vertical que rompe la lectura.
     useEffect(() => {
         const track = trackRef.current;
         if (!track) return;
-        if (window.matchMedia('(min-width: 768px)').matches) return;
+        if (track.scrollWidth <= track.clientWidth) return; // no hay nada que scrollear
         const el = track.querySelector<HTMLElement>(`[data-step="${activeStep}"]`);
         if (!el) return;
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        const max = track.scrollWidth - track.clientWidth;
+        const destino = el.offsetLeft - (track.clientWidth - el.offsetWidth) / 2;
+        const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        track.scrollTo({
+            left: Math.max(0, Math.min(destino, max)),
+            behavior: suave ? 'smooth' : 'auto',
+        });
     }, [activeStep]);
 
     // Mide el centro real de cada circulo en lugar de estimarlo con porcentajes.
@@ -576,11 +584,16 @@ function Requisitos() {
                                                 </div>
                                             </div>
 
-                                            {/* Alto fijo en escritorio: cambiar de etapa no debe
-                                                cambiar el tamaño del panel, así el carrusel
-                                                automático no salta mientras avanza. */}
-                                            <div className="flex-1 flex flex-col lg:flex-row lg:h-[24rem]">
-                                                <div className="flex-1 p-5 md:p-7 lg:p-8 lg:overflow-y-auto">
+                            {/* Alto fijo en escritorio: cambiar de etapa no debe
+                                cambiar el tamaño del panel, así el carrusel
+                                automático no salta mientras avanza.
+                                En movil el alto es natural, pero con min-h se
+                                iguala el piso entre etapas y overflow-anchor-none
+                                evita que el navegador compense el desplazamiento
+                                del contenido que queda debajo. */}
+                            <div className="flex-1 flex flex-col lg:flex-row lg:h-[24rem] overflow-anchor-none">
+                                <div className="flex-1 p-5 md:p-7 lg:p-8 lg:overflow-y-auto min-h-[24rem] lg:min-h-0">
+
                                                     <p className="content-text text-gray-600 mb-6">{step.desc}</p>
 
                                                     <p className="text-[11px] font-black uppercase tracking-widest text-orange-600 mb-3">

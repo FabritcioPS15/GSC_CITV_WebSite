@@ -1,19 +1,19 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FaWhatsapp } from 'react-icons/fa';
 import {
     categorias,
-    getTarifasPorCategoria,
-    getPrecio,
+    tarifas,
     getRequisitos,
     TarifaCategoriaId,
     TarifaItem,
 } from '../../backend/data/tarifario';
 import { whatsappUrl } from '../../backend/data/branches';
+import { getTarifasDeSede, getPrecioEsPropio } from '../../backend/data/tarifarioSedes';
 import TarifaModal from './TarifaModal';
 
 interface TarificoProps {
-    overrides?: Record<string, number> | null;
-    /** Nombre de la sede, para incluirlo en el mensaje de WhatsApp. */
+    /** Id de la sede: resuelve sus precios propios desde tarifarioSedes.ts. */
+    sedeId?: number;
     sedeNombre?: string;
     /** WhatsApp específico de la sede. Si no se pasa, se usa el central. */
     whatsapp?: string | null;
@@ -44,12 +44,31 @@ function construirMensaje(
     return lineas.join('\n');
 }
 
-export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoProps) {
+export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps) {
     const [activa, setActiva] = useState<TarifaCategoriaId>('particular');
     const [seleccion, setSeleccion] = useState<TarifaItem | null>(null);
-    const items = getTarifasPorCategoria(activa);
-    const categoria = categorias.find((c) => c.id === activa);
     const sede = sedeNombre ?? 'San Cristobal';
+
+    // Todas las tarifas de la sede con precio y nombre ya resueltos. Las que
+    // la sede no ofrece no vienen en la lista, así que no hay que filtrar.
+    const todas = useMemo(
+        () => (sedeId ? getTarifasDeSede(sedeId) : tarifas),
+        [sedeId]
+    );
+
+    // Si la categoría activa deja de tener filas, cae a la primera con contenido.
+    const categoriasVisibles = useMemo(() => {
+        const conFilas = categorias.filter((c) => todas.some((t) => t.categoria === c.id));
+        return conFilas.length > 0 ? conFilas.map((c) => c.id) : categorias.map((c) => c.id);
+    }, [todas]);
+    useEffect(() => {
+        if (!categoriasVisibles.includes(activa)) {
+            setActiva(categoriasVisibles[0] ?? 'particular');
+        }
+    }, [categoriasVisibles, activa]);
+
+    const items = todas.filter((t) => t.categoria === activa);
+    const categoria = categorias.find((c) => c.id === activa);
 
     const consultar = (item: TarifaItem, precio?: number) => {
         window.open(
@@ -80,17 +99,23 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
                             onChange={(e) => setActiva(e.target.value as TarifaCategoriaId)}
                             className="w-full appearance-none bg-white border border-gray-200 px-4 py-2.5 text-sm font-bold uppercase tracking-wide text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#f97316] focus:border-transparent"
                         >
-                            {categorias.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                    {c.label}
-                                </option>
-                            ))}
+                            {categoriasVisibles.map((idCat) => {
+                                const c = categorias.find((x) => x.id === idCat);
+                                if (!c) return null;
+                                return (
+                                    <option key={c.id} value={c.id}>
+                                        {c.label}
+                                    </option>
+                                );
+                            })}
                         </select>
                     </div>
 
                     {/* Escritorio: tira vertical con indicador lateral */}
                     <ul className="hidden lg:flex lg:flex-col lg:overflow-visible">
-                        {categorias.map((c) => {
+                        {categoriasVisibles.map((idCat) => {
+                            const c = categorias.find((x) => x.id === idCat);
+                            if (!c) return null;
                             const esActiva = c.id === activa;
                             return (
                                 <li
@@ -130,8 +155,13 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
                     {/* Filas con scroll propio: el alto de la caja no depende de la
                         cantidad de vehículos de la categoría. */}
                     <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+                    {items.length === 0 ? (
+                        <p className="px-5 py-10 text-center text-sm text-gray-500">
+                            Esta sede no ofrece servicios de esta categoría.
+                        </p>
+                    ) : null}
                     {items.map((item, i) => {
-                        const precio = getPrecio(item.id, overrides);
+                        const precio = item.precio;
                         const esUltimo = i === items.length - 1;
                         return (
                             <button
@@ -211,13 +241,13 @@ export default function Tarifico({ overrides, sedeNombre, whatsapp }: TarificoPr
                 item={seleccion}
                 categoriaLabel={categoria?.label ?? ''}
                 icono={categoria?.icon ?? 'car'}
-                precio={seleccion ? getPrecio(seleccion.id, overrides) : undefined}
-                esPrecioDeSede={seleccion ? typeof overrides?.[seleccion.id] === 'number' : false}
+                precio={seleccion?.precio}
+                esPrecioDeSede={seleccion ? getPrecioEsPropio(sedeId, seleccion.id) : false}
                 sedeNombre={sede}
                 requisitos={seleccion ? getRequisitos(seleccion.id) : []}
                 onClose={cerrar}
                 onConsultar={() => {
-                    if (seleccion) consultar(seleccion, getPrecio(seleccion.id, overrides));
+                    if (seleccion) consultar(seleccion, seleccion.precio);
                     cerrar();
                 }}
             />

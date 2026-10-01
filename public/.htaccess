@@ -1,0 +1,37 @@
+# Rewrite de Single Page App.
+#
+# Sin esto, al recargar /sedes o /tarifario el servidor busca un archivo
+# fisico que no existe y devuelve 404 antes de que React Router pueda
+# resolver la ruta en el cliente.
+#
+# Solo se redirige a index.html lo que NO existe como archivo. Por eso el
+# condicion !-f: los assets reales (/assets/index-abc123.js, /favicon.png,
+# /bannermtc.png) siguen sirviéndose con normalidad.
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Rewrite condicional para hosting compartido: no pisa archivos ni carpetas
+  # que existen de verdad.
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule ^ index.html [L]
+</IfModule>
+
+# Cache de assets con hash en el nombre (Vite los genera, ej.
+# index-DqY6bDHt.js). Son inmutables, se pueden cachear para siempre.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  <FilesMatch "\.(js|css|woff2?|png|jpg|jpeg|gif|svg|ico|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE application/xml image/svg+xml
+</IfModule>
+
+# No listar directorios.
+Options -Indexes

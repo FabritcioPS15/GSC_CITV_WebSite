@@ -11,6 +11,7 @@ import { getConsent } from '../utils/consent';
 function Sedes() {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [nearestBranchId, setNearestBranchId] = useState<number | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll para el carrusel de beneficios (solo en móvil)
@@ -50,7 +51,7 @@ function Sedes() {
 
   const findNearest = () => {
     if (!navigator.geolocation) {
-      alert("Lo sentimos, tu navegador no soporta geolocalización.");
+      setLocationError("Tu navegador no soporta geolocalización.");
       return;
     }
 
@@ -59,12 +60,13 @@ function Sedes() {
       return;
     }
 
+    setLocationError(null);
     setLoadingLocation(true);
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
         let minDistance = Infinity;
-        let closestId = null;
+        let closestId: number | null = null;
 
         branches.forEach(branch => {
           const dist = getDistance(latitude, longitude, branch.position[0], branch.position[1]);
@@ -77,24 +79,27 @@ function Sedes() {
         if (closestId) {
           setNearestBranchId(closestId);
           setLoadingLocation(false);
-          // Scroll to the nearest branch card
-          const element = document.getElementById(`branch-${closestId}`);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
+          // Lleva la vista a la tarjeta. Antes esto se quitó porque se disparaba
+          // solo al cargar la página y saltaba sin que el usuario pidiera nada.
+          // Ahora findNearest() solo corre al pulsar el botón, así que el scroll
+          // es la respuesta a esa acción y sin él no hay feedback visible: la
+          // tarjeta puede quedar muy por debajo del pliegue.
+          requestAnimationFrame(() => {
+            const element = document.getElementById(`branch-${closestId}`);
+            if (element) {
+              const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+              element.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
+            }
+          });
         }
       },
       (error) => {
-        console.warn("Geolocation auto-load on Sedes failed:", error.message);
+        console.warn("Geolocation on Sedes failed:", error.message);
         setLoadingLocation(false);
+        setLocationError('No pudimos obtener tu ubicación. Revisa los permisos del navegador e inténtalo de nuevo.');
       }
     );
   };
-
-  // Auto-locate nearest branch on mount
-  useEffect(() => {
-    findNearest();
-  }, []);
 
   return (
     <div className="bg-white">
@@ -130,28 +135,47 @@ function Sedes() {
                   Garantizamos una inspección rápida, profesional y certificada en todo el Perú.
                 </p>
 
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-4 pt-2 items-center">
+                {/* Action Buttons. Ambos usan las mismas medidas (h-11 px-5) para
+                    que se vean como un par y no como un boton grande al lado de
+                    un link chico. */}
+                <div className="flex flex-wrap gap-3 pt-2 items-center">
                   <PremiumButton
                     onClick={findNearest}
                     disabled={loadingLocation}
-                    className="!py-3 bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30 gap-3"
+                    className="!px-5 !py-2.5 !h-11 text-sm gap-2 bg-orange-500 hover:bg-orange-600 text-white shadow-orange-500/30"
                   >
                     {loadingLocation ? (
-                      <Loader2 className="animate-spin" size={20} />
+                      <Loader2 className="animate-spin" size={17} />
                     ) : (
-                      <Navigation size={20} className="group-hover:rotate-12 transition-transform" />
+                      <Navigation size={17} className="group-hover:rotate-12 transition-transform" />
                     )}
                     {loadingLocation ? "Buscando..." : "Sede más cercana a mí"}
                   </PremiumButton>
 
-                  <a href="#mapa" className="text-white hover:text-orange-500 font-bold transition-colors flex items-center gap-2 group">
-                    <div className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-orange-500 transition-colors">
-                      <Search size={20} />
-                    </div>
+                  <a
+                    href="#mapa"
+                    className="inline-flex items-center justify-center gap-2 !h-11 !px-5 rounded-full bg-white/10 hover:bg-orange-500 text-white text-sm font-bold transition-colors"
+                  >
+                    <Search size={17} />
                     Ver en el mapa
                   </a>
                 </div>
+
+                {locationError && (
+                  <p role="alert" className="text-sm text-red-400 font-semibold mt-1">
+                    {locationError}
+                  </p>
+                )}
+
+                {nearestBranchId && !locationError && (
+                  <p className="text-sm text-gray-400 mt-1">
+                    Tu sede más cercana es{" "}
+                    <span className="text-orange-500 font-bold">
+                      {branches.find((b) => b.id === nearestBranchId)?.name}
+                    </span>
+                    . Está marcada más abajo en la lista.
+                  </p>
+                )}
               </div>
             </div>
           </RevealOnScroll>

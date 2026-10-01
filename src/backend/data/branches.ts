@@ -15,8 +15,6 @@ export interface Branch {
     whatsapp?: string;
     schedule?: string;
     image?: string;
-    /** Overrides de precio por tarifa para esta sede. Si no existe, se usa el precio base del tarifario. */
-    tarifario?: Record<string, number>;
     /** Fotos propias de la sede. Si no se define, se usa la galería de muestra. */
     galeria?: FotoGaleria[];
 }
@@ -49,12 +47,13 @@ export function whatsappUrl(phone: string | null | undefined, mensaje: string): 
     return `https://wa.me/${normalizeWhatsapp(phone)}?text=${encodeURIComponent(mensaje)}`;
 }
 
-/** Enlace de búsqueda en Google Maps a partir de la dirección (no inventamos un pin). */
-function mapsUrl(address: string): string {
-    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+/** Enlace de navegación en Google Maps a partir de coordenadas exactas. */
+function mapsUrl(position: [number, number]): string {
+    const [lat, lng] = position;
+    return `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
 }
 
-/** Enlace de navegación de Waze a partir de las coordenadas. */
+/** Enlace de navegación de Waze a partir de las coordenadas exactas. */
 function wazeUrl(position: [number, number]): string {
     const [lat, lng] = position;
     return `https://waze.com/ul?ll=${lat},${lng}&navigate=yes`;
@@ -63,10 +62,15 @@ function wazeUrl(position: [number, number]): string {
 /**
  * Sede de la red.
  *
- * `position` fue geocodificado con Nominatim (OpenStreetMap) a partir de la
+ * `position` se-geocodifico con Nominatim (OpenStreetMap) a partir de la
  * dirección y de las referencias de cada sede (restaurante, grifo, barrio).
  * Antes los datos tenían errores groseros: Ica apuntaba a Arequipa y tres sedes
  * apuntaban al mismo punto en Trujillo.
+ *
+ * La sede 1 (Callao) se actualizó con las coordenadas que entrega el enlace
+ * corto de Google Maps que pasó el cliente, no con Nominatim. Ojo: el lugar
+ * aparece registrado como "RTV SAN CRISTOBAL SAC", así que conviene confirmar
+ * que el pin es el de la sede y no el de otra empresa del mismo grupo.
  *
  * PENDIENTE: las sedes 6 y 7 (Av. Cusco, Ayacucho) están a nivel de avenida,
  * porque OSM no registra los números de puerta ni los grifos de referencia.
@@ -77,13 +81,14 @@ const BRANCHES: Branch[] = [
     {
         id: 1,
         name: 'Sede Callao',
-        // OSM: Avenida de la Alameda, Gambetta Baja, Callao
-        position: [-12.0426373, -77.1164993],
-        address: 'Av. Néstor Gambeta Mz. A Lt. 2 Alt. Paradero Zeta Gas, a una cuadra del Terminal Pesquero',
+        // Google Maps: Av. Néstor Gambeta Mz. 1, 2 y 3, Las Orquídeas 2, Callao
+        position: [-11.9844532, -77.1249420],
+        address: 'Av. Néstor Gambeta Mz. 1, 2 y 3 - Las Orquídeas 2, Callao',
         region: 'lima',
         type: 'RTP',
         phone: '975759712',
         whatsapp: '51975759712',
+        placeId: 'ChIJrfWkrCn94B4Rqh4FupC13Gk',
     },
     {
         id: 2,
@@ -156,6 +161,6 @@ const BRANCHES: Branch[] = [
 /** Links de navegación derivados de dirección y coordenadas. */
 export const branches: Branch[] = BRANCHES.map((b) => ({
     ...b,
-    googleMapsUrl: mapsUrl(`${b.address}, Peru`),
+    googleMapsUrl: mapsUrl(b.position),
     wazeUrl: wazeUrl(b.position),
 }));

@@ -191,10 +191,6 @@ export const tarifas: TarifaItem[] = [
     },
 ];
 
-export function getTarifasPorCategoria(categoria: TarifaCategoriaId): TarifaItem[] {
-    return tarifas.filter((t) => t.categoria === categoria);
-}
-
 /** Documentos que pide la inspección para cualquier vehículo. */
 export const requisitosBase: string[] = [
     'Tarjeta de Propiedad (TIV) física o electrónica.',
@@ -233,17 +229,4 @@ export function getRequisitos(tarifaId: string): string[] {
     const item = tarifas.find((t) => t.id === tarifaId);
     if (!item) return requisitosBase;
     return [...requisitosBase, ...requisitosPorCategoria[item.categoria]];
-}
-
-/**
- * Resuelve el precio de una tarifa para una sede concreta.
- * Prioriza el override definido en la sede y, si no existe, cae al precio base.
- */
-export function getPrecio(
-    tarifaId: string,
-    overrides?: Record<string, number> | null
-): number | undefined {
-    const override = overrides?.[tarifaId];
-    if (typeof override === 'number') return override;
-    return tarifas.find((t) => t.id === tarifaId)?.precio;
 }
