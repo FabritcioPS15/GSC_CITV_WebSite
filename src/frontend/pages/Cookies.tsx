@@ -5,6 +5,7 @@ import { EMAIL_CONTACTO, TELEFONO_CONTACTO } from '../../backend/data/contacto';
 const Cookies = () => {
   return (
     <LegalLayout
+      path="/cookies"
       eyebrow="Tecnologia y Navegacion"
       title="Politica de Cookies"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"

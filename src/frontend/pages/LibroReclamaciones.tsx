@@ -9,6 +9,7 @@ const Placeholder = ({ children }: { children: string }) => (
 const LibroReclamaciones = () => {
   return (
     <LegalLayout
+      path="/libro-de-reclamaciones"
       eyebrow="Defensa del Consumidor"
       title="Libro de Reclamaciones"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"

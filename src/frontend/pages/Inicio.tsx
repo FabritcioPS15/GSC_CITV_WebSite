@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import SedesMap from '../components/SedesMap';
 import RevealOnScroll from '../components/RevealOnScroll';
 import ConveniosCarousel from '../components/ConveniosCarousel';
 import HeroCarousel from '../components/HeroCarousel';
 import { ShieldCheck, Award, Zap, Clock, ChevronRight } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
+import { schemaNegocio } from '../seo/schemas';
+import ServicioModal from '../components/ServicioModal';
 import PremiumButton from '../components/PremiumButton';
 import { useCarrusel } from '../hooks/useCarrusel';
 
@@ -35,37 +37,70 @@ const VENTAJAS = [
 /** Milisegundos entre cambio automático de card. */
 const VENTAJAS_AUTOPLAY_MS = 10000;
 
-/** "Nuestros Servicios". También carrusel en móvil. */
+/**
+ * "Nuestros Servicios". También carrusel en móvil.
+ *
+ * `detalle` e `incluye` alimentan el popup de cada tarjeta: sin ellos la tarjeta
+ * se veía clickeable pero no tenía nada que abrir.
+ */
 const SERVICIOS = [
   {
     title: 'Inspección Livianos',
     img: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     desc: 'Automóviles, Camionetas, SUV. Servicio ágil y preciso.',
+    detalle:
+      'Revisión técnica vehicular para vehículos livianos, registrada en el sistema del MTC y con entrega del certificado oficial en el acto. El proceso se realiza con líneas calibradas y sin que tengas que salir del vehículo.',
+    incluye: [
+      'Inspección de luces y señalización',
+      'Frenos, suspensión y dirección',
+      'Medición de emisiones de gases',
+      'Neumáticos y estado general',
+      'Certificado oficial MTC'
+    ]
   },
   {
     title: 'Transporte Pesado',
     img: 'https://images.unsplash.com/photo-1506774518161-b710d10e2733?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     desc: 'Camiones, buses y flotas logísticas. Líneas especializadas.',
+    detalle:
+      'Inspección para camiones, buses y unidades de carga. Contamos con plataforma para vehículos pesados y personal capacitado en la normativa vigente, con líneas pensadas para el flujo de flotas comerciales.',
+    incluye: [
+      'Frenos y suspensión reforzada',
+      'Control de ejes y peso permitido',
+      'Emisiones para motor diésel',
+      'Verificación de elementos de seguridad',
+      'Certificado oficial MTC'
+    ]
   },
   {
     title: 'Motocicletas',
     img: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     desc: 'Revisión técnica para vehículos menores, motos y mototaxis.',
+    detalle:
+      'Revisión técnica de motocicletas y vehículos menores según el calendario del MTC. Una línea agility para mototaxis y repartidores, con atención rápida y emisión del certificado en el acto.',
+    incluye: [
+      'Inspección de luces, claxon y señalización',
+      'Frenos, suspensión y dirección',
+      'Neumáticos y estado general',
+      'Medición de emisiones cuando corresponde',
+      'Certificado oficial MTC'
+    ]
   },
 ];
 
 function Inicio() {
   const ventajas = useCarrusel({ total: VENTAJAS.length, autoplayMs: VENTAJAS_AUTOPLAY_MS });
   const servicios = useCarrusel({ total: SERVICIOS.length, autoplayMs: VENTAJAS_AUTOPLAY_MS });
+  const [servicioAbierto, setServicioAbierto] = useState<(typeof SERVICIOS)[number] | null>(null);
 
   return (
     <div className="bg-[#f8fafc]">
-      <Helmet>
-        <title>Inicio | Revisiones Técnicas Vehiculares - Inspección Técnica Certificada</title>
-        <meta name="description" content="Centro de revisiones técnicas vehiculares certificado por el MTC. Realizamos inspección técnica de vehículos con tecnología de punta. Encuentra nuestras sedes y requisitos." />
-        <meta name="keywords" content="revisiones tecnicas, revision tecnica vehicular, inspeccion tecnica, inspeccion tecnica vehicular, revision vehicular, MTC, certificacion vehicular" />
-        <link rel="canonical" href="https://tu-dominio.com/" />
-      </Helmet>
+      <Seo
+        path="/"
+        title="Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal"
+        description="Revisión técnica vehicular autorizada por el MTC. Inspección técnica de autos, camionetas, camiones y buses con certificado oficial. Sedes en Lima y provincias. Consulta tu revisión técnica, placa o gas."
+        schema={schemaNegocio}
+      />
       {/* Hero Carousel */}
       <RevealOnScroll>
         <HeroCarousel />
@@ -220,7 +255,21 @@ function Inicio() {
             className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible snap-x md:snap-none scrollbar-hide"
           >
             {SERVICIOS.map((item) => (
-              <div key={item.title} className="w-full shrink-0 snap-center md:w-auto md:shrink group cursor-pointer rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-500 flex flex-col">
+              <div
+                key={item.title}
+                role="button"
+                tabIndex={0}
+                aria-haspopup="dialog"
+                aria-label={`Ver detalles de ${item.title}`}
+                onClick={() => setServicioAbierto(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setServicioAbierto(item);
+                  }
+                }}
+                className="w-full shrink-0 snap-center md:w-auto md:shrink group cursor-pointer rounded-3xl overflow-hidden bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-orange-500/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500 transition-all duration-500 flex flex-col"
+              >
                 <div className="h-64 overflow-hidden relative">
                   <img
                     src={item.img}
@@ -281,6 +330,19 @@ function Inicio() {
           </div>
         </section>
       </RevealOnScroll>
+
+      {/* Popup de detalle del servicio. Va al final del árbol para no quedar
+          dentro de los RevealOnScroll, que transforman el contenedor y romperían
+          un portal posicionado. */}
+      {servicioAbierto && (
+        <ServicioModal
+          titulo={servicioAbierto.title}
+          imagen={servicioAbierto.img}
+          detalle={servicioAbierto.detalle}
+          incluye={servicioAbierto.incluye}
+          onClose={() => setServicioAbierto(null)}
+        />
+      )}
     </div>
   );
 }

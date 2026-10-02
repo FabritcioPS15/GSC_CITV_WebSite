@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, MapPin, Car } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
@@ -34,7 +34,14 @@ const segments: WheelSegment[] = [
 ];
 
 const InspectionWheel: React.FC = () => {
-    const [hoveredDigit, setHoveredDigit] = useState<number | null>(null);
+    // El sector se elige con un clic y la selección se mantiene hasta que se
+    // elige otro: antes se resaltaba al pasar el cursor, lo que hacia que el
+    // detalle de la placa central cambiara solo y fuera imposible de leer.
+    const [selectedDigit, setSelectedDigit] = useState<number | null>(null);
+
+    const selectDigit = useCallback((digit: number) => {
+        setSelectedDigit((prev) => (prev === digit ? null : digit));
+    }, []);
 
     // Mes actual en tiempo real
     const currentMonth = useMemo(() => new Date().getMonth(), []);
@@ -43,10 +50,10 @@ const InspectionWheel: React.FC = () => {
         [currentMonth]
     );
 
-    const activeDigit = hoveredDigit;
+    const activeDigit = selectedDigit;
     const activeSegment = useMemo(
-        () => segments.find((s) => s.digit === hoveredDigit) || null,
-        [hoveredDigit]
+        () => segments.find((s) => s.digit === selectedDigit) || null,
+        [selectedDigit]
     );
 
     // Renderizar los 10 segmentos SVG
@@ -90,25 +97,32 @@ const InspectionWheel: React.FC = () => {
             const boxPos = { x: sectorCenter.x, y: boxY };
 
             const isCurrentMonth = seg.digit === currentSegment.digit;
-            const isHovered = hoveredDigit === seg.digit;
+            const isSelected = selectedDigit === seg.digit;
 
             const fill = isCurrentMonth
                 ? 'url(#activeSegGrad)'
-                : isHovered
-                    ? 'url(#hoverSegGrad)'
+                : isSelected
+                    ? 'url(#selectedSegGrad)'
                     : 'url(#inactiveSegGrad)';
 
             return (
                 <g
                     key={seg.digit}
-                    className="group/segment cursor-pointer transition-all duration-300"
-                    onMouseEnter={() => setHoveredDigit(seg.digit)}
-                    onMouseLeave={() => setHoveredDigit(null)}
-                    role="img"
+                    className="group/segment cursor-pointer"
+                    onClick={() => selectDigit(seg.digit)}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            selectDigit(seg.digit);
+                        }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={isSelected}
                     aria-label={`Dígito ${seg.digit}: Placas que deben pasar inspección en ${seg.monthLong}`}
                     style={{
                         transformOrigin: '200px 200px',
-                        transform: isHovered ? 'scale(1.025)' : 'scale(1)',
+                        transform: isSelected ? 'scale(1.025)' : 'scale(1)',
                         transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
                     }}
                 >
@@ -116,8 +130,8 @@ const InspectionWheel: React.FC = () => {
                     <path
                         d={pathData}
                         fill={fill}
-                        stroke={isCurrentMonth ? '#ffffff' : '#e2e8f0'}
-                        strokeWidth={isCurrentMonth ? '2.5' : '1.5'}
+                        stroke={isCurrentMonth ? '#ffffff' : isSelected ? '#ea580c' : '#e2e8f0'}
+                        strokeWidth={isCurrentMonth ? '2.5' : isSelected ? '2' : '1.5'}
                         className="transition-all duration-300"
                         style={{
                             filter: isCurrentMonth
@@ -143,7 +157,7 @@ const InspectionWheel: React.FC = () => {
                             fontWeight="900"
                             fontFamily="system-ui, -apple-system, sans-serif"
                             className={`transition-colors duration-200 select-none ${
-                                isCurrentMonth ? 'fill-white' : 'fill-gray-900 group-hover/segment:fill-orange-600'
+                                isCurrentMonth ? 'fill-white' : isSelected ? 'fill-orange-600' : 'fill-gray-900'
                             }`}
                         >
                             {seg.digit}
@@ -164,7 +178,7 @@ const InspectionWheel: React.FC = () => {
                             height={boxHeight}
                             rx="2.5"
                             ry="2.5"
-                            fill={isCurrentMonth ? '#001e3d' : isHovered ? '#ea580c' : '#0a2540'}
+                            fill={isCurrentMonth ? '#001e3d' : isSelected ? '#ea580c' : '#0a2540'}
                             className="transition-colors duration-200 drop-shadow-sm"
                         />
                         {isTwoLines ? (
@@ -218,7 +232,7 @@ const InspectionWheel: React.FC = () => {
                 </g>
             );
         });
-    }, [currentSegment, hoveredDigit]);
+    }, [currentSegment, selectedDigit, selectDigit]);
 
     return (
         <section className="section bg-white overflow-hidden">
@@ -244,7 +258,7 @@ const InspectionWheel: React.FC = () => {
 
                                 <p className="text-sm text-gray-500 font-medium leading-relaxed">
                                     Ubica en la rueda el mes que le corresponde a tu placa según su <strong>último dígito</strong>.
-                                    Pasa el cursor sobre cada sector para ver el detalle.
+                                    Haz clic en el sector para ver el detalle.
                                 </p>
 
                                 {/* Leyenda */}
@@ -252,6 +266,10 @@ const InspectionWheel: React.FC = () => {
                                     <li className="flex items-center gap-2.5 text-xs font-bold text-gray-600">
                                         <span className="w-4 h-4 rounded-md bg-gradient-to-br from-[#ff9f43] to-[#ff5e00] shrink-0" />
                                         Mes en curso (dígito {currentSegment.digit})
+                                    </li>
+                                    <li className="flex items-center gap-2.5 text-xs font-bold text-gray-600">
+                                        <span className="w-4 h-4 rounded-md bg-gradient-to-br from-[#fff7ed] to-[#ffedd5] border border-orange-300 shrink-0" />
+                                        Sector seleccionado
                                     </li>
                                     <li className="flex items-center gap-2.5 text-xs font-bold text-gray-600">
                                         <span className="w-4 h-4 rounded-md bg-white border border-gray-300 shrink-0" />
@@ -264,7 +282,8 @@ const InspectionWheel: React.FC = () => {
                                     <ul className="space-y-3">
                                         {[
                                             'Identifica el mes según tu último dígito',
-                                            'Pasa el cursor por el sector para ver el detalle',
+                                            'Haz clic en el sector para ver el detalle',
+                                            'Vuelve a hacer clic para cerrar el detalle',
                                             'Agenda tu cita con anticipación'
                                         ].map((text, i) => (
                                             <li key={i} className="flex items-start gap-3 text-sm font-bold text-gray-700">
@@ -326,8 +345,8 @@ const InspectionWheel: React.FC = () => {
                                         <stop offset="100%" stopColor="#f8fafc" />
                                     </linearGradient>
 
-                                    {/* Gradient for hovered segment */}
-                                    <linearGradient id="hoverSegGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    {/* Gradient for selected segment */}
+                                    <linearGradient id="selectedSegGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                                         <stop offset="0%" stopColor="#fff7ed" />
                                         <stop offset="100%" stopColor="#ffedd5" />
                                     </linearGradient>
@@ -517,7 +536,7 @@ const InspectionWheel: React.FC = () => {
                                             fontFamily="system-ui, -apple-system, sans-serif"
                                             className="select-none"
                                         >
-                                            PASA EL CURSOR
+                                            HAZ CLIC EN UN DÍGITO
                                         </text>
                                     )}
                                 </g>

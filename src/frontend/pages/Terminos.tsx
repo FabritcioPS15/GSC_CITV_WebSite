@@ -9,6 +9,7 @@ const Placeholder = ({ children }: { children: string }) => (
 const Terminos = () => {
   return (
     <LegalLayout
+      path="/terminos"
       eyebrow="Uso del Sitio y de los Servicios"
       title="Terminos y Condiciones"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"

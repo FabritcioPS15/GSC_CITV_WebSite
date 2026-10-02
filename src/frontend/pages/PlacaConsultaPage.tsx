@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { Search, Car, AlertCircle, CheckCircle2, ExternalLink, ArrowLeft } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const helmetContent = (
-  <Helmet>
-    <title>Consulta de Placa | Grupo San Cristóbal</title>
-    <meta name="description" content="Consulta la información de tu vehículo verificando su estado, última revisión técnica y fecha próxima de renovación." />
-    <meta name="keywords" content="consulta placa, vehiculo, revision tecnica, MTC" />
-    <link rel="canonical" href="https://tu-dominio.com/consulta-placa" />
-  </Helmet>
+    <Seo
+        path="/consulta-placa"
+        title="Consulta tu Placa y RevisiÃ³n TÃ©cnica | Grupo San CristÃ³bal"
+        description="Consulta la revisiÃ³n tÃ©cnica de tu vehÃ­culo por placa. Verifica tu Ãºltima inspecciÃ³n, la fecha de vencimiento y el estado de tu certificado ante el MTC. Gratis y online."
+        keywords={['consulta placa', 'consulta de placa vehicular', 'revisiÃ³n tÃ©cnica por placa', 'estado de revisiÃ³n tÃ©cnica', 'certificado vehicular MTC']}
+    />
 );
 
 export default function PlacaConsultaPage() {
@@ -23,7 +23,7 @@ export default function PlacaConsultaPage() {
     const handleConsulta = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!placa || placa.length < 6) {
-            setError('Ingresa una placa válida (mínimo 6 caracteres)');
+            setError('Ingresa una placa vÃ¡lida (mÃ­nimo 6 caracteres)');
             return;
         }
 
@@ -31,7 +31,7 @@ export default function PlacaConsultaPage() {
         setError('');
         setResult(null);
 
-        // Simulación de consulta
+        // SimulaciÃ³n de consulta
         setTimeout(() => {
             setLoading(false);
             // Datos de ejemplo
@@ -74,7 +74,7 @@ export default function PlacaConsultaPage() {
                                     Consulta de <span className="text-orange-500">Placa</span>
                                 </h1>
                                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                                    Consulta la información de tu vehículo verificando su estado, última revisión técnica y fecha próxima de renovación.
+                                    Consulta la informaciÃ³n de tu vehÃ­culo verificando su estado, Ãºltima revisiÃ³n tÃ©cnica y fecha prÃ³xima de renovaciÃ³n.
                                 </p>
                             </div>
                         </div>
@@ -90,7 +90,7 @@ export default function PlacaConsultaPage() {
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Número de Placa
+                                            NÃºmero de Placa
                                         </label>
                                         <input
                                             type="text"
@@ -101,7 +101,7 @@ export default function PlacaConsultaPage() {
                                             maxLength={8}
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            Formato: Letras y números (ej: ABC-1234)
+                                            Formato: Letras y nÃºmeros (ej: ABC-1234)
                                         </p>
                                     </div>
 
@@ -160,7 +160,7 @@ export default function PlacaConsultaPage() {
                                         </div>
                                         <div className="space-y-4">
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Año</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">AÃ±o</p>
                                                 <p className="text-lg font-semibold text-gray-900">{result.anio}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
@@ -176,11 +176,11 @@ export default function PlacaConsultaPage() {
 
                                     <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-                                            <p className="text-xs text-orange-600 uppercase tracking-wider mb-1">Última Revisión</p>
+                                            <p className="text-xs text-orange-600 uppercase tracking-wider mb-1">Ãšltima RevisiÃ³n</p>
                                             <p className="text-lg font-bold text-gray-900">{result.ultimaRevision}</p>
                                         </div>
                                         <div className="bg-orange-50 rounded-xl p-4 border border-orange-200">
-                                            <p className="text-xs text-orange-600 uppercase tracking-wider mb-1">Próxima Revisión</p>
+                                            <p className="text-xs text-orange-600 uppercase tracking-wider mb-1">PrÃ³xima RevisiÃ³n</p>
                                             <p className="text-lg font-bold text-gray-900">{result.proximaRevision}</p>
                                         </div>
                                     </div>
@@ -202,7 +202,7 @@ export default function PlacaConsultaPage() {
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm transition-colors"
                                         >
-                                            Ver más detalles en el portal del MTC
+                                            Ver mÃ¡s detalles en el portal del MTC
                                             <ExternalLink size={14} />
                                         </a>
                                     </div>
@@ -217,8 +217,8 @@ export default function PlacaConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostración. Para obtener información oficial y actualizada, 
-                                        utiliza el portal del MTC o acércate a nuestras sedes.
+                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada, 
+                                        utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
                                     </p>
                                 </div>
                             </div>

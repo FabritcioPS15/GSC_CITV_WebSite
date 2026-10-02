@@ -1,17 +1,17 @@
 import { useState } from 'react';
 import { FileText, AlertCircle, CheckCircle2, ExternalLink, ArrowLeft } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const helmetContent = (
-  <Helmet>
-    <title>Consulta de Revisión Técnica | Grupo San Cristóbal</title>
-    <meta name="description" content="Consulta el resultado de tu revisión técnica ingresando el código que aparece en tu certificado o sticker." />
-    <meta name="keywords" content="consulta revision tecnica, certificado, sticker, MTC" />
-    <link rel="canonical" href="https://tu-dominio.com/consulta-revision" />
-  </Helmet>
+    <Seo
+        path="/consulta-revision"
+        title="Consulta de Revisión Técnica por Código | Grupo San Cristóbal"
+        description="Consulta el resultado de tu revisión técnica vehicular ingresando el código de tu certificado o sticker. Verifica si aprobaste, las observaciones y la fecha de vigencia ante el MTC."
+        keywords={['consulta revisión técnica', 'consultar revisión vehicular', 'resultado de inspección técnica', 'código de certificado vehicular', 'consulta sticker MTC']}
+    />
 );
 
 export default function RevisionConsultaPage() {
@@ -23,7 +23,7 @@ export default function RevisionConsultaPage() {
     const handleConsulta = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!codigo || codigo.length < 8) {
-            setError('Ingresa un código de revisión válido (mínimo 8 caracteres)');
+            setError('Ingresa un cÃ³digo de revisiÃ³n vÃ¡lido (mÃ­nimo 8 caracteres)');
             return;
         }
 
@@ -31,7 +31,7 @@ export default function RevisionConsultaPage() {
         setError('');
         setResult(null);
 
-        // Simulación de consulta
+        // SimulaciÃ³n de consulta
         setTimeout(() => {
             setLoading(false);
             // Datos de ejemplo
@@ -41,15 +41,15 @@ export default function RevisionConsultaPage() {
                 fechaVencimiento: '15/03/2026',
                 resultado: 'APROBADO',
                 sede: 'Sede RTP Callao',
-                inspector: 'ING. Juan Pérez',
-                observaciones: 'Vehículo en buenas condiciones. Todos los sistemas operativos.',
+                inspector: 'ING. Juan PÃ©rez',
+                observaciones: 'VehÃ­culo en buenas condiciones. Todos los sistemas operativos.',
                 itemsVerificados: [
                     { item: 'Frenos', estado: 'APROBADO' },
                     { item: 'Luces', estado: 'APROBADO' },
-                    { item: 'Suspensión', estado: 'APROBADO' },
-                    { item: 'Neumáticos', estado: 'OBSERVADO' },
+                    { item: 'SuspensiÃ³n', estado: 'APROBADO' },
+                    { item: 'NeumÃ¡ticos', estado: 'OBSERVADO' },
                     { item: 'Emisiones', estado: 'APROBADO' },
-                    { item: 'Documentación', estado: 'APROBADO' }
+                    { item: 'DocumentaciÃ³n', estado: 'APROBADO' }
                 ]
             });
         }, 1500);
@@ -77,10 +77,10 @@ export default function RevisionConsultaPage() {
                                 </Link>
                                 <p className="text-orange-500 font-bold tracking-[0.2em] uppercase text-sm mb-4">SERVICIOS DIGITALES</p>
                                 <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] mb-6">
-                                    Consulta de <span className="text-orange-500">Revisión Técnica</span>
+                                    Consulta de <span className="text-orange-500">RevisiÃ³n TÃ©cnica</span>
                                 </h1>
                                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                                    Consulta el resultado de tu revisión técnica ingresando el código que aparece en tu certificado o sticker.
+                                    Consulta el resultado de tu revisiÃ³n tÃ©cnica ingresando el cÃ³digo que aparece en tu certificado o sticker.
                                 </p>
                             </div>
                         </div>
@@ -90,13 +90,13 @@ export default function RevisionConsultaPage() {
                         {/* Formulario de consulta */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                             <div className="p-6 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-gray-900">Ingresa el Código de Revisión</h3>
+                                <h3 className="text-xl font-bold text-gray-900">Ingresa el CÃ³digo de RevisiÃ³n</h3>
                             </div>
                             <form onSubmit={handleConsulta} className="p-6">
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Código de Revisión
+                                            CÃ³digo de RevisiÃ³n
                                         </label>
                                         <input
                                             type="text"
@@ -107,7 +107,7 @@ export default function RevisionConsultaPage() {
                                             maxLength={15}
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            El código se encuentra en tu certificado o sticker de revisión
+                                            El cÃ³digo se encuentra en tu certificado o sticker de revisiÃ³n
                                         </p>
                                     </div>
 
@@ -131,7 +131,7 @@ export default function RevisionConsultaPage() {
                                         ) : (
                                             <>
                                                 <FileText size={20} />
-                                                <span>Consultar Revisión</span>
+                                                <span>Consultar RevisiÃ³n</span>
                                             </>
                                         )}
                                     </button>
@@ -145,18 +145,18 @@ export default function RevisionConsultaPage() {
                                 <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-green-100">
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="text-green-600" size={24} />
-                                        <h3 className="text-xl font-bold text-gray-900">Resultado de Revisión</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">Resultado de RevisiÃ³n</h3>
                                     </div>
                                 </div>
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div className="space-y-4">
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Código</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">CÃ³digo</p>
                                                 <p className="text-lg font-bold text-gray-900 font-mono">{result.codigo}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de Emisión</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de EmisiÃ³n</p>
                                                 <p className="text-lg font-semibold text-gray-900">{result.fechaEmision}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
@@ -186,7 +186,7 @@ export default function RevisionConsultaPage() {
                                     </div>
 
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ítems Verificados</h4>
+                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ãtems Verificados</h4>
                                         <div className="space-y-2">
                                             {result.itemsVerificados.map((item: any, index: number) => (
                                                 <div
@@ -215,7 +215,7 @@ export default function RevisionConsultaPage() {
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm transition-colors"
                                         >
-                                            Ver más detalles en el portal del MTC
+                                            Ver mÃ¡s detalles en el portal del MTC
                                             <ExternalLink size={14} />
                                         </a>
                                     </div>
@@ -230,8 +230,8 @@ export default function RevisionConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostración. Para obtener información oficial y actualizada, 
-                                        utiliza el portal del MTC o acércate a nuestras sedes.
+                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada, 
+                                        utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
                                     </p>
                                 </div>
                             </div>

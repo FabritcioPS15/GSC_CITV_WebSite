@@ -19,6 +19,8 @@ import {
     FaPause
 } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import Seo from '../components/Seo';
+import { schemaFaq } from '../seo/schemas';
 import PremiumButton from '../components/PremiumButton';
 
 function Requisitos() {
@@ -277,6 +279,13 @@ function Requisitos() {
 
     return (
         <div className="bg-gray-50 min-h-screen">
+            <Seo
+            path="/requisitos"
+            title="Requisitos para la Revisión Técnica Vehicular | Grupo San Cristóbal"
+            description="Todos los requisitos para pasar la revisión técnica vehicular en el Perú: documentos, cronograma según tu placa, costo, qué revisar y qué pasa si no apruebas. Guía actualizada por el MTC."
+            keywords={['requisitos revisión técnica', 'documentos para revisión técnica vehicular', 'qué se necesita para la inspección vehicular', 'requisitos MTC revisión técnica']}
+            schema={schemaFaq(faqs)}
+        />
             {/* Standardized Left-Aligned Banner (Compact) */}
             <section className="page-banner">
                 {/* Background Layer */}
@@ -451,7 +460,7 @@ function Requisitos() {
                         </h2>
 
                         <p className="text-gray-600 text-center max-w-2xl mx-auto mb-12">
-                            El carro avanza solo por cada etapa del proceso. Toca una etapa para detenerlo y leerla con calma.
+                            El carro avanza solo por cada etapa del proceso. Haz clic en una etapa para seleccionarla y leerla con calma.
                         </p>
 
                         {/* Timeline interactivo con carro en movimiento */}
@@ -494,8 +503,6 @@ function Requisitos() {
                                 <div
                                     ref={trackRef}
                                     className="relative flex overflow-x-auto pt-3 pb-4 md:pt-24 scrollbar-hide"
-                                    onMouseEnter={() => setIsPaused(true)}
-                                    onMouseLeave={() => setIsPaused(false)}
                                 >
                                     {steps.map((step) => {
                                         const isActive = activeStep === step.id;
@@ -505,11 +512,9 @@ function Requisitos() {
                                                 key={step.id}
                                                 type="button"
                                                 data-step={step.id}
-                                                onMouseEnter={() => { setIsPaused(true); setActiveStep(step.id); }}
-                                                onFocus={() => { setIsPaused(true); setActiveStep(step.id); }}
                                                 onClick={() => { setIsPaused(true); setActiveStep(step.id); }}
                                                 aria-pressed={isActive}
-                                                className="group relative flex-1 min-w-[88px] px-1.5 py-2 flex flex-col items-center gap-2.5 text-center focus:outline-none"
+                                                className="group relative flex-1 min-w-[88px] px-1.5 py-2 flex flex-col items-center gap-2.5 text-center focus:outline-none cursor-pointer"
                                             >
                                                 <span
                                                     className={`relative z-10 w-14 h-14 shrink-0 rounded-full flex items-center justify-center transition-all duration-300 ${isActive

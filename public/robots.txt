@@ -1,11 +1,10 @@
-# robots.txt para Revisiones Técnicas Vehiculares
-
 User-agent: *
 Allow: /
 
-# Sitemap
-Sitemap: https://tu-dominio.com/sitemap.xml
+# Rutas privadas o sin valor de búsqueda: rastrearlas no aporta nada y
+# consume presupuesto de rastreo.
+Disallow: /404
+Disallow: /*?utm_
+Disallow: /*?ref=
 
-# Disallow specific paths if needed
-# Disallow: /admin/
-# Disallow: /private/
+Sitemap: https://gruposancristobal.pe/sitemap.xml

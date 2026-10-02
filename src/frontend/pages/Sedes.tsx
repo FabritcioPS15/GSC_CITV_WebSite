@@ -1,37 +1,55 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import RevealOnScroll from '../components/RevealOnScroll';
 import SedesMap from '../components/SedesMap';
-import { branches } from '../../backend/data/branches';
+import { branches, branchSlug } from '../../backend/data/branches';
 import { MapPin, Phone, Clock, ArrowRight, ShieldCheck, Navigation, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import PremiumButton from '../components/PremiumButton';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
+import { schemaSedes, schemaBreadcrumbs } from '../seo/schemas';
 import { getConsent } from '../utils/consent';
+
+const SEDE_BENEFITS = [
+  {
+    icon: ShieldCheck,
+    title: 'Certificación MTC',
+    desc: 'Todas nuestras sedes cuentan con la autorización oficial del Ministerio de Transportes y Comunicaciones.',
+  },
+  {
+    icon: MapPin,
+    title: 'Cobertura Nacional',
+    desc: 'Estamos presentes en puntos estratégicos de Lima y las principales provincias del Perú.',
+  },
+  {
+    icon: Clock,
+    title: 'Atención Preferencial',
+    desc: 'Horarios extendidos y procesos optimizados para que tu revisión técnica sea lo más rápida posible.',
+  },
+];
 
 function Sedes() {
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [nearestBranchId, setNearestBranchId] = useState<number | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
-  const carouselRef = useRef<HTMLDivElement>(null);
+  const [activeBenefit, setActiveBenefit] = useState(0);
+  const [isBenefitHovered, setIsBenefitHovered] = useState(false);
 
-  // Auto-scroll para el carrusel de beneficios (solo en móvil)
-  useEffect(() => {
-    const el = carouselRef.current;
-    if (!el) return;
-    const interval = setInterval(() => {
-      if (el.scrollWidth <= el.clientWidth) return; // no hay overflow (desktop)
-      const cardWidth = el.querySelector('.shrink-0')?.clientWidth ?? 0;
-      const gap = 24; // gap-6 = 24px
-      const step = cardWidth + gap;
-      const nextScroll = el.scrollLeft + step;
-      if (nextScroll >= el.scrollWidth - el.clientWidth - 1) {
-        el.scrollTo({ left: 0, behavior: 'smooth' });
-      } else {
-        el.scrollTo({ left: nextScroll, behavior: 'smooth' });
-      }
-    }, 4000);
-    return () => clearInterval(interval);
+  const nextBenefit = useCallback(() => {
+    setActiveBenefit((prev) => (prev + 1) % SEDE_BENEFITS.length);
   }, []);
+
+  const prevBenefit = useCallback(() => {
+    setActiveBenefit((prev) => (prev - 1 + SEDE_BENEFITS.length) % SEDE_BENEFITS.length);
+  }, []);
+
+  // Auto-slide para el carrusel de beneficios (1 a 1 cada 7 segundos)
+  useEffect(() => {
+    if (isBenefitHovered) return;
+    const interval = setInterval(() => {
+      nextBenefit();
+    }, 7000);
+    return () => clearInterval(interval);
+  }, [isBenefitHovered, nextBenefit]);
 
   const limaBranches = branches.filter((b) => b.region === 'lima');
   const provinciaBranches = branches.filter((b) => b.region === 'provincia');
@@ -103,12 +121,12 @@ function Sedes() {
 
   return (
     <div className="bg-white">
-      <Helmet>
-        <title>Sedes | Centros de Revisión Técnica Vehicular - Encuentra la Más Cercana</title>
-        <meta name="description" content="Encuentra nuestras sedes de revisión técnica vehicular. Centros en Lima y provincias certificados por el MTC. Ubicación, horarios y servicios de inspección técnica." />
-        <meta name="keywords" content="sedes, centros de revision tecnica, revision tecnica cerca de mi, revision vehicular lima, inspeccion tecnica sedes, MTC" />
-        <link rel="canonical" href="https://tu-dominio.com/sedes" />
-      </Helmet>
+<Seo
+            path="/sedes"
+            title="Sedes de Revisión Técnica Vehicular en Lima y Provincias | Grupo San Cristóbal"
+            description="Encuentra el centro de revisión técnica vehicular más cercano. Sedes autorizadas por el MTC en Callao, Ica, Ayacucho, Andahuaylas y Huancavelica. Dirección, horarios y contacto por WhatsApp."
+            schema={{ ...schemaSedes, ...schemaBreadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Sedes', path: '/sedes' }]) }}
+        />
       {/* Standardized Left-Aligned Banner (Compact) */}
       <section className="page-banner">
         {/* Background Layer with uniform overlay */}
@@ -135,10 +153,8 @@ function Sedes() {
                   Garantizamos una inspección rápida, profesional y certificada en todo el Perú.
                 </p>
 
-                {/* Action Buttons. Ambos usan las mismas medidas (h-11 px-5) para
-                    que se vean como un par y no como un boton grande al lado de
-                    un link chico. */}
-                <div className="flex flex-wrap gap-3 pt-2 items-center">
+                {/* Action Buttons (ocultos en vista móvil) */}
+                <div className="hidden sm:flex flex-wrap gap-3 pt-2 items-center">
                   <PremiumButton
                     onClick={findNearest}
                     disabled={loadingLocation}
@@ -185,55 +201,68 @@ function Sedes() {
         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-orange-500/0 to-transparent opacity-50" />
       </section>
 
-      {/* Hero Info Section */}
-      <section className="py-16 bg-gray-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 relative">
-          {/* Carrusel en móvil, grid en tablet+ */}
+      {/* Hero Info Section - Carrusel automático 7s (1 por 1) */}
+      <section className="py-14 bg-gray-50 border-b border-gray-100 overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4">
           <div
-            ref={carouselRef}
-            className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 px-[calc(50vw-1.5rem)] md:px-0 md:flex-row md:overflow-visible md:snap-none md:pb-0 md:grid md:grid-cols-3 md:gap-8 scrollbar-hide"
+            className="relative"
+            onMouseEnter={() => setIsBenefitHovered(true)}
+            onMouseLeave={() => setIsBenefitHovered(false)}
           >
-            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
-                <ShieldCheck className="text-orange-500" size={28} />
+            {/* Slider container */}
+            <div className="overflow-hidden rounded-3xl">
+              <div
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${activeBenefit * 100}%)` }}
+              >
+                {SEDE_BENEFITS.map((item, index) => (
+                  <div key={index} className="w-full shrink-0 px-2 sm:px-6">
+                    <div className="bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
+                      <div className="w-14 h-14 sm:w-16 sm:h-16 bg-orange-500/10 rounded-2xl flex items-center justify-center mb-5 text-orange-500 shadow-inner">
+                        <item.icon size={32} />
+                      </div>
+                      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3">{item.title}</h3>
+                      <p className="content-text text-gray-600 max-w-xl text-sm sm:text-base leading-relaxed">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <h3 className="text-xl font-bold mb-3">Certificación MTC</h3>
-              <p className="content-text text-gray-600">Todas nuestras sedes cuentan con la autorización oficial del Ministerio de Transportes y Comunicaciones.</p>
             </div>
-            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
-                <MapPin className="text-orange-500" size={28} />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Cobertura Nacional</h3>
-              <p className="content-text text-gray-600">Estamos presentes en puntos estratégicos de Lima y las principales provincias del Perú.</p>
-            </div>
-            <div className="shrink-0 snap-center w-full md:w-auto bg-white p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
-              <div className="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center mb-6">
-                <Clock className="text-orange-500" size={28} />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Atención Preferencial</h3>
-              <p className="content-text text-gray-600">Horarios extendidos y procesos optimizados para que tu revisión técnica sea lo más rápida posible.</p>
-            </div>
-          </div>
 
-          {/* Flechas de navegación (solo móvil) */}
-          <div className="absolute inset-y-0 left-0 right-0 md:hidden pointer-events-none">
+            {/* Navigation Arrows */}
             <button
               type="button"
-              onClick={() => carouselRef.current?.scrollBy({ left: -300, behavior: 'smooth' })}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-10 pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-700 hover:bg-white hover:shadow-xl transition-all"
+              onClick={prevBenefit}
+              className="absolute -left-3 sm:-left-6 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-md border border-gray-100 text-gray-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-300 cursor-pointer"
               aria-label="Beneficio anterior"
             >
               <ChevronLeft size={20} />
             </button>
             <button
               type="button"
-              onClick={() => carouselRef.current?.scrollBy({ left: 300, behavior: 'smooth' })}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-10 pointer-events-auto flex items-center justify-center w-10 h-10 rounded-full bg-white/90 shadow-lg text-gray-700 hover:bg-white hover:shadow-xl transition-all"
+              onClick={nextBenefit}
+              className="absolute -right-3 sm:-right-6 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white shadow-md border border-gray-100 text-gray-700 hover:bg-orange-500 hover:text-white hover:border-orange-500 transition-all duration-300 cursor-pointer"
               aria-label="Siguiente beneficio"
             >
               <ChevronRight size={20} />
             </button>
+
+            {/* Indicator Dots */}
+            <div className="flex items-center justify-center gap-2.5 mt-6">
+              {SEDE_BENEFITS.map((_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => setActiveBenefit(i)}
+                  aria-label={`Ir a beneficio ${i + 1}`}
+                  className={`h-2.5 rounded-full transition-all duration-500 cursor-pointer ${
+                    activeBenefit === i ? 'w-8 bg-orange-500' : 'w-2.5 bg-gray-300 hover:bg-gray-400'
+                  }`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -301,7 +330,7 @@ function Sedes() {
 
                           <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                             <Link
-                              to={`/sedes/${branch.id}`}
+                              to={`/sedes/${branchSlug(branch)}`}
                               className="text-sm font-bold text-gray-900 flex items-center gap-2 group/btn"
                             >
                               Ver Detalles
@@ -387,7 +416,7 @@ function Sedes() {
 
                           <div className="mt-auto pt-6 border-t border-gray-50 flex items-center justify-between">
                             <Link
-                              to={`/sedes/${branch.id}`}
+                              to={`/sedes/${branchSlug(branch)}`}
                               className="text-sm font-bold text-gray-900 flex items-center gap-2 group/btn"
                             >
                               Ver Detalles

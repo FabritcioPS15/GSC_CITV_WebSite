@@ -9,6 +9,7 @@ const Placeholder = ({ children }: { children: string }) => (
 const Privacidad = () => {
   return (
     <LegalLayout
+      path="/privacidad"
       eyebrow="Proteccion de Datos Personales"
       title="Politica de Privacidad"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"

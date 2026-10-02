@@ -7,7 +7,8 @@ import {
   MapPin,
   FileText,
   Calendar,
-  Search
+  Search,
+  Heart
 } from 'lucide-react';
 import { FaFacebook, FaInstagram, FaTiktok } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
@@ -22,14 +23,6 @@ export default function Footer() {
     { path: '/sedes', label: 'Nuestras Sedes' },
     { path: '/cronograma', label: 'Cronograma MTC' },
     { path: '/requisitos', label: 'Requisitos de Inspección' },
-  ], []);
-
-  const serviceLinks = useMemo(() => [
-    { path: '/consulta-placa', label: 'Consulta por Placa MTC' },
-    { path: '/consulta-revision', label: 'Consulta de Revisión' },
-    { path: '/consulta-gas', label: 'Inspección GLP / GNV' },
-    { path: '/requisitos', label: 'Inspección Periódica Ordinaria' },
-    { path: '/contacto', label: 'Servicio para Flotas y Empresas' },
   ], []);
 
   const mobileLinks = useMemo(() => [
@@ -58,11 +51,11 @@ export default function Footer() {
         <div className="block lg:hidden space-y-4">
           {/* Fila 1: Logo + Redes Sociales en una sola línea compacta */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10">
-            <Link to="/" className="inline-block">
+            <Link to="/" className="inline-block" aria-label="Grupo San Cristóbal - Inicio">
               <img
                 src="/LogoRTPSanCristobal_horizontal.png"
                 alt="Grupo San Cristóbal Logo"
-                className="h-8 w-auto object-contain brightness-0 invert"
+                className="h-9 w-auto object-contain brightness-0 invert"
               />
             </Link>
             <div className="flex items-center gap-1.5">
@@ -132,24 +125,23 @@ export default function Footer() {
             <div className="grid grid-cols-12 gap-8 pb-14 border-b border-white/10">
 
               {/* Columna 1: Logo, Descripción y Redes (4 cols) */}
-              <div className="col-span-4 space-y-5">
-                <Link to="/" className="inline-block group">
-                  <div className="bg-white/5 border border-white/10 p-2.5 rounded-xl inline-block transition-transform duration-300 group-hover:scale-[1.02]">
-                    <img
-                      src="/LogoRTPSanCristobal_horizontal.png"
-                      alt="Grupo San Cristóbal Logo"
-                      className="h-12 w-auto object-contain brightness-0 invert"
-                    />
-                  </div>
+              <div className="col-span-4">
+                <Link to="/" className="inline-block group" aria-label="Grupo San Cristóbal - Inicio">
+                  <img
+                    src="/LogoRTPSanCristobal_horizontal.png"
+                    alt="Grupo San Cristóbal Logo"
+                    className="h-16 w-auto object-contain brightness-0 invert transition-opacity duration-300 group-hover:opacity-80"
+                  />
                 </Link>
 
-                <p className="text-gray-400 text-sm leading-relaxed max-w-sm">
-                  Líderes en revisiones técnicas vehiculares en el Perú.
+                <p className="mt-5 max-w-sm text-sm leading-relaxed text-gray-400">
+                  Centro de inspección técnica vehicular autorizado por el MTC. Verificamos el estado de tu
+                  vehículo con equipos calibrados y personal técnico certificado.
                 </p>
 
                 {/* Redes Sociales */}
-                <div className="pt-2">
-                  <p className="text-[11px] font-black tracking-widest text-gray-400 uppercase mb-3">
+                <div className="mt-5">
+                  <p className="mb-4 text-[11px] font-black uppercase tracking-widest text-gray-400">
                     Síguenos en redes
                   </p>
                   <div className="flex flex-wrap gap-2.5">
@@ -170,20 +162,20 @@ export default function Footer() {
                 </div>
               </div>
 
-              {/* Columna 2: Explorar / Navegación (3 cols) */}
-              <div className="col-span-3">
-                <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+              {/* Columna 2: Explorar / Navegación (4 cols) */}
+              <div className="col-span-4">
+                <h4 className="mb-5 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
                   <span className="w-2 h-2 rounded-full bg-orange-500" />
                   <span>Explorar</span>
                 </h4>
-                <ul className="space-y-2.5 text-sm">
+                <ul className="grid grid-cols-1 gap-2.5 text-sm">
                   {quickLinks.map((link, i) => (
                     <li key={i}>
                       <Link
                         to={link.path}
-                        className="text-gray-400 hover:text-orange-400 transition-colors flex items-center gap-2 group py-0.5"
+                        className="group flex items-center gap-2 py-0.5 text-gray-400 transition-colors hover:text-orange-400"
                       >
-                        <ChevronRight size={13} className="text-orange-500/60 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
+                        <ChevronRight size={13} className="text-orange-500/60 transition-all group-hover:translate-x-0.5 group-hover:text-orange-500" />
                         <span>{link.label}</span>
                       </Link>
                     </li>
@@ -191,30 +183,9 @@ export default function Footer() {
                 </ul>
               </div>
 
-              {/* Columna 3: Consultas y Servicios (2 cols) */}
-              <div className="col-span-2">
-                <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-orange-500" />
-                  <span>Servicios</span>
-                </h4>
-                <ul className="space-y-2.5 text-sm">
-                  {serviceLinks.map((link, i) => (
-                    <li key={i}>
-                      <Link
-                        to={link.path}
-                        className="text-gray-400 hover:text-orange-400 transition-colors flex items-center gap-2 group py-0.5"
-                      >
-                        <ChevronRight size={13} className="text-orange-500/60 group-hover:text-orange-500 group-hover:translate-x-0.5 transition-all" />
-                        <span>{link.label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Columna 4: Contáctanos & Horarios (3 cols) */}
-              <div className="col-span-3 space-y-4">
-                <h4 className="text-white font-bold text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
+              {/* Columna 3: Contáctanos & Horarios (4 cols) */}
+              <div className="col-span-4">
+                <h4 className="mb-5 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-white">
                   <span className="w-2 h-2 rounded-full bg-orange-500" />
                   <span>Atención al Cliente</span>
                 </h4>
@@ -222,50 +193,48 @@ export default function Footer() {
                 <div className="space-y-3.5 text-sm">
                   <a
                     href={`tel:${TELEFONO_CONTACTO.replace(/\s/g, '')}`}
-                    className="flex items-start gap-3 text-gray-300 hover:text-white group transition-colors"
+                    className="group flex items-start gap-3 text-gray-300 transition-colors hover:text-white"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-orange-500 transition-colors group-hover:border-orange-500 group-hover:bg-orange-500 group-hover:text-white">
                       <Phone size={14} />
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-bold">Teléfono / Celular</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Teléfono / Celular</span>
                       <span className="font-medium text-gray-300 group-hover:text-orange-400">{TELEFONO_CONTACTO}</span>
                     </div>
                   </a>
 
                   <a
                     href={MAILTO_CONTACTO}
-                    className="flex items-start gap-3 text-gray-300 hover:text-white group transition-colors"
+                    className="group flex items-start gap-3 text-gray-300 transition-colors hover:text-white"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-orange-500 group-hover:bg-orange-500 group-hover:text-white transition-colors shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-orange-500 transition-colors group-hover:border-orange-500 group-hover:bg-orange-500 group-hover:text-white">
                       <Mail size={14} />
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-bold">Correo Oficial</span>
-                      <span className="font-medium text-gray-300 group-hover:text-orange-400 break-words">{EMAIL_CONTACTO}</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Correo Oficial</span>
+                      <span className="break-words font-medium text-gray-300 group-hover:text-orange-400">{EMAIL_CONTACTO}</span>
                     </div>
                   </a>
 
                   <div className="flex items-start gap-3 text-gray-300">
-                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-orange-500 shrink-0 mt-0.5">
+                    <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-orange-500">
                       <Clock size={14} />
                     </div>
                     <div className="min-w-0">
-                      <span className="text-[10px] text-gray-500 uppercase tracking-widest block font-bold">Horario de Atención</span>
+                      <span className="block text-[10px] font-bold uppercase tracking-widest text-gray-500">Horario de Atención</span>
                       <span className="font-medium text-gray-300">Lun – Sáb: 7:00 AM a 6:00 PM</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-2">
-                  <Link
-                    to="/contacto"
-                    className="w-full inline-flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white/5 hover:bg-orange-500 text-gray-300 hover:text-white border border-white/10 hover:border-orange-500 text-xs font-semibold transition-all duration-200"
-                  >
-                    <span>Formulario de Contacto</span>
-                    <ChevronRight size={14} />
-                  </Link>
-                </div>
+                <Link
+                  to="/contacto"
+                  className="mt-5 inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-semibold text-gray-300 transition-all duration-200 hover:border-orange-500 hover:bg-orange-500 hover:text-white"
+                >
+                  <span>Formulario de Contacto</span>
+                  <ChevronRight size={14} />
+                </Link>
               </div>
 
             </div>
@@ -296,11 +265,23 @@ export default function Footer() {
           {/* Footer Bottom Bar Desktop */}
           <RevealOnScroll>
             <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-left">
-              <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium">
+              <div className="flex flex-wrap items-center justify-center gap-2 text-[11px] text-gray-400 font-medium">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 <span>Centro de Inspección Autorizado MTC</span>
                 <span className="text-gray-600 hidden sm:inline">•</span>
                 <span className="hidden sm:inline">Perú</span>
+                {/* Easter eggs: mismo color que el fondo del footer (#0a0a0c),
+                    separadores incluidos, para que el bloque no se vea hasta
+                    que alguien lo seleccione o inspeccione. */}
+                <span className="hidden sm:inline text-[#0a0a0c]">•</span>
+                <span className="hidden sm:inline-flex items-center gap-1 text-[#0a0a0c]">
+                  En Honor a Balto
+                  <Heart size={12} className="fill-current" aria-hidden="true" />
+                </span>
+                <span className="hidden sm:inline text-[#0a0a0c]">•</span>
+                <span className="hidden sm:inline text-[#0a0a0c]">
+                  Realizado por: <span className="font-semibold">Sparktree Studio</span>
+                </span>
               </div>
 
               <p className="text-[11px] text-gray-500">

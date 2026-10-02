@@ -1,32 +1,185 @@
 import { useParams, Navigate } from 'react-router-dom';
-import { branches } from '../../backend/data/branches';
-import { MapPin, Phone, ArrowRight, Mail } from 'lucide-react';
+import { findBranch, branchSlug, branchHref } from '../../backend/data/branches';
+import { MapPin, Phone, ArrowRight, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
 import { SiGooglemaps, SiWaze } from 'react-icons/si';
 import SimpleBranchMap from '../components/SimpleBranchMap';
 import RevealOnScroll from '../components/RevealOnScroll';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { scrollToTop } from '../components/SmoothScroll';
 import Tarifico from '../components/Tarifico';
 import GalleryCarousel from '../components/GalleryCarousel';
 import { getGaleria } from '../../backend/data/galeria';
 import { EMAIL_CONTACTO } from '../../backend/data/contacto';
+import ServicioModal from '../components/ServicioModal';
+import Seo from '../components/Seo';
+import { schemaSede } from '../seo/schemas';
+
+/** Servicios de inspección que ofrece cada sede, con el detalle que abre el popup. */
+const SERVICIOS_SEDE = [
+    {
+        id: 'livianos',
+        titulo: 'Vehículos Livianos',
+        imagen: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800',
+        resumen: 'Autos, camionetas y SUV con tiempo estimado de proceso de menos de 20 minutos.',
+        detalle:
+            'Revisión técnica vehicular para vehículos livianos, registrada en el sistema del MTC y con entrega del certificado oficial en el acto. El proceso se realiza con líneas calibradas y sin que tengas que salir del vehículo.',
+        incluye: [
+            'Inspección de luces y elementos de señalización',
+            'Frenos, suspensión y dirección',
+            'Medición de emisiones de gases',
+            'Neumáticos y estado general del vehículo',
+            'Entrega del certificado oficial MTC'
+        ]
+    },
+    {
+        id: 'pesados',
+        titulo: 'Vehículos Pesados',
+        imagen: 'https://images.unsplash.com/photo-1586191582151-f70351799633?q=80&w=800',
+        resumen: 'Camiones, buses y transporte de carga especializado hasta 12 toneladas.',
+        detalle:
+            'Inspección para camiones, buses y unidades de carga. Contamos con plataforma para vehículos pesados y personal capacitado en la normativa vigente.',
+        incluye: [
+            'Inspección de frenos y suspensión reforzada',
+            'Control de ejes y peso permitido',
+            'Medición de emisiones para motor diésel',
+            'Verificación de elementos de seguridad',
+            'Entrega del certificado oficial MTC'
+        ]
+    },
+    {
+        id: 'especiales',
+        titulo: 'Certificados Especiales',
+        imagen: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800',
+        resumen: 'Modificaciones, bonificaciones por neumáticos y certificados de operatividad.',
+        detalle:
+            'Emitimos los certificados especiales que requieren unidades con modificaciones o condiciones particulares, evaluando cada caso según lo establecido por el MTC.',
+        incluye: [
+            'Certificado de operatividad para transporte público',
+            'Bonificaciones por uso de neumáticos',
+            'Modificaciones de estructura o carrocería',
+            'Verificación de equipos de seguridad',
+            'Acompañamiento del trámite ante el MTC'
+        ]
+    }
+];
+
+type ServicioSede = (typeof SERVICIOS_SEDE)[number];
+
+/**
+ * En móvil los servicios se muestran de a uno. En lugar de un carrusel con
+ * scroll horizontal, se muestra solo la tarjeta activa y se cambia con las
+ * flechas o los puntos inferiores.
+ */
+function ServiciosCarousel({
+    servicios,
+    onMasInfo
+}: {
+    servicios: readonly ServicioSede[];
+    onMasInfo: (servicio: ServicioSede) => void;
+}) {
+    const [activo, setActivo] = useState(0);
+    const total = servicios.length;
+
+    const ir = (i: number) => setActivo((i + total) % total);
+    const servicio = servicios[activo];
+
+    return (
+        <div>
+            <div className="relative">
+                <div
+                    key={servicio.id}
+                    className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 animate-entry-fade"
+                >
+                    <img
+                        src={servicio.imagen}
+                        alt={servicio.titulo}
+                        className="absolute inset-0 w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+                    <div className="absolute bottom-12 left-8 right-8 text-white">
+                        <h3 className="text-2xl font-black mb-3">{servicio.titulo}</h3>
+                        <p className="content-text text-gray-300 mb-6">{servicio.resumen}</p>
+                        <button
+                            onClick={() => onMasInfo(servicio)}
+                            className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all"
+                        >
+                            Más Información <ArrowRight size={16} />
+                        </button>
+                    </div>
+                </div>
+
+                {total > 1 && (
+                    <>
+                        <button
+                            onClick={() => ir(activo - 1)}
+                            aria-label="Servicio anterior"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all"
+                        >
+                            <ChevronLeft size={20} />
+                        </button>
+                        <button
+                            onClick={() => ir(activo + 1)}
+                            aria-label="Siguiente servicio"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all"
+                        >
+                            <ChevronRight size={20} />
+                        </button>
+                    </>
+                )}
+            </div>
+
+            {/* Puntos de posición */}
+            <div className="mt-6 flex items-center justify-center gap-2">
+                {servicios.map((s, i) => (
+                    <button
+                        key={s.id}
+                        onClick={() => setActivo(i)}
+                        aria-label={`Ver ${s.titulo}`}
+                        aria-current={i === activo}
+                        className={`h-2 rounded-full transition-all duration-300 ${
+                            i === activo ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                        }`}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}
+
 
 function SedeDetalle() {
-    const { id } = useParams<{ id: string }>();
-    const branch = branches.find(b => b.id === Number(id));
+    const { slug } = useParams<{ slug: string }>();
+    const branch = findBranch(slug);
+    const [servicioAbierto, setServicioAbierto] = useState<ServicioSede | null>(null);
 
     useEffect(() => {
         scrollToTop();
-    }, [id]);
+    }, [slug]);
+
+    // URL antigua con id numérico (ej. /sedes/3): se redirige al slug para no
+    // perder los enlaces ya indexados ni los que el usuario tenga guardados.
+    const slugActual = branch ? branchSlug(branch) : null;
+    if (branch && slug !== slugActual) {
+        return <Navigate to={branchHref(branch)} replace />;
+    }
 
     if (!branch) {
         return <Navigate to="/sedes" replace />;
     }
 
     const emailContacto = EMAIL_CONTACTO;
+    const ciudad = branch.address.split(',').pop()?.trim() ?? '';
+    const sedeNombre = branch.name.replace('Sede RTP ', '').replace('Sede RTV ', '');
 
     return (
         <div className="min-h-screen bg-white">
+            <Seo
+                path={branchHref(branch)}
+                title={`Revisión Técnica en ${sedeNombre} | ${ciudad} | Grupo San Cristóbal`}
+                description={`Centro de revisión técnica vehicular autorizado por el MTC en ${sedeNombre}, ${ciudad}. Inspección de vehículos livianos y pesados, certificado oficial, dirección ${branch.address}. Agenda tu cita por WhatsApp.`}
+                keywords={[`revisión técnica ${sedeNombre}`, `revisión técnica ${ciudad}`, `RTP ${sedeNombre}`, 'inspección técnica vehicular cerca']}
+                schema={schemaSede(branch.id)}
+            />
             {/* HERO SECTION - ADAPTADO CON ESTÉTICA PREMIUM */}
             <section className="page-banner w-full">
                 {/* Cuadriláteros de fondo y máscara de imagen adaptativos */}
@@ -79,17 +232,7 @@ function SedeDetalle() {
                                 ))}
                             </h1>
 
-                            {/* Botones Interactivos solo para Móvil - Mejorados */}
-                            <div className="flex gap-4 mt-4 md:hidden">
-                                <button className="px-5 py-2.5 bg-[#f97316] text-white text-[11px] font-black uppercase rounded-xl shadow-[0_10px_20px_rgba(249,115,22,0.3)] active:scale-95 transition-all animate-entry-fade animate-stagger-1">
-                                    Reservar Cita
-                                </button>
-                                <button className="px-5 py-2.5 bg-white/10 text-white text-[11px] font-black uppercase rounded-xl border border-white/20 backdrop-blur-md shadow-lg active:scale-95 transition-all animate-entry-fade animate-stagger-2">
-                                    Ver Tarifas
-                                </button>
-                            </div>
-
-                            <p className="banner-description text-gray-400 max-w-lg mt-5 animate-entry-fade animate-stagger-3">
+<p className="banner-description text-gray-400 max-w-lg mt-5 animate-entry-fade animate-stagger-3">
                                 Guía completa y atención especializada para aprobar tu inspección vehicular sin contratiempos.
                             </p>
                         </div>
@@ -114,58 +257,34 @@ function SedeDetalle() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    {/* Livianos */}
-                    {/* Livianos */}
-                    <RevealOnScroll className="delay-100">
-                        <div className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 hover:shadow-orange-500/10 transition-all duration-500">
-                            <img src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Livianos" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                            <div className="absolute bottom-12 left-10 right-10 text-white">
-                                <h3 className="text-2xl font-black mb-3">Vehículos Livianos</h3>
-                                <p className="content-text text-gray-300 mb-6">
-                                    Autos, camionetas y SUV con tiempo estimado de proceso de menos de 20 minutos.
-                                </p>
-                                <button className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all">
-                                    Más Información <ArrowRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </RevealOnScroll>
+                {/* Móvil: un servicio a la vez. Escritorio: las tres columnas. */}
+                <div className="md:hidden">
+                    <ServiciosCarousel servicios={SERVICIOS_SEDE} onMasInfo={setServicioAbierto} />
+                </div>
 
-                    {/* Pesados */}
-                    <RevealOnScroll className="delay-200">
-                        <div className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 hover:shadow-orange-500/10 transition-all duration-500">
-                            <img src="https://images.unsplash.com/photo-1586191582151-f70351799633?q=80&w=800" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Pesados" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                            <div className="absolute bottom-12 left-10 right-10 text-white">
-                                <h3 className="text-2xl font-black mb-3">Vehículos Pesados</h3>
-                                <p className="content-text text-gray-300 mb-6">
-                                    Camiones, buses y transporte de carga especializado hasta 12 toneladas.
-                                </p>
-                                <button className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all">
-                                    Más Información <ArrowRight size={16} />
-                                </button>
+                <div className="hidden md:grid grid-cols-3 gap-8">
+                    {SERVICIOS_SEDE.map((servicio, i) => (
+                        <RevealOnScroll key={servicio.id} className={`delay-${(i + 1) * 100}`}>
+                            <div className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 hover:shadow-orange-500/10 transition-all duration-500">
+                                <img
+                                    src={servicio.imagen}
+                                    alt={servicio.titulo}
+                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
+                                <div className="absolute bottom-12 left-10 right-10 text-white">
+                                    <h3 className="text-2xl font-black mb-3">{servicio.titulo}</h3>
+                                    <p className="content-text text-gray-300 mb-6">{servicio.resumen}</p>
+                                    <button
+                                        onClick={() => setServicioAbierto(servicio)}
+                                        className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all"
+                                    >
+                                        Más Información <ArrowRight size={16} />
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    </RevealOnScroll>
-
-                    {/* Especiales */}
-                    <RevealOnScroll className="delay-300">
-                        <div className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 hover:shadow-orange-500/10 transition-all duration-500">
-                            <img src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="Especiales" />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                            <div className="absolute bottom-12 left-10 right-10 text-white">
-                                <h3 className="text-2xl font-black mb-3">Certificados Especiales</h3>
-                                <p className="content-text text-gray-300 mb-6">
-                                    Modificaciones, bonificaciones por neumáticos y certificados de operatividad.
-                                </p>
-                                <button className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all">
-                                    Más Información <ArrowRight size={16} />
-                                </button>
-                            </div>
-                        </div>
-                    </RevealOnScroll>
+                        </RevealOnScroll>
+                    ))}
                 </div>
             </section>
 
@@ -305,6 +424,18 @@ function SedeDetalle() {
                     </RevealOnScroll>
                 </div>
             </section>
+
+            {servicioAbierto && (
+<ServicioModal
+                          titulo={servicioAbierto.titulo}
+                          imagen={servicioAbierto.imagen}
+                          detalle={servicioAbierto.detalle}
+                          incluye={servicioAbierto.incluye}
+                          sedeNombre={branch.name}
+                          whatsapp={branch.whatsapp}
+                          onClose={() => setServicioAbierto(null)}
+                      />
+            )}
         </div>
     );
 }

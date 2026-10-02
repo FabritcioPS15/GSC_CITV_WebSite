@@ -1,39 +1,142 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Sitemap generado a partir de las rutas reales de src/App.tsx y las sedes de
+  src/backend/data/branches.ts.
+
+  Al agregar o quitar una ruta en App.tsx hay que actualizar este archivo.
+-->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Principales -->
   <url>
-    <loc>https://tu-dominio.com/</loc>
-    <lastmod>2025-04-21</lastmod>
+    <loc>https://gruposancristobal.pe/</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://tu-dominio.com/nosotros</loc>
-    <lastmod>2025-04-21</lastmod>
+    <loc>https://gruposancristobal.pe/sedes</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tu-dominio.com/sedes</loc>
-    <lastmod>2025-04-21</lastmod>
+    <loc>https://gruposancristobal.pe/requisitos</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/cronograma</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://tu-dominio.com/requisitos</loc>
-    <lastmod>2025-04-21</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://tu-dominio.com/convenios</loc>
-    <lastmod>2025-04-21</lastmod>
+    <loc>https://gruposancristobal.pe/nosotros</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://tu-dominio.com/contacto</loc>
-    <lastmod>2025-04-21</lastmod>
+    <loc>https://gruposancristobal.pe/contacto</loc>
+    <lastmod>2026-10-02</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.6</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/cupon</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Consultas en línea: páginas de intención transaccional -->
+  <url>
+    <loc>https://gruposancristobal.pe/consulta-placa</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/consulta-revision</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/consulta-gas</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Sedes: el SEO local depende de que cada una exista en el sitemap -->
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-callao</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-canta-callao</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-ica</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-andahuaylas</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-huancavelica</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-ayacucho-av-cusco</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/sedes/sede-ayacucho-grifo-fenix</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Legal -->
+  <url>
+    <loc>https://gruposancristobal.pe/privacidad</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/cookies</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/terminos</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://gruposancristobal.pe/libro-de-reclamaciones</loc>
+    <lastmod>2026-10-02</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 </urlset>

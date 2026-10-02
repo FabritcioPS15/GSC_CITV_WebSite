@@ -14,6 +14,6 @@ export const socialLinks: SocialLink[] = [
   },
   {
     name: 'TikTok',
-    url: 'https://www.tiktok.com/@gruposancristobal',
+    url: 'https://www.tiktok.com/@grupo_sancristobal',
   },
 ];

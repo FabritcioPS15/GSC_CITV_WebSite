@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react';
 import { X, Menu, ChevronDown, ChevronRight, MapPin, Home, Users, FileText, Phone, Calendar, Search, FileCheck, Fuel, Tag, ExternalLink, ArrowRight } from 'lucide-react';
 import PremiumButton from './PremiumButton';
 import { Link, useLocation } from 'react-router-dom';
-import { branches } from '../../backend/data/branches';
-import { getLenis } from './SmoothScroll';
+import { branches, branchSlug } from '../../backend/data/branches';
+import { useBloqueoScroll } from '../hooks/useBloqueoScroll';
 import { useMobileMenu } from '../context/MobileMenuContext';
 
 /**
@@ -73,22 +73,8 @@ export default function Header() {
         setMobileSedesOpen(false);
     }, [location.pathname]);
 
-    // Bloquea el scroll con el menú abierto. El overflow hidden solo no alcanza:
-    // Lenis sigue con su loop de animación y sigue llamando a window.scrollTo
-    // por debajo, así que hay que detenerlo con su propia API. El valor previo
-    // se guarda y se restaura porque antes se ponía 'unset' en el cleanup y
-    // pisaba cualquier overflow que ya tuviera el body.
-    useEffect(() => {
-        if (!mobileMenuOpen) return;
-        const lenis = getLenis();
-        const overflowPrevio = document.body.style.overflow;
-        lenis?.stop();
-        document.body.style.overflow = 'hidden';
-        return () => {
-            lenis?.start();
-            document.body.style.overflow = overflowPrevio;
-        };
-    }, [mobileMenuOpen]);
+    // Bloquea el scroll con el menú abierto.
+    useBloqueoScroll(mobileMenuOpen);
 
     // Escape cierra el menú y devuelve el foco al botón, para que quien navega
     // con teclado no quede perdido. Al abrir, el foco entra al drawer.
@@ -257,7 +243,7 @@ export default function Header() {
                                                 {limaBranches.map(branch => (
                                                     <li key={branch.id}>
                                                         <Link
-                                                            to={`/sedes/${branch.id}`}
+                                                            to={`/sedes/${branchSlug(branch)}`}
                                                             onClick={() => setSedesDropdownOpen(false)}
                                                             className="flex items-start gap-2.5 px-2.5 py-2 rounded-xl hover:bg-orange-50/60 transition-colors group"
                                                         >
@@ -282,7 +268,7 @@ export default function Header() {
                                                 {provinciaBranches.map(branch => (
                                                     <li key={branch.id}>
                                                         <Link
-                                                            to={`/sedes/${branch.id}`}
+                                                            to={`/sedes/${branchSlug(branch)}`}
                                                             onClick={() => setSedesDropdownOpen(false)}
                                                             className="flex items-start gap-2.5 px-2.5 py-2 rounded-xl hover:bg-orange-50/60 transition-colors group"
                                                         >
@@ -381,7 +367,7 @@ export default function Header() {
                     role="dialog"
                     aria-modal="true"
                     aria-label="Menú de navegación"
-                    className={`absolute right-0 top-0 h-full w-full max-w-sm sm:max-w-md bg-white shadow-2xl border-l border-gray-200 flex flex-col transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+                    className={`absolute right-0 top-0 h-full w-full max-w-[300px] sm:max-w-[340px] bg-white shadow-2xl border-l border-gray-200 flex flex-col transform transition-transform duration-300 ease-out ${mobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
                         }`}
                 >
                     {/* Drawer Header */}
@@ -502,7 +488,7 @@ export default function Header() {
                                             {(mobileRegion === 'lima' ? limaBranches : provinciaBranches).map((branch) => (
                                                 <Link
                                                     key={branch.id}
-                                                    to={`/sedes/${branch.id}`}
+                                                    to={`/sedes/${branchSlug(branch)}`}
                                                     onClick={() => setMobileMenuOpen(false)}
                                                     className="flex items-center justify-between p-2 rounded-lg bg-white hover:bg-orange-50/80 border border-gray-200/60 transition-colors group"
                                                 >
@@ -606,12 +592,12 @@ export default function Header() {
 
                     {/* Drawer Footer. El banner reemplaza al texto de marca y también
                         al horario, que ya está en la barra de arriba del drawer.
-                        Mide 10:1, así que a 160px de ancho queda en 16px de alto. */}
+                        Mide 10:1, así que a 200px de ancho queda en 20px de alto. */}
                     <div className="px-5 py-3 border-t border-gray-100 bg-gray-50/80 flex items-center justify-end">
                         <img
                             src="/bannermtc.png"
                             alt="RTP & RTV San Cristóbal, autorizados por el MTC"
-                            className="w-40 h-auto block shrink-0"
+                            className="w-[200px] h-auto block shrink-0"
                         />
                     </div>
 

@@ -1,11 +1,34 @@
-import { ShieldCheck, Target, Eye, Gauge, MapPin, X, Navigation, Clock, Building2, Truck, CheckCircle2, ChevronDown } from 'lucide-react';
+import {
+  ShieldCheck,
+  Target,
+  Eye,
+  Gauge,
+  MapPin,
+  X,
+  Navigation,
+  Clock,
+  Building2,
+  Truck,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Award,
+  Users,
+  Wrench,
+  Cpu,
+  ClipboardCheck,
+  HeartPulse
+} from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
 import RevealOnScroll from '../components/RevealOnScroll';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
+import { schemaBreadcrumbs } from '../seo/schemas';
 import PremiumButton from '../components/PremiumButton';
 import ReactDOM from 'react-dom';
 import { useRef, useState, useEffect } from 'react';
+import { branches, whatsappUrl, WHATSAPP_INSPECCION } from '../../backend/data/branches';
+import { useBloqueoScroll } from '../hooks/useBloqueoScroll';
 
 import escuelaLogo from '../../resources/assets/escuela_logo.png';
 import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
@@ -23,68 +46,205 @@ import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
 const PLAN_CARD_WIDTH =
   'shrink-0 snap-start w-[88%] sm:w-[62%] md:w-[calc(50%-0.75rem)] lg:w-[calc(33.3333%-1rem)]';
 
-/* Componente Milestone para la línea de tiempo */
-interface MilestoneProps {
+/* Año de fundación del grupo: base de la cifra "años de experiencia". */
+const ANIO_FUNDACION = 2014;
+const ANIOS_DE_EXPERIENCIA = new Date().getFullYear() - ANIO_FUNDACION;
+
+/* Planes B2B. Cada tarjeta del carrusel se genera desde aquí y el popup de
+   "Saber más" consume los mismos campos, así que no hay que duplicar textos. */
+interface PlanB2B {
+  id: string;
+  titulo: string;
+  resumen: string;
+  imagen: string;
+  alt: string;
+  destacado: string[];
+  detalle: string;
+  incluye: string[];
+  idealPara: string;
+}
+
+const PLANES: PlanB2B[] = [
+  {
+    id: 'flotas',
+    titulo: 'Flotas de Empresa',
+    resumen:
+      'Optimice la gestión técnica de sus vehículos comerciales con tarifas preferenciales y facturación centralizada.',
+    imagen: 'https://images.unsplash.com/photo-1586528116311-ad86d3ef37f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    alt: 'Flota de vehículos de reparto en un estacionamiento',
+    destacado: ['Descuentos por volumen', 'Reportes mensuales de estado'],
+    detalle:
+      'Si su empresa tiene vehículos propios o arrendados, la revisión técnica deja de ser una tarea suelta del conductor y pasa a ser una línea dentro de su plan de mantenimiento. Centralizamos la facturación, seguimos el estado de cada unidad y avisamos las revisiones próximas al vencimiento para que ninguna placa se quede fuera de plazo.',
+    incluye: [
+      'Tarifa corporativa por cantidad de unidades, con tramos de descuento por volumen',
+      'Facturación única mensual o trimestral, sin que cada conductor gestione su comprobante',
+      'Alertas de vencimiento antes de que la revisión expire',
+      'Reporte consolidado por unidad, sede y mes con el detalle de observaciones',
+      'Coordinación de citas en la sede que le quede más cerca'
+    ],
+    idealPara: 'Empresas con cinco o más vehículos propios o arrendados.'
+  },
+  {
+    id: 'transporte',
+    titulo: 'Transporte de Carga',
+    resumen:
+      'Prioridad en turnos y atención técnica especializada para vehículos pesados y de transporte logístico.',
+    imagen: 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    alt: 'Camiones de carga estacionados en un patio logístico',
+    destacado: ['Horarios flexibles VIP', 'Asesoría técnica normativa'],
+    detalle:
+      'Un camión detenido es mercancía que no se está moviendo. Por eso este plan prioriza el tiempo de taller: atendemos primero a las unidades de transporte de carga y materiales peligrosos, con franjas reservadas fuera del pico y con un técnico disponible para interpretar la norma cuando la revisión no pasa y hay que corregir antes de volver.',
+    incluye: [
+      'Prioridad de turno en la cola de inspección para unidades pesadas',
+      'Atención en ventana extendida y en días de alta demanda',
+      'Acompañamiento técnico para resolver las observaciones que causaron el rechazo',
+      'Revisión previa de la unidad cuando el transportista lo requiere',
+      'Orientación sobre los requisitos vigentes de la categoría del vehículo'
+    ],
+    idealPara: 'Transportistas de carga, operadores de distribución y empresas con flota pesada.'
+  },
+  {
+    id: 'seguros',
+    titulo: 'Aliados de Seguros',
+    resumen:
+      'Integración de servicios para siniestros y revisiones preventivas personalizadas para todos sus asegurados.',
+    imagen: 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    alt: 'Asesor de seguros revisando la póliza de un vehículo con el cliente',
+    destacado: ['Validación digital inmediata', 'Red de beneficios compartida'],
+    detalle:
+      'Trabajamos como aliado operativo de aseguradoras: el centro de inspección aporta el dato técnico verificado que la póliza necesita para resolver un siniestro o para prevenir uno. En lugar de una inspección aislada, la aseguradora accede a un histórico del estado mecánico del vehículo y a una red nacional de puntos de atención para sus asegurados.',
+    incluye: [
+      'Validación técnica de unidades en siniestros, con registro documentado',
+      'Historial del estado mecánico consultable por unidad y por asegurado',
+      'Cobertura de nuestros centros para las derivaciones de la póliza',
+      'Acceso preferencial de los asegurados a nuestra red de sedes',
+      'Interlocución técnica directa para resolver discrepancias de peritaje'
+    ],
+    idealPara: 'Companías aseguradoras y intermediarios que necesitan un aliado técnico en campo.'
+  }
+];
+
+/* Icono de cada tarjeta, indexado por el id del plan. */
+const PLAN_ICON: Record<string, typeof Building2> = {
+  flotas: Building2,
+  transporte: Truck,
+  seguros: ShieldCheck
+};
+
+/* Mensaje prellenado para contactar por un plan concreto. */
+function mensajePlan(plan: PlanB2B) {
+  return `Hola, quisiera información sobre el plan "${plan.titulo}" para empresas.`;
+}
+
+/* Hitos de la línea de tiempo de innovación. */
+interface Milestone {
   year: string;
   title: string;
   description: string;
   image: string;
-  number: string;
-  side: 'left' | 'right';
+  imageAlt: string;
   featured?: boolean;
 }
 
-function Milestone({ year, title, description, image, number, side, featured }: MilestoneProps) {
-  const isLeft = side === 'left';
+const HITOS: Milestone[] = [
+  {
+    year: '2014',
+    title: 'Fundación',
+    description:
+      'Nació nuestro primer taller técnico en la región, con profesionales de la industria y un estándar de trabajo que no existía antes en la zona.',
+    image: 'https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Técnico inspeccionando un vehículo en el taller'
+  },
+  {
+    year: '2019',
+    title: 'Innovación Digital',
+    description:
+      'Implementamos diagnósticos basados en la nube y reportes digitales automatizados, para que cada resultado sea trazable y verificable por el conductor.',
+    image: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Panel digital con resultados de una inspección técnica'
+  },
+  {
+    year: '2025',
+    title: 'Liderazgo Regional',
+    description:
+      'Consolidamos la red de inspección técnica más amplia del país, con centros operativos en Lima, Callao y regiones, conectados bajo un mismo estándar de calidad.',
+    image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    imageAlt: 'Red de centros operativos de inspección técnica'
+  }
+];
+
+function MilestoneCard({ hito, index }: { hito: Milestone; index: number }) {
+  // Alterna lados en escritorio para que la línea central se lea como recorrido.
+  const isLeft = index % 2 === 0;
+  const number = String(index + 1).padStart(2, '0');
 
   return (
-    <div className={`relative flex flex-col lg:flex-row gap-8 lg:gap-12 ${isLeft ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center`}>
-      {/* Conector en la línea central (solo desktop) */}
-      <div className={`hidden lg:block lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 lg:w-10 lg:h-10 lg:rounded-full lg:border-4 lg:shadow-lg lg:z-10 lg:flex lg:items-center lg:justify-center ${
-        featured ? 'bg-gradient-to-br from-orange-400 to-orange-600 border-white/20' : 'bg-white border-orange-400'
-      }`}>
-        {featured ? (
-          <>
-            <div className="absolute inset-2 bg-white rounded-full"></div>
-            <div className="absolute inset-3 bg-orange-500 rounded-full animate-pulse"></div>
-          </>
-        ) : (
-          <div className="absolute inset-1 bg-orange-400 rounded-full animate-pulse"></div>
-        )}
-      </div>
+    <div className="relative z-10 lg:grid lg:grid-cols-2 lg:gap-16">
+      {/* Conector sobre la línea central. `lg:top-1/2` es imprescindible: sin
+          él el punto se queda en su posición estática (arriba de la fila) y
+          queda desalineado del trazo. En móvil sigue a la insignia del año. */}
+      <span
+        aria-hidden="true"
+        className={`absolute top-3 z-20 flex h-6 w-6 items-center justify-center rounded-full border-4 shadow-lg lg:left-1/2 lg:top-1/2 lg:h-11 lg:w-11 lg:-translate-x-1/2 lg:-translate-y-1/2 ${
+          hito.featured
+            ? 'border-white/20 bg-gradient-to-br from-orange-400 to-orange-600'
+            : 'border-orange-400 bg-white'
+        } left-6`}
+      >
+        <span className={`rounded-full ${hito.featured ? 'bg-orange-500' : 'bg-orange-400'} h-2.5 w-2.5 animate-pulse`} />
+      </span>
 
-      {/* Contenido textual */}
-      <div className={`flex-1 min-w-0 ${isLeft ? 'lg:text-right lg:pr-8' : 'lg:pl-8'} lg:w-1/2 text-center lg:text-left`}>
-        <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-bold mb-4 lg:mx-auto lg:mb-4 ${
-          featured ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg' : 'bg-gray-900 text-orange-400 border border-gray-800'
-        }`}>
-          <span className={`w-2 h-2 rounded-full animate-pulse ${featured ? 'bg-white' : 'bg-orange-400'}`} />
-          {year}
+      {/* Texto. El lado se resuelve con `order` en la rejilla, no con
+          text-align: alinear el texto hacia el centro de la línea queda
+          consistente en ambos sentidos. */}
+      <div
+        className={`pl-14 lg:pl-0 ${isLeft ? 'lg:order-1 lg:pr-4 lg:text-right' : 'lg:order-2 lg:pl-4'}`}
+      >
+        <div
+          className={`mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
+            hito.featured
+              ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+              : 'border border-gray-800 bg-gray-900 text-orange-400'
+          }`}
+        >
+          <span className={`h-2 w-2 shrink-0 rounded-full animate-pulse ${hito.featured ? 'bg-white' : 'bg-orange-400'}`} />
+          {hito.year}
         </div>
-        <h3 className="text-2xl lg:text-3xl font-black text-gray-900 mb-4">{title}</h3>
-        <p className="text-gray-600 leading-relaxed lg:text-lg">{description}</p>
+        <h3 className="mb-4 text-2xl font-black leading-tight text-gray-900 lg:text-3xl">{hito.title}</h3>
+        <p className="content-text text-gray-600 lg:text-lg">{hito.description}</p>
       </div>
 
-      {/* Imagen con marco */}
-      <div className={`relative lg:w-1/2 lg:flex lg:items-center ${isLeft ? 'lg:order-last' : 'lg:order-first'}`}>
-        <div className={`relative rounded-2xl overflow-hidden shadow-xl transition-all duration-700 group-hover:scale-[1.02] ${
-          featured ? 'h-80 lg:h-96 border-2 border-orange-400/50' : 'h-72 lg:h-80 border border-gray-200'
-        }`}>
+      {/* Imagen con marco. El envoltorio necesita `relative` para que el badge
+          numerado se ancle a la foto y no al `<li>` completo. */}
+      <div className={`relative mt-8 lg:mt-0 ${isLeft ? 'lg:order-2' : 'lg:order-1'}`}>
+        <div
+          className={`group relative overflow-hidden rounded-2xl shadow-xl transition-transform duration-500 hover:scale-[1.02] ${
+            hito.featured ? 'h-72 border-2 border-orange-400/50 lg:h-96' : 'h-64 border border-gray-200 lg:h-80'
+          }`}
+        >
           <img
-            src={image}
-            alt={year}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+            src={hito.image}
+            alt={hito.imageAlt}
+            className="h-full w-full object-cover"
+            loading="lazy"
+            decoding="async"
           />
-          <div className={`absolute inset-0 transition-opacity duration-300 ${
-            featured ? 'bg-gradient-to-t from-orange-900/30 to-transparent' : 'bg-gradient-to-t from-gray-900/50 to-transparent opacity-0 group-hover:opacity-100'
-          }`} />
+          <div
+            className={`absolute inset-0 bg-gradient-to-t from-orange-900/40 to-transparent ${
+              hito.featured ? 'opacity-100' : 'opacity-0 transition-opacity duration-300 group-hover:opacity-100'
+            }`}
+          />
         </div>
-        {/* Badge número decorativo */}
-        <div className={`absolute -bottom-4 -left-4 lg:-bottom-6 lg:-left-6 w-16 h-16 lg:w-20 lg:h-20 rounded-2xl flex items-center justify-center text-2xl lg:text-3xl font-black ${
-          featured ? 'bg-gradient-to-br from-orange-500 to-orange-600 text-white border-2 border-white/20 shadow-2xl shadow-orange-500/50' : 'bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400 border-2 border-orange-400'
-        }`}>
+        <span
+          className={`absolute -bottom-4 -left-1 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black shadow-2xl lg:-bottom-6 lg:-left-6 lg:h-20 lg:w-20 lg:text-3xl ${
+            hito.featured
+              ? 'border-2 border-white/20 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-500/50'
+              : 'border-2 border-orange-400 bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400'
+          }`}
+          aria-hidden="true"
+        >
           {number}
-        </div>
+        </span>
       </div>
     </div>
   );
@@ -231,55 +391,246 @@ const policlinicosBranches: ServiceBranch[] = [
   },
 ];
 const helmetContent = (
-  <Helmet>
-    <title>Nosotros | Grupo San Cristóbal - Líderes en Revisiones Técnicas</title>
-    <meta name="description" content="Conoce al Grupo San Cristóbal, líderes en revisiones técnicas vehiculares e inspección técnica vehicular. Tecnología europea de última generación y profesionales capacitados." />
-    <meta name="keywords" content="nosotros, grupo san cristobal, revisiones tecnicas, inspeccion tecnica vehicular, seguridad vial, tecnologia europea" />
-    <link rel="canonical" href="https://tu-dominio.com/nosotros" />
-  </Helmet>
+  <Seo
+    path="/nosotros"
+    title="Sobre Nosotros | Grupo San Cristóbal, Revisión Técnica Vehicular"
+    description="Conoce Grupo San Cristóbal: más de 15 años en revisión técnica vehicular en el Perú. Tecnología europea, profesionales certificados por el MTC y sedes a nivel nacional."
+    schema={schemaBreadcrumbs([
+      { name: 'Inicio', path: '/' },
+      { name: 'Nosotros', path: '/nosotros' }
+    ])}
+  />
 );
-const Counter = ({ end, duration = 2000, suffix = "" }: { end: number, duration?: number, suffix?: string }) => {
+/**
+ * Contador animado que arranca cuando el bloque entra en pantalla.
+ * `decimals` fija cuántos decimales se muestran: sin él, un valor entero
+ * como 30 se renderizaba como 25.6 a mitad del conteo.
+ */
+const Counter = ({
+  end,
+  duration = 2000,
+  suffix = '',
+  decimals = 0
+}: {
+  end: number;
+  duration?: number;
+  suffix?: string;
+  decimals?: number;
+}) => {
   const [count, setCount] = useState(0);
   const { ref, inView } = useInView({ triggerOnce: true });
 
   useEffect(() => {
-    if (inView) {
-      let start = 0;
-      const increment = end / (duration / 16);
-      const timer = setInterval(() => {
-        start += increment;
-        if (start >= end) {
-          setCount(end);
-          clearInterval(timer);
-        } else {
-          setCount(Math.floor(start * 10) / 10);
-        }
-      }, 16);
-      return () => clearInterval(timer);
-    }
-  }, [inView, end, duration]);
+    if (!inView) return;
 
-  return <span ref={ref}>{count}{suffix}</span>;
+    let frame = 0;
+    const startedAt = performance.now();
+
+    const tick = (now: number) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      // easeOutCubic: arranca rápido y frena, en lugar de avance lineal.
+      const eased = 1 - Math.pow(1 - progress, 3);
+      if (progress >= 1) {
+        setCount(end);
+        return;
+      }
+      setCount(Number((end * eased).toFixed(decimals)));
+      frame = requestAnimationFrame(tick);
+    };
+
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [inView, end, duration, decimals]);
+
+  return (
+    <span ref={ref}>
+      {count}
+      {suffix}
+    </span>
+  );
 };
+
+/* Tarjeta desplegable de un servicio complementario (escuela / policlínico). */
+interface ComplementarioProps {
+  id: string;
+  titulo: string;
+  descripcion: string;
+  imagen: string;
+  alt: string;
+  logo: string;
+  tipo: 'escuela' | 'policlinico';
+  branches: ServiceBranch[];
+  abierto: boolean;
+  onToggle: () => void;
+  onSelectBranch: (branch: ServiceBranch, type: 'escuela' | 'policlinico') => void;
+}
+
+function ComplementarioCard({
+  id,
+  titulo,
+  descripcion,
+  imagen,
+  alt,
+  logo,
+  tipo,
+  branches,
+  abierto,
+  onToggle,
+  onSelectBranch
+}: ComplementarioProps) {
+  return (
+    <div
+      className={`flex flex-col overflow-hidden rounded-[40px] border border-gray-100 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl ${
+        abierto ? 'ring-2 ring-orange-500/30' : ''
+      }`}
+    >
+      {/* Cabecera */}
+      <div className="group relative h-64 overflow-hidden">
+        <img
+          src={imagen}
+          alt={alt}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 p-6 sm:p-8">
+          <div className="flex min-w-0 items-center gap-4">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white p-2 shadow-xl">
+              <img src={logo} alt="" className="h-full w-full object-contain" />
+            </span>
+            <h3 className="text-xl font-black uppercase leading-tight tracking-tight text-white sm:text-2xl">
+              {titulo}
+            </h3>
+          </div>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-expanded={abierto}
+            aria-controls={`panel-${id}`}
+            aria-label={abierto ? `Ocultar ${titulo}` : `Ver ${titulo}`}
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-500 text-white shadow-lg transition-all duration-300 hover:bg-white hover:text-orange-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <ChevronDown size={24} className={`transition-transform duration-500 ${abierto ? 'rotate-180' : ''}`} />
+          </button>
+        </div>
+      </div>
+
+      {/*
+        Despliegue con grid-rows 0fr -> 1fr: la caja crece hasta la altura real
+        del contenido. Con max-height el bloque se estiraba de más durante la
+        transición (2000px de sobra) y el relleno inferior seguía creciendo
+        después de que el contenido ya se había mostrado.
+      */}
+      <div
+        id={`panel-${id}`}
+        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
+          abierto ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+        }`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="border-t border-gray-100 p-6 sm:p-8">
+            <p className="content-text mb-6 text-gray-600">{descripcion}</p>
+
+            <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+              {branches.length} {branches.length === 1 ? 'sucursal' : 'sucursales'} disponible
+              {branches.length === 1 ? '' : 's'}
+            </p>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {branches.map((branch) => (
+                <button
+                  key={branch.id}
+                  type="button"
+                  onClick={() => onSelectBranch(branch, tipo)}
+                  className="group/card flex h-full flex-col items-start rounded-2xl border border-gray-100 bg-gray-50 p-5 text-left transition-all duration-300 hover:border-orange-400 hover:bg-white hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-500"
+                >
+                  <h4 className="mb-1 text-sm font-black uppercase leading-tight tracking-tight text-gray-900 transition-colors group-hover/card:text-orange-600">
+                    {branch.name}
+                  </h4>
+                  <p className="text-xs leading-relaxed text-gray-500">{branch.address}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-orange-500">
+                    Más info
+                    <ChevronRight size={12} className="transition-transform duration-300 group-hover/card:translate-x-0.5" />
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            <a
+              href={whatsappUrl(
+                WHATSAPP_INSPECCION,
+                `Hola, quisiera información sobre ${titulo}.`
+              )}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-8 flex w-full items-center justify-center gap-3 rounded-2xl bg-green-500 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-green-500/20 transition-all hover:bg-green-600 active:scale-[0.98]"
+            >
+              <FaWhatsapp size={18} />
+              Consultar por {tipo === 'escuela' ? 'este servicio' : 'estos servicios'}
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Datos de los dos servicios complementarios del accordion. */
+const COMPLEMENTARIOS: Omit<ComplementarioProps, 'abierto' | 'onToggle' | 'onSelectBranch'>[] = [
+  {
+    id: 'escuela',
+    titulo: 'Escuela de Conductores',
+    descripcion:
+      'Formamos conductores profesionales con los más altos estándares de calidad y seguridad vial, con cursos para todas las categorías.',
+    imagen:
+      'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    alt: 'Vehículo en una vía urbana',
+    logo: escuelaLogo,
+    tipo: 'escuela',
+    branches: escuelaBranches
+  },
+  {
+    id: 'policlinicos',
+    titulo: 'Policlínicos Médicos',
+    descripcion:
+      'Servicios médicos especializados para la obtención de licencias de conducir y certificados de salud.',
+    imagen:
+      'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80',
+    alt: 'Pasillo de un centro médico',
+    logo: policlinicosLogo,
+    tipo: 'policlinico',
+    branches: policlinicosBranches
+  }
+];
 
 function Nosotros() {
   const [showEscuela, setShowEscuela] = useState(false);
   const [showPoliclinicos, setShowPoliclinicos] = useState(false);
-  
+
   const [selectedBranch, setSelectedBranch] = useState<ServiceBranch | null>(null);
   const [branchType, setBranchType] = useState<'escuela' | 'policlinico'>('escuela');
+  const [selectedPlan, setSelectedPlan] = useState<PlanB2B | null>(null);
   const [planIndex, setPlanIndex] = useState(0);
-  const scrollPositionRef = useRef(0);
+  const plansTrackRef = useRef<HTMLDivElement | null>(null);
 
-  // Bloquear scroll del body cuando el modal está abierto
+  const modalAbierto = Boolean(selectedBranch || selectedPlan);
+
+  // Bloquear scroll del body mientras haya cualquier modal abierto.
+  useBloqueoScroll(modalAbierto);
+
+  // Escape cierra el modal que esté abierto.
   useEffect(() => {
-    if (selectedBranch) {
-      scrollPositionRef.current = window.scrollY;
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-  }, [selectedBranch]);
+    if (!modalAbierto) return;
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedBranch(null);
+        setSelectedPlan(null);
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [modalAbierto]);
 
   const openBranchModal = (branch: ServiceBranch, type: 'escuela' | 'policlinico') => {
     setSelectedBranch(branch);
@@ -288,6 +639,34 @@ function Nosotros() {
 
   const closeBranchModal = () => {
     setSelectedBranch(null);
+  };
+
+  const closePlanModal = () => {
+    setSelectedPlan(null);
+  };
+
+  /** Índice de la tarjeta más cercana al inicio del carrusel. */
+  const syncPlanIndex = (track: HTMLDivElement) => {
+    const cards = Array.from(track.children) as HTMLElement[];
+    let nearest = 0;
+    let minDistance = Infinity;
+    cards.forEach((card, i) => {
+      const distance = Math.abs(card.offsetLeft - track.offsetLeft - track.scrollLeft);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearest = i;
+      }
+    });
+    setPlanIndex(nearest);
+  };
+
+  /** Desplaza el carrusel hasta la tarjeta indicada, para los puntos indicadores. */
+  const goToPlan = (index: number) => {
+    const track = plansTrackRef.current;
+    if (!track) return;
+    const card = track.children[index] as HTMLElement | undefined;
+    if (!card) return;
+    track.scrollTo({ left: card.offsetLeft - track.offsetLeft, behavior: 'smooth' });
   };
 
   const openGoogleMaps = (branch: ServiceBranch) => {
@@ -300,6 +679,10 @@ function Nosotros() {
   const openWhatsApp = (branch: ServiceBranch) => {
     const url = `https://wa.me/${branch.whatsapp}?text=Hola,%20quiero%20información%20de%20${encodeURIComponent(branch.name)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const contactarPlan = (plan: PlanB2B) => {
+    window.open(whatsappUrl(WHATSAPP_INSPECCION, mensajePlan(plan)), '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -337,8 +720,148 @@ function Nosotros() {
           <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-orange-500/0 to-transparent opacity-50" />
         </section>
 
-        {/* 2. VISION / MISSION / VALUES GRID */}
-        <section className="max-w-7xl mx-auto px-4 section -mt-20 relative z-20">
+        {/* 2. SOBRE NOSOTROS */}
+        <section className="section relative z-20 -mt-20">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="grid items-center gap-12 rounded-[40px] border border-gray-100 bg-white p-8 shadow-2xl shadow-gray-200/50 md:p-12 lg:grid-cols-12 lg:gap-16 lg:p-14">
+              {/* Narrativa */}
+              <div className="lg:col-span-7">
+                <RevealOnScroll>
+                  <p className="mb-4 text-sm font-bold uppercase tracking-widest text-orange-500">Quiénes somos</p>
+                  <h2 className="mb-6 text-4xl font-black leading-[1.1] tracking-tight text-gray-900 md:text-5xl">
+                    Un grupo peruano que lleva la <span className="text-orange-500">inspección técnica</span> a otro nivel
+                  </h2>
+                  <div className="content-text max-w-2xl space-y-5 text-gray-500">
+                    <p>
+                      San Cristóbal nació en 2014 como un taller técnico de la región y hoy es una de las redes de
+                      inspección vehicular más grandes del país. Atendemos a conductores, empresas de transporte,
+                      flotas privadas y aseguradoras con un mismo estándar de trabajo: el mismo rigor en una revisión
+                      breve que en una flota completa.
+                    </p>
+                    <p>
+                      Contamos con equipos de última generación, personal técnico capacitado y un sistema de gestión
+                      que deja registro de cada revisión. Por encima del resultado, explicamos por qué el vehículo
+                      pasó o no pasó, con criterios verificables y sin ambigüedades.
+                    </p>
+                    <p>
+                      Además de los centros de inspección, operamos una red de academias de conductores y policlínicos
+                      autorizados, de modo que un usuario pueda resolver en un solo lugar la revisión vehicular, el
+                      examen médico y la formación que necesita para mantener su licencia vigente.
+                    </p>
+                  </div>
+                </RevealOnScroll>
+
+                <RevealOnScroll className="delay-200">
+                  <ul className="mt-10 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+                    {[
+                      {
+                        icon: Cpu,
+                        title: 'Tecnología de punta',
+                        desc: 'Líneas calibradas y digitalización completa del proceso.'
+                      },
+                      {
+                        icon: Wrench,
+                        title: 'Manos expertas',
+                        desc: 'Técnicos formados en cada sistema de suspensión y frenado.'
+                      },
+                      {
+                        icon: ClipboardCheck,
+                        title: 'Trazabilidad total',
+                        desc: 'Cada resultado queda registrado y disponible para consulta.'
+                      },
+                      {
+                        icon: Users,
+                        title: 'Atención humana',
+                        desc: 'Explicamos cada observación para que salgas con dudas resueltas.'
+                      }
+                    ].map(({ icon: Icon, title, desc }) => (
+                      <li key={title} className="flex gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-orange-600 transition-colors duration-300">
+                          <Icon size={22} />
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-gray-900">{title}</span>
+                          <span className="mt-1 block text-xs leading-relaxed text-gray-500">{desc}</span>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-10 flex flex-wrap gap-4">
+                    <PremiumButton to="/sedes" className="w-full py-4 text-sm uppercase tracking-widest sm:w-auto">
+                      Conoce nuestras sedes
+                    </PremiumButton>
+                    <PremiumButton
+                      to="/contacto"
+                      plain
+                      className="w-full border-none !bg-gray-100 py-4 text-sm uppercase tracking-widest !text-gray-900 shadow-none hover:!bg-gray-900 hover:!text-white sm:w-auto"
+                    >
+                      Escríbenos
+                    </PremiumButton>
+                  </div>
+                </RevealOnScroll>
+              </div>
+
+              {/* Visual */}
+              <div className="lg:col-span-5">
+                <RevealOnScroll className="delay-100">
+                  <div className="group relative">
+                    <div className="overflow-hidden rounded-[32px] shadow-xl">
+                      <img
+                        src="https://images.unsplash.com/photo-1633419461186-7d40a38105ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80"
+                        alt="Técnico del grupo revisando un vehículo en un centro de inspección"
+                        className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105 lg:h-[26rem]"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </div>
+                    <div className="absolute inset-x-6 -bottom-6 rounded-2xl border border-gray-100 bg-white/95 p-5 shadow-2xl backdrop-blur">
+                      <div className="flex items-center gap-4">
+                        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-400 to-orange-600 text-white">
+                          <Award size={24} />
+                        </span>
+                        <p className="text-xs font-bold uppercase leading-relaxed tracking-wider text-gray-600">
+                          Proceso estandarizado y{' '}
+                          <strong className="text-gray-900">resultados auditables</strong> en cada sede
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </RevealOnScroll>
+              </div>
+            </div>
+
+            {/* Cifras de la red: se derivan de los datos reales de sedes y servicios. */}
+            <RevealOnScroll className="mt-16">
+              <ul className="grid grid-cols-2 gap-6 lg:grid-cols-4">
+                {[
+                  { end: ANIOS_DE_EXPERIENCIA, suffix: '+', label: 'Años de experiencia', icon: Award },
+                  { end: branches.length, suffix: '', label: 'Centros de inspección', icon: MapPin },
+                  { end: escuelaBranches.length, suffix: '', label: 'Escuelas de conductores', icon: Building2 },
+                  { end: policlinicosBranches.length, suffix: '', label: 'Policlínicos médicos', icon: HeartPulse }
+                ].map(({ end, suffix, label, icon: Icon }) => (
+                  <li
+                    key={label}
+                    className="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm transition-shadow duration-500 hover:shadow-xl"
+                  >
+                    <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
+                      <Icon size={20} />
+                    </span>
+                    <span className="stat-num block text-4xl font-black text-gray-900">
+                      <Counter end={end} suffix={suffix} />
+                    </span>
+                    <span className="mt-2 block text-[11px] font-bold uppercase tracking-widest text-gray-400">
+                      {label}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </RevealOnScroll>
+          </div>
+        </section>
+
+        {/* 3. VISION / MISSION / VALUES GRID */}
+        <section className="mx-auto max-w-7xl px-4 section">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
             {/* Card: Vision */}
@@ -366,7 +889,7 @@ function Nosotros() {
             {/* Card: Stats (Orange) */}
             <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center text-white shadow-xl shadow-orange-500/20 group">
               <h4 className="stat-num text-6xl font-black mb-2 tracking-tighter">
-                <Counter end={99.9} suffix="%" />
+                <Counter end={99.9} suffix="%" decimals={1} />
               </h4>
               <p className="text-xs uppercase tracking-[0.2em] font-bold opacity-80 mb-6">Índice de Precisión</p>
               <p className="text-sm font-medium opacity-90 border-t border-white/20 pt-6">
@@ -419,89 +942,60 @@ function Nosotros() {
           </div>
         </section>
 
-        {/* 3. TIMELINE SECTION (HITOS DE INNOVACIÓN) - LÍNEA DE TIEMPO LIMPIA */}
-        <section className="bg-gradient-to-b from-gray-50 to-white section relative overflow-hidden">
-          <div className="max-w-4xl mx-auto px-4 relative z-10">
-            <div className="text-center mb-16">
-              <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">TRAYECTORIA</p>
-              <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tight mb-4">Hitos de Innovación</h2>
-              <p className="text-gray-500 text-lg md:text-xl max-w-2xl mx-auto">
-                Una década transformando la seguridad vial a través de la excelencia técnica.
+        {/* 4. TIMELINE SECTION (HITOS DE INNOVACIÓN) */}
+        <section className="section relative overflow-hidden border-t border-gray-100 bg-gradient-to-b from-white to-gray-50">
+          <div className="relative z-10 mx-auto max-w-5xl px-4">
+            <RevealOnScroll className="mb-16 text-center">
+              <p className="mb-4 text-sm font-bold uppercase tracking-widest text-orange-500">TRAYECTORIA</p>
+              <h2 className="mb-4 text-4xl font-black tracking-tight text-gray-900 md:text-5xl">Hitos de Innovación</h2>
+              <p className="mx-auto max-w-2xl text-lg text-gray-500 md:text-xl">
+                Más de una década transformando la seguridad vial a través de la excelencia técnica.
               </p>
+            </RevealOnScroll>
+
+            {/*
+              El trazo vive dentro del contenedor de la lista, no en el `section`:
+              así sus extremos coinciden exactamente con el primer y el último
+              punto, y en móvil queda pegado al margen izquierdo (left-6) en vez
+              de cruzar por medio del texto.
+            */}
+            <div className="relative">
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-6 w-0.5 -translate-x-1/2 bg-orange-200 lg:hidden"
+              />
+              <div
+                aria-hidden="true"
+                className="absolute inset-y-0 left-1/2 hidden w-1 -translate-x-1/2 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 lg:block"
+              />
+
+              <ol className="space-y-16 lg:space-y-24">
+                {HITOS.map((hito, i) => (
+                  <li key={hito.year}>
+                    <RevealOnScroll className={`delay-${(i % 3) * 100}`}>
+                      <MilestoneCard hito={hito} index={i} />
+                    </RevealOnScroll>
+                  </li>
+                ))}
+              </ol>
             </div>
 
-            {/* Línea central vertical - dentro del contenedor para alinear con los conectores */}
-            <div className="absolute left-1/2 top-24 bottom-24 w-1 bg-gradient-to-b from-orange-200 via-orange-400 to-orange-600 -translate-x-1/2 hidden lg:block" />
-            <div className="absolute left-1/2 top-24 bottom-24 w-[4px] bg-orange-500/30 -translate-x-1/2 lg:hidden" />
-
-            <div className="space-y-16 lg:space-y-20">
-              {/* Hito 1 - 2014 */}
-              <RevealOnScroll className="group">
-                <Milestone
-                  year="2014"
-                  title="Fundación"
-                  description="Nacimiento del primer taller Técnico en la región, revolucionando los estándares con profesionales de la industria."
-                  image="https://images.unsplash.com/photo-1530046339160-ce3e530c7d2f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  number="01"
-                  side="left"
-                />
-              </RevealOnScroll>
-
-              {/* Hito 2 - 2019 */}
-              <RevealOnScroll className="group delay-200">
-                <Milestone
-                  year="2019"
-                  title="Innovación Digital"
-                  description="Implementación de diagnósticos basados en la nube y reportes digitales automatizados para transparencia total."
-                  image="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  number="02"
-                  side="right"
-                />
-              </RevealOnScroll>
-
-              {/* Hito 3 - 2025 */}
-              <RevealOnScroll className="group delay-400">
-                <Milestone
-                  year="2025"
-                  title="Liderazgo Regional"
-                  description="Consolidación como la red de inspección técnica más avanzada del continente, con más de 30 centros operativos."
-                  image="https://images.unsplash.com/photo-1581092160607-ee22621dd758?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  number="03"
-                  side="left"
-                  featured
-                />
-              </RevealOnScroll>
-
-              {/* Meta */}
-              <div className="relative lg:hidden">
-                <div className="inline-flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-gray-900 to-gray-800 rounded-full border-2 border-orange-400 shadow-xl mx-auto">
-                  <div className="w-5 h-5 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <span className="text-white font-bold">META: Excelencia Continua</span>
-                  <div className="w-5 h-5 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                    <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
-                  </div>
-                </div>
+            {/* Cierre del recorrido: mismo bloque para móvil y escritorio. */}
+            <RevealOnScroll className="mt-16 flex justify-center lg:mt-20">
+              <div className="inline-flex items-center gap-3 rounded-full border-2 border-orange-400 bg-gradient-to-r from-gray-900 to-gray-800 px-6 py-3 shadow-2xl lg:px-8 lg:py-4">
+                <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-white to-gray-200 lg:h-6 lg:w-6">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-orange-500 lg:h-3 lg:w-3" />
+                </span>
+                <span className="text-sm font-bold text-white lg:text-lg">META: Excelencia Continua</span>
+                <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-white to-gray-200 lg:h-6 lg:w-6">
+                  <span className="h-2 w-2 animate-pulse rounded-full bg-orange-500 lg:h-3 lg:w-3" />
+                </span>
               </div>
-            </div>
-
-            {/* Meta de llegada - Solo desktop */}
-            <div className="hidden lg:block mt-12 text-center">
-              <div className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-900 to-gray-800 rounded-full border-2 border-orange-400 shadow-2xl">
-                <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                </div>
-                <span className="text-white font-black text-lg">META: Excelencia Continua</span>
-                <div className="w-6 h-6 bg-gradient-to-br from-white to-gray-200 rounded-full flex items-center justify-center">
-                  <div className="w-3 h-3 bg-orange-500 rounded-full animate-pulse"></div>
-                </div>
-              </div>
-            </div>
+            </RevealOnScroll>
           </div>
         </section>
 
-        {/* 4. CONVENIOS Y PLANES EMPRESARIALES */}
+        {/* 5. CONVENIOS Y PLANES EMPRESARIALES */}
         <section className="max-w-7xl mx-auto px-4 section border-t border-gray-100">
           <div className="text-center mb-12">
             <p className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-4">SOLUCIONES B2B</p>
@@ -511,121 +1005,58 @@ function Nosotros() {
 
           {/* Carrusel: 1 card en móvil, 2 en tablet, 3 en desktop. Scrollbar oculta, puntos indicadores. */}
           <div className="relative">
-            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 -mx-4 px-4 scrollbar-hide">
-              {/* Card 1: Flotas de Empresa */}
-              <RevealOnScroll className={PLAN_CARD_WIDTH}>
-                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
-                  <div className="h-64 overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1586528116311-ad86d3ef37f0?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      alt="Flotas"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                      <Building2 className="text-orange-600 w-7 h-7" />
-                    </div>
-                  </div>
-                  <div className="p-10 flex flex-col">
-                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Flotas de Empresa</h3>
-                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                      Optimice la gestión técnica de sus vehículos comerciales con tarifas preferenciales y facturación centralizada.
-                    </p>
-                    <div className="space-y-4 mb-10">
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Descuentos por volumen</span>
+            <div
+              ref={plansTrackRef}
+              className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-6 -mx-4 px-4 scrollbar-hide"
+              onScroll={(event) => syncPlanIndex(event.currentTarget)}
+            >
+              {PLANES.map((plan, i) => {
+                const Icon = PLAN_ICON[plan.id];
+                return (
+                  <RevealOnScroll key={plan.id} className={`delay-${(i % 3) * 100} ${PLAN_CARD_WIDTH}`}>
+                    <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
+                      <div className="h-64 overflow-hidden relative">
+                        <img
+                          src={plan.imagen}
+                          alt={plan.alt}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
+                          {Icon && <Icon className="text-orange-600 w-7 h-7" />}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Reportes mensuales de estado</span>
-                      </div>
-                    </div>
-                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                      Saber más
-                    </PremiumButton>
-                  </div>
-                </div>
-              </RevealOnScroll>
-
-              {/* Card 2: Empresas de Transporte */}
-              <RevealOnScroll className={`delay-200 ${PLAN_CARD_WIDTH}`}>
-                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
-                  <div className="h-64 overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      alt="Transporte"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                      <Truck className="text-orange-600 w-7 h-7" />
-                    </div>
-                  </div>
-                  <div className="p-10 flex flex-col">
-                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Transporte de Carga</h3>
-                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                      Prioridad en turnos y atención técnica especializada para vehículos pesados y de transporte logístico.
-                    </p>
-                    <div className="space-y-4 mb-10">
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Horarios flexibles VIP</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Asesoría técnica normativa</span>
+                      <div className="p-10 flex flex-col">
+                        <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">{plan.titulo}</h3>
+                        <p className="text-gray-500 mb-8 leading-relaxed font-medium">{plan.resumen}</p>
+                        <div className="space-y-4 mb-10">
+                          {plan.destacado.map((item) => (
+                            <div key={item} className="flex items-center gap-3 text-sm font-bold text-gray-600">
+                              <CheckCircle2 size={18} className="text-orange-500 shrink-0" />
+                              <span>{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                        <PremiumButton
+                          onClick={() => setSelectedPlan(plan)}
+                          className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none"
+                        >
+                          Saber más
+                        </PremiumButton>
                       </div>
                     </div>
-                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                      Saber más
-                    </PremiumButton>
-                  </div>
-                </div>
-              </RevealOnScroll>
-
-              {/* Card 3: Aseguradoras */}
-              <RevealOnScroll className={`delay-400 ${PLAN_CARD_WIDTH}`}>
-                <div className="h-full bg-white rounded-[40px] overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-500 group flex flex-col">
-                  <div className="h-64 overflow-hidden relative">
-                    <img
-                      src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                      alt="Aseguradoras"
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute top-6 left-6 p-4 bg-white/95 backdrop-blur rounded-2xl shadow-xl">
-                      <ShieldCheck className="text-orange-600 w-7 h-7" />
-                    </div>
-                  </div>
-                  <div className="p-10 flex flex-col">
-                    <h3 className="text-2xl font-black text-gray-900 mb-4 uppercase tracking-tight">Aliados de Seguros</h3>
-                    <p className="text-gray-500 mb-8 leading-relaxed font-medium">
-                      Integración de servicios para siniestros y revisiones preventivas personalizadas para todos sus asegurados.
-                    </p>
-                    <div className="space-y-4 mb-10">
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Validación digital inmediata</span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm font-bold text-gray-600">
-                        <CheckCircle2 size={18} className="text-orange-500" />
-                        <span>Red de beneficios compartida</span>
-                      </div>
-                    </div>
-                    <PremiumButton to="/contacto" className="mt-auto w-full py-4 text-sm uppercase tracking-widest bg-gray-50 !text-gray-900 hover:!text-white border-none shadow-none">
-                      Saber más
-                    </PremiumButton>
-                  </div>
-                </div>
-              </RevealOnScroll>
+                  </RevealOnScroll>
+                );
+              })}
             </div>
 
-            {/* Puntos indicadores (solo móvile/tablet) */}
+            {/* Puntos indicadores (solo movil/tablet) */}
             <div className="flex justify-center gap-2 mt-4 md:hidden">
-              {[0, 1, 2].map((i) => (
+              {PLANES.map((plan, i) => (
                 <button
-                  key={i}
+                  key={plan.id}
                   type="button"
-                  onClick={() => setPlanIndex(i)}
-                  aria-label={`Ir al plan ${i + 1}`}
+                  onClick={() => goToPlan(i)}
+                  aria-label={`Ir al plan ${plan.titulo}`}
                   aria-current={planIndex === i}
                   className={`h-2 transition-all duration-300 ${
                     planIndex === i ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
@@ -636,7 +1067,7 @@ function Nosotros() {
           </div>
         </section>
 
-        {/* 5. SERVICIOS COMPLEMENTARIOS (ESCUELA / POLICLINICOS) */}
+        {/* 6. SERVICIOS COMPLEMENTARIOS (ESCUELA / POLICLINICOS) */}
         <section className="bg-gray-50 section border-t border-gray-100">
           <div className="max-w-7xl mx-auto px-4">
             <div className="text-center mb-12">
@@ -645,112 +1076,134 @@ function Nosotros() {
               <p className="text-gray-500 max-w-2xl mx-auto font-medium text-lg">Nuestra red de excelencia incluye formación especializada y servicios médicos certificados.</p>
             </div>
 
-            <div className={`grid gap-12 transition-all duration-300 ${showEscuela || showPoliclinicos ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
-              {/* Escuela de Conductores */}
-              <RevealOnScroll>
-                <div className={`bg-white border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-[40px] ${showEscuela ? 'md:col-span-1' : ''}`}>
-                  <div className="relative h-64 overflow-hidden group">
-                    <img src="https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Escuela" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                    <div className="absolute bottom-8 left-10 right-10 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-2 shadow-xl">
-                          <img src={escuelaLogo} alt="Logo Escuela" className="w-full h-full object-contain" />
-                        </div>
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tight">Escuela de Conductores</h3>
-                      </div>
-                      <button
-                        className="bg-orange-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white hover:text-orange-500 transition-all shadow-lg"
-                        onClick={() => {
-                          setShowEscuela(!showEscuela);
-                          if (!showEscuela) setShowPoliclinicos(false);
-                        }}
-                      >
-                        <ChevronDown size={24} className={`transition-transform duration-300 ${showEscuela ? 'rotate-180' : ''}`} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={`transition-all duration-500 ease-in-out ${showEscuela ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                    <div className="p-10">
-                      <p className="text-gray-500 font-medium mb-10 leading-relaxed text-lg">Formamos conductores profesionales con los más altos estándares de calidad y seguridad vial.</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                        {escuelaBranches.map((branch) => (
-                          <div
-                            key={branch.id}
-                            className="p-6 border border-gray-100 rounded-3xl bg-gray-50 hover:border-orange-500 transition-all hover:shadow-xl cursor-pointer group"
-                            onClick={() => openBranchModal(branch, 'escuela')}
-                          >
-                            <h4 className="font-black text-gray-900 text-sm mb-2 group-hover:text-orange-600 transition-colors uppercase tracking-tight">{branch.name}</h4>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{branch.address}</p>
-                            <p className="text-[10px] text-orange-500 font-black mt-4 uppercase tracking-[0.2em]">Más info →</p>
-                          </div>
-                        ))}
-                      </div>
-                      <PremiumButton className="w-full py-5 text-lg">Ir a la web oficial</PremiumButton>
-                    </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
-
-              {/* Policlínicos */}
-              <RevealOnScroll className="delay-200">
-                <div className={`bg-white border border-gray-100 shadow-xl hover:shadow-2xl transition-all duration-500 overflow-hidden rounded-[40px] ${showPoliclinicos ? 'md:col-span-1' : ''}`}>
-                  <div className="relative h-64 overflow-hidden group">
-                    <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Policlínicos" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                    <div className="absolute bottom-8 left-10 right-10 flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center p-2 shadow-xl">
-                          <img src={policlinicosLogo} alt="Logo Policlínicos" className="w-full h-full object-contain" />
-                        </div>
-                        <h3 className="text-2xl font-black text-white uppercase tracking-tight">Policlínicos Médicos</h3>
-                      </div>
-                      <button
-                        className="bg-orange-500 text-white w-12 h-12 rounded-2xl flex items-center justify-center hover:bg-white hover:text-orange-500 transition-all shadow-lg"
-                        onClick={() => {
-                          setShowPoliclinicos(!showPoliclinicos);
-                          if (!showPoliclinicos) setShowEscuela(false);
-                        }}
-                      >
-                        <ChevronDown size={24} className={`transition-transform duration-300 ${showPoliclinicos ? 'rotate-180' : ''}`} />
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className={`transition-all duration-500 ease-in-out ${showPoliclinicos ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0 overflow-hidden'}`}>
-                    <div className="p-10">
-                      <p className="text-gray-500 font-medium mb-10 leading-relaxed text-lg">Servicios médicos especializados para la obtención de licencias de conducir y certificados de salud.</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-                        {policlinicosBranches.map((branch) => (
-                          <div
-                            key={branch.id}
-                            className="p-6 border border-gray-100 rounded-3xl bg-gray-50 hover:border-orange-500 transition-all hover:shadow-xl cursor-pointer group"
-                            onClick={() => openBranchModal(branch, 'policlinico')}
-                          >
-                            <h4 className="font-black text-gray-900 text-sm mb-2 group-hover:text-orange-600 transition-colors uppercase tracking-tight">{branch.name}</h4>
-                            <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">{branch.address}</p>
-                            <p className="text-[10px] text-orange-500 font-black mt-4 uppercase tracking-[0.2em]">Más info →</p>
-                          </div>
-                        ))}
-                      </div>
-                      <PremiumButton className="w-full py-5 text-lg">Ir a la web oficial</PremiumButton>
-                    </div>
-                  </div>
-                </div>
-              </RevealOnScroll>
+            {/* Al abrir una tarjeta la rejilla pasa a una sola columna para que el
+                panel desplegado tenga el ancho completo; al cerrar vuelve al
+                comparativo de dos columnas. */}
+            <div
+              className={`grid items-start gap-8 transition-[grid-template-columns] duration-500 ease-out ${
+                showEscuela || showPoliclinicos ? 'grid-cols-1' : 'md:grid-cols-2'
+              }`}
+            >
+              {COMPLEMENTARIOS.map((servicio, i) => (
+                <RevealOnScroll key={servicio.id} className={i === 1 ? 'delay-200' : ''}>
+                  <ComplementarioCard
+                    {...servicio}
+                    abierto={servicio.tipo === 'escuela' ? showEscuela : showPoliclinicos}
+                    onSelectBranch={openBranchModal}
+                    onToggle={() => {
+                      if (servicio.tipo === 'escuela') {
+                        setShowEscuela(!showEscuela);
+                        if (!showEscuela) setShowPoliclinicos(false);
+                      } else {
+                        setShowPoliclinicos(!showPoliclinicos);
+                        if (!showPoliclinicos) setShowEscuela(false);
+                      }
+                    }}
+                  />
+                </RevealOnScroll>
+              ))}
             </div>
           </div>
         </section>
 
 
+        {/* Popup de detalle del plan B2B: en lugar de navegar a /contacto, muestra la
+            información completa y ofrece cerrar o escribirnos por WhatsApp. */}
+        {selectedPlan &&
+          ReactDOM.createPortal(
+            <>
+              <div className="modal-overlay overscroll-contain" onClick={closePlanModal} />
+              <div className="modal-container">
+                <div
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="plan-modal-title"
+                  className="modal-content w-full max-w-3xl overflow-y-auto overscroll-contain rounded-[32px] bg-white shadow-2xl animate-entry-slide-down"
+                  style={{ maxHeight: '90vh' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Cabecera con imagen */}
+                  <div className="relative h-44 overflow-hidden sm:h-56">
+                    <img src={selectedPlan.imagen} alt={selectedPlan.alt} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/25" />
+                    <button
+                      type="button"
+                      onClick={closePlanModal}
+                      aria-label="Cerrar"
+                      className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur transition-colors hover:bg-white hover:text-gray-900"
+                    >
+                      <X size={20} />
+                    </button>
+                    <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                      <p className="mb-2 text-[10px] font-black uppercase tracking-[0.3em] text-orange-400">
+                        Solución B2B
+                      </p>
+                      <h3
+                        id="plan-modal-title"
+                        className="pr-12 text-2xl font-black uppercase leading-tight tracking-tight text-white sm:text-4xl"
+                      >
+                        {selectedPlan.titulo}
+                      </h3>
+                    </div>
+                  </div>
+
+                  {/* Cuerpo con scroll propio para que el pie quede siempre visible */}
+                  <div className="max-h-[45vh] overflow-y-auto p-6 sm:p-8">
+                    <p className="content-text mb-8 text-gray-600">{selectedPlan.detalle}</p>
+
+                    <p className="mb-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                      Qué incluye
+                    </p>
+                    <ul className="space-y-3">
+                      {selectedPlan.incluye.map((item) => (
+                        <li key={item} className="flex items-start gap-3 text-sm font-medium text-gray-700">
+                          <CheckCircle2 size={18} className="mt-0.5 shrink-0 text-orange-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <p className="mt-8 flex items-start gap-3 rounded-2xl bg-orange-50 p-4 text-sm text-gray-700">
+                      <Target size={18} className="mt-0.5 shrink-0 text-orange-600" />
+                      <span>
+                        <strong className="font-bold text-gray-900">Ideal para: </strong>
+                        {selectedPlan.idealPara}
+                      </span>
+                    </p>
+                  </div>
+
+                  {/* Pie: cerrar o contactar por este plan en concreto */}
+                  <div className="grid grid-cols-1 gap-3 border-t border-gray-100 bg-gray-50 p-6 sm:grid-cols-2 sm:p-8">
+                    <button
+                      type="button"
+                      onClick={closePlanModal}
+                      className="flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white py-4 text-xs font-black uppercase tracking-widest text-gray-600 transition-colors hover:border-gray-900 hover:text-gray-900"
+                    >
+                      <X size={16} />
+                      Cerrar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => contactarPlan(selectedPlan)}
+                      className="flex items-center justify-center gap-2 rounded-2xl bg-green-500 py-4 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-green-500/20 transition-colors hover:bg-green-600 active:scale-95"
+                    >
+                      <FaWhatsapp size={18} />
+                      Contactar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </>,
+            document.body
+          )}
+
         {/* Modal Popup para información de sucursal - Usando Portal para asegurar centrado */}
         {selectedBranch && ReactDOM.createPortal(
           <>
-            <div className="modal-overlay" onClick={closeBranchModal} />
+            <div className="modal-overlay overscroll-contain" onClick={closeBranchModal} />
             <div className="modal-container">
-              <div className="modal-content bg-white rounded-[40px] max-w-4xl w-full shadow-2xl overflow-hidden animate-entry-slide-down" onClick={(e) => e.stopPropagation()}>
-                <div className="flex flex-col md:flex-row overflow-y-auto md:overflow-hidden" style={{ maxHeight: '90vh' }}>
+              <div className="modal-content bg-white rounded-[40px] max-w-4xl w-full shadow-2xl overflow-y-auto overscroll-contain animate-entry-slide-down" onClick={(e) => e.stopPropagation()}>
+                <div className="flex flex-col md:flex-row overflow-y-auto md:overflow-hidden overscroll-contain" style={{ maxHeight: '90vh' }}>
                   {/* Columna izquierda - Imagen */}
                   <div className="md:w-2/5 relative min-h-[250px] md:min-h-[600px]">
                     <img

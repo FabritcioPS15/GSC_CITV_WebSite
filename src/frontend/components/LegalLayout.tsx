@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ChevronRight, ShieldCheck, Lock } from 'lucide-react';
 import RevealOnScroll from './RevealOnScroll';
+import Seo from './Seo';
+import { schemaBreadcrumbs } from '../seo/schemas';
 
 interface LegalSection {
   id: string;
@@ -11,6 +12,8 @@ interface LegalSection {
 }
 
 interface LegalLayoutProps {
+  /** Ruta interna, para la canonical. Ejemplo: `/privacidad`. */
+  path: string;
   eyebrow: string;
   title: string;
   lastUpdated: string;
@@ -21,6 +24,7 @@ interface LegalLayoutProps {
 }
 
 const LegalLayout = ({
+  path,
   eyebrow,
   title,
   lastUpdated,
@@ -31,11 +35,15 @@ const LegalLayout = ({
 }: LegalLayoutProps) => {
   return (
     <>
-      <Helmet>
-        <title>{title} | Grupo San Cristóbal</title>
-        <meta name="description" content={intro} />
-        <meta name="robots" content="index, follow" />
-      </Helmet>
+      <Seo
+        path={path}
+        title={`${title} | Grupo San Cristóbal`}
+        description={intro}
+        schema={schemaBreadcrumbs([
+          { name: 'Inicio', path: '/' },
+          { name: title, path },
+        ])}
+      />
 
       <section className="bg-gradient-to-b from-gray-50 to-white border-b border-gray-100">
         <div className="max-w-4xl mx-auto px-4 pt-14 pb-12">

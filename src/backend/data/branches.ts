@@ -3,6 +3,11 @@ import { FotoGaleria } from './galeria';
 export interface Branch {
     id: number;
     name: string;
+    /**
+     * Identificador legible usado en la URL (`/sedes/sede-ica`).
+     * Se deriva de `name` salvo que se defina explícitamente.
+     */
+    slug?: string;
     position: [number, number];
     address: string;
     region: 'lima' | 'provincia';
@@ -158,9 +163,52 @@ const BRANCHES: Branch[] = [
     },
 ];
 
+/**
+ * Convierte un nombre en un slug apto para URL: sin tildes, sin ñ, en minúsculas
+ * y separado por guiones.
+ *
+ * "Sede Ayacucho - Av. Cusco" -> "sede-ayacucho-av-cusco"
+ */
+export function slugify(texto: string): string {
+    return texto
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // quita las tildes que dejó NFD
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Slug de una sede. Usa el explícito si existe; si no, lo deriva del nombre.
+ */
+export function branchSlug(branch: Branch): string {
+    return branch.slug ?? slugify(branch.name);
+}
+
+/**
+ * Ruta pública de una sede. Todo enlace interno debe usar esta función para no
+ * volver a los ids numéricos.
+ */
+export function branchHref(branch: Branch): string {
+    return `/sedes/${branchSlug(branch)}`;
+}
+
+/**
+ * Busca una sede por slug. Acepta también el id numérico para que las URLs
+ * antigas (`/sedes/3`) sigan funcionando y redirijan a la nueva.
+ */
+export function findBranch(param: string | undefined): Branch | undefined {
+    if (!param) return undefined;
+    return (
+        branches.find(b => branchSlug(b) === param) ??
+        branches.find(b => String(b.id) === param)
+    );
+}
+
 /** Links de navegación derivados de dirección y coordenadas. */
 export const branches: Branch[] = BRANCHES.map((b) => ({
     ...b,
+    slug: b.slug ?? slugify(b.name),
     googleMapsUrl: mapsUrl(b.position),
     wazeUrl: wazeUrl(b.position),
 }));

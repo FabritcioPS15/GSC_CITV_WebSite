@@ -1,7 +1,8 @@
 import React from 'react';
 import { FaFacebook, FaInstagram, FaTiktok, FaPhoneAlt, FaEnvelope, FaClock } from 'react-icons/fa';
 import RevealOnScroll from '../components/RevealOnScroll';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
+import { schemaNegocio } from '../seo/schemas';
 import PremiumButton from '../components/PremiumButton';
 import { socialLinks } from '../../backend/data/social';
 import { EMAIL_CONTACTO, TELEFONO_CONTACTO } from '../../backend/data/contacto';
@@ -15,12 +16,12 @@ const socialIcons: Record<string, React.ReactNode> = {
 function Contacto() {
     return (
         <div>
-            <Helmet>
-                <title>Contacto | Ponte en Contacto - Revisiones Técnicas Vehiculares</title>
-                <meta name="description" content="Contáctanos para consultas sobre revisiones técnicas vehiculares, sedes, requisitos y servicios corporativos. Atención personalizada y soporte técnico." />
-                <meta name="keywords" content="contacto, atencion al cliente, soporte revision tecnica, consultas vehiculares, informacion sedes, ayuda MTC" />
-                <link rel="canonical" href="https://tu-dominio.com/contacto" />
-            </Helmet>
+            <Seo
+                path="/contacto"
+                title="Contacto | Group San Cristóbal, Revisión Técnica Vehicular"
+                description="Contacta a Grupo San Cristóbal para información sobre revisión técnica vehicular, sedes, requisitos y servicios corporativos. Atención de lunes a sábado en todo el Perú."
+                schema={schemaNegocio}
+            />
             {/* Standardized Left-Aligned Banner (Compact) */}
             <section className="page-banner">
                 {/* Background Layer */}

@@ -1,15 +1,15 @@
 import { Search, Car, Fuel, AlertCircle, ExternalLink } from 'lucide-react';
-import { Helmet } from 'react-helmet-async';
+import Seo from '../components/Seo';
 import RevealOnScroll from '../components/RevealOnScroll';
 import InspectionWheel from '../components/InspectionWheel';
 
 const helmetContent = (
-    <Helmet>
-        <title>Cronograma | Grupo San Cristóbal - Consultas y Cronograma</title>
-        <meta name="description" content="Consulta tu placa, revisión técnica y certificación de gas. Cronograma interactivo de revisiones técnicas vehiculares en Perú." />
-        <meta name="keywords" content="cronograma, consulta placa, revision tecnica, certificacion gas, consulta vehicular" />
-        <link rel="canonical" href="https://tu-dominio.com/cronograma" />
-    </Helmet>
+    <Seo
+        path="/cronograma"
+        title="Cronograma de Revisión Técnica Vehicular 2026 | Grupo San Cristóbal"
+        description="Consulta el cronograma de revisión técnica vehicular en el Perú: fechas límite por placa, consulta de revisión, certificación de gas y renovación del certificado MTC."
+        keywords={['cronograma revisión técnica 2026', 'plazo revisión técnica vehicular', 'fecha de revisión técnica por placa', 'cronograma MTC Perú']}
+    />
 );
 
 // Datos del cronograma por mes
@@ -79,7 +79,7 @@ function Cronograma() {
                                         Cronograma y <span className="text-orange-500">Consultas</span>
                                     </h1>
                                     <p className="banner-description text-gray-400 max-w-2xl">
-                                        Consulta tu placa, verifica tu revisión técnica y certificación de gas. Todo en un solo lugar.
+                                        Consulta tu placa, verifica tu revisiÃ³n tÃ©cnica y certificaciÃ³n de gas. Todo en un solo lugar.
                                     </p>
                                 </div>
                             </div>
@@ -106,7 +106,7 @@ function Cronograma() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-bold text-gray-900 mb-1">Consulta Placa</h3>
-                                        <p className="text-sm text-gray-600">Verifica tu vehículo</p>
+                                        <p className="text-sm text-gray-600">Verifica tu vehÃ­culo</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
                                 </div>
@@ -123,7 +123,7 @@ function Cronograma() {
                                         <Car size={24} className="text-orange-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-gray-900 mb-1">Revisión Técnica</h3>
+                                        <h3 className="font-bold text-gray-900 mb-1">RevisiÃ³n TÃ©cnica</h3>
                                         <p className="text-sm text-gray-600">Consulta tu certificado</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
@@ -142,7 +142,7 @@ function Cronograma() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-bold text-gray-900 mb-1">Gas (GNV/GLP)</h3>
-                                        <p className="text-sm text-gray-600">Certificación de gas</p>
+                                        <p className="text-sm text-gray-600">CertificaciÃ³n de gas</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
                                 </div>
@@ -167,9 +167,9 @@ function Cronograma() {
                                         <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                         <p className="text-gray-600 text-sm leading-relaxed">
                                             Este cronograma es referencial. Verifica siempre la fecha exacta en tu tarjeta de propiedad
-                                            o consulta directamente con el MTC, ya que las fechas pueden variar según disposiciones oficiales.
-                                            El incumplimiento de la inspección en el mes asignado conlleva multas y recargos adicionales,
-                                            y las citas están sujetas a disponibilidad según la sede elegida.
+                                            o consulta directamente con el MTC, ya que las fechas pueden variar segÃºn disposiciones oficiales.
+                                            El incumplimiento de la inspecciÃ³n en el mes asignado conlleva multas y recargos adicionales,
+                                            y las citas estÃ¡n sujetas a disponibilidad segÃºn la sede elegida.
                                         </p>
                                     </div>
                                 </div>

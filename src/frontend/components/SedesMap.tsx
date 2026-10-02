@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import rtvLogo from '../../resources/logos/RTV LOGO CIRCULAR.png';
 import rtpLogo from '../../resources/logos/RTP LOGO CIRCULAR.png';
-import { branches, Branch, whatsappUrl } from '../../backend/data/branches';
+import { branches, branchSlug, Branch, whatsappUrl } from '../../backend/data/branches';
 import { getConsent } from '../utils/consent';
 
 // Pin para sedes RTV
@@ -740,7 +740,7 @@ export default function SedesMap({ selectedBranchId }: { selectedBranchId?: numb
                                             </a>
 
                                             <Link
-                                                to={`/sedes/${selectedBranch.id}`}
+                                                to={`/sedes/${branchSlug(selectedBranch)}`}
                                                 className="flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl bg-gray-900 hover:bg-black text-white text-[11px] font-bold shadow-xs transition-all active:scale-95"
                                             >
                                                 <span>Ver sede</span>
