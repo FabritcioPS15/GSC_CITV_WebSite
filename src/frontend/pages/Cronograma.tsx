@@ -79,7 +79,7 @@ function Cronograma() {
                                         Cronograma y <span className="text-orange-500">Consultas</span>
                                     </h1>
                                     <p className="banner-description text-gray-400 max-w-2xl">
-                                        Consulta tu placa, verifica tu revisiÃ³n tÃ©cnica y certificaciÃ³n de gas. Todo en un solo lugar.
+                                        Consulta tu placa, verifica tu revisión técnica y certificación de gas. Todo en un solo lugar.
                                     </p>
                                 </div>
                             </div>
@@ -123,7 +123,7 @@ function Cronograma() {
                                         <Car size={24} className="text-orange-600" />
                                     </div>
                                     <div className="flex-1">
-                                        <h3 className="font-bold text-gray-900 mb-1">RevisiÃ³n TÃ©cnica</h3>
+                                        <h3 className="font-bold text-gray-900 mb-1">Revisión Técnica</h3>
                                         <p className="text-sm text-gray-600">Consulta tu certificado</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />

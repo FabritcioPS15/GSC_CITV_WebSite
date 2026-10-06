@@ -174,9 +174,9 @@ export default function Header() {
                     } ${isScrolled ? 'h-[75px]' : 'h-[90px]'}`}
             >
                 <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between xl:justify-center items-center h-full">
+                    <div className="flex justify-between items-center h-full">
                         {/* Logo */}
-                        <div className="flex-shrink-0 xl:absolute xl:left-8 animate-entry-slide-down">
+                        <div className="flex-shrink-0 animate-entry-slide-down">
                             <Link
                                 to="/"
                                 className="group block"
@@ -184,13 +184,14 @@ export default function Header() {
                                 <img
                                     src="/LogoRTPSanCristobal_horizontal.png"
                                     alt="Grupo San Cristóbal Logo"
-                                    className="h-11 md:h-13 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
+                                    className="h-12 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                                 />
                             </Link>
                         </div>
 
-                        {/* Desktop Navigation */}
-                        <div className="hidden xl:flex items-center h-full space-x-0">
+                        {/* Desktop Navigation + Contáctanos, agrupados a la derecha */}
+                        <div className="hidden xl:flex items-center h-full">
+                            <div className="flex items-center h-full space-x-0">
                             {navLinks.slice(0, 2).map((link, index) => (
                                 <Link
                                     key={link.path}
@@ -200,7 +201,7 @@ export default function Header() {
                                         : 'text-gray-800 hover:text-orange-500 font-medium'
                                         } ${index === 0 ? 'animate-stagger-1' : 'animate-stagger-2'}`}
                                 >
-                                    <span className="text-lg relative py-0.5">
+                                    <span className="text-base relative py-0.5">
                                         {link.label}
                                         <span className={`absolute -bottom-1 left-0 h-[2px] bg-orange-500 transition-all duration-300 ease-out ${isActive(link.path) ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                                     </span>
@@ -217,7 +218,7 @@ export default function Header() {
                                         }`}
                                 >
                                     <div className="flex items-center gap-1.5 relative py-0.5">
-                                        <span className="text-lg text-inherit">Sedes</span>
+                                        <span className="text-base text-inherit">Sedes</span>
                                         <ChevronDown
                                             size={17}
                                             className={`transition-transform duration-300 ${sedesDropdownOpen ? 'rotate-180' : ''
@@ -312,20 +313,21 @@ export default function Header() {
                                         : 'text-gray-800 hover:text-orange-500 font-medium'
                                         }`}
                                 >
-                                    <span className="text-lg relative py-0.5">
+                                    <span className="text-base relative py-0.5">
                                         {link.label}
                                         <span className={`absolute -bottom-1 left-0 h-[2px] bg-orange-500 transition-all duration-300 ease-out ${isActive(link.path) ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                                     </span>
                                 </Link>
                             ))}
-                        </div>
+                            </div>
 
-                        {/* Contact Desktop */}
-                        <div className="hidden xl:flex items-center gap-4 absolute right-8 animate-entry-fade animate-stagger-4">
-                            <PremiumButton to="/contacto" className="gap-2 !py-3 !px-6 text-base">
-                                <Phone size={18} />
-                                <span>Contáctanos</span>
-                            </PremiumButton>
+                            {/* Contact Desktop */}
+                            <div className="flex items-center gap-4 pl-6 animate-entry-fade animate-stagger-4">
+                                <PremiumButton to="/contacto" className="gap-2 !py-2.5 !px-5 text-sm">
+                                    <Phone size={16} />
+                                    <span>Contáctanos</span>
+                                </PremiumButton>
+                            </div>
                         </div>
 
                         {/* Tablet & Mobile Menu Button */}

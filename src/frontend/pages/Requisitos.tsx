@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import RevealOnScroll from '../components/RevealOnScroll';
 import {
     FaIdCard,
+    FaAddressCard,
     FaFileContract,
     FaGasPump,
     FaBus,
@@ -43,6 +44,11 @@ function Requisitos() {
             title: "SOAT Vigente",
             description: "Seguro Obligatorio de Accidentes de Tránsito activo (físico o digital).",
             icon: <FaFileContract className="text-3xl text-orange-600" />
+        },
+        {
+            title: "DNI o Licencia de Conducir",
+            description: "Documento de identidad del conductor (DNI, CE o equivalente) o licencia de conducir vigente.",
+            icon: <FaAddressCard className="text-3xl text-orange-600" />
         },
         {
             title: "Revisión Anterior",
@@ -95,6 +101,7 @@ function Requisitos() {
             checks: [
                 "Tarjeta de propiedad (TIV) física o electrónica",
                 "SOAT vigente",
+                "DNI o licencia de conducir",
                 "Pago del servicio en ventanilla"
             ],
             duration: "5 a 10 min",

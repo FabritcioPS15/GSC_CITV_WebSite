@@ -1,4 +1,4 @@
-import { FotoGaleria } from './galeria';
+import { FotoGaleria, fotosSede } from './galeria';
 
 export interface Branch {
     id: number;
@@ -65,6 +65,46 @@ function wazeUrl(position: [number, number]): string {
 }
 
 /**
+ * Fotos reales de las sedes, tomadas de `public/WEB FOTOS/<carpeta>`.
+ * La primera foto de cada lista se usa como portada en el listado de sedes.
+ */
+export const FOTOS_CANTA_CALLAO = fotosSede(
+    'RTP_CANTACALLAO',
+    [
+        'WhatsApp Image 2026-10-05 at 12.19.08 PM.jpeg',
+        'WhatsApp Image 2026-10-05 at 12.19.08 PM (1).jpeg',
+        'WhatsApp Image 2026-10-05 at 12.19.08 PM (2).jpeg',
+        'WhatsApp Image 2026-10-05 at 12.19.09 PM.jpeg',
+    ],
+    'Sede Canta Callao'
+);
+
+export const FOTOS_ICA = fotosSede(
+    'RTV_ICA',
+    Array.from({ length: 20 }, (_, i) => `${i + 1}.jpeg`),
+    'Sede Ica'
+);
+
+export const FOTOS_HUANCAVELICA = fotosSede(
+    'RTP_HUANCAVELICA',
+    Array.from({ length: 5 }, (_, i) => `${i + 1}.jpeg`),
+    'Sede Huancavelica'
+);
+
+// Cada sede de Ayacucho tiene su propia carpeta de fotos.
+export const FOTOS_AYACUCHO_CUSCO = fotosSede(
+    'RTP_AYACUCHO',
+    Array.from({ length: 7 }, (_, i) => `${i + 1}.jpeg`),
+    'Sede Ayacucho - Av. Cusco'
+);
+
+export const FOTOS_AYACUCHO_FENIX = fotosSede(
+    'RTV_AYACUCHO',
+    Array.from({ length: 4 }, (_, i) => `${i + 1}.jpeg`),
+    'Sede Ayacucho - Grifo Fénix'
+);
+
+/**
  * Sede de la red.
  *
  * `position` se-geocodifico con Nominatim (OpenStreetMap) a partir de la
@@ -80,7 +120,7 @@ function wazeUrl(position: [number, number]): string {
  * PENDIENTE: las sedes 6 y 7 (Av. Cusco, Ayacucho) están a nivel de avenida,
  * porque OSM no registra los números de puerta ni los grifos de referencia.
  * Ambas comparten calle, así que están separadas a mano unos 200 m para que los
- * pines no se superpongan. Requieren confirmación.
+ * pines no se superponan. Requieren confirmación.
  */
 const BRANCHES: Branch[] = [
     {
@@ -105,6 +145,8 @@ const BRANCHES: Branch[] = [
         type: 'RTP',
         phone: '933697419',
         whatsapp: '51933697419',
+        image: FOTOS_CANTA_CALLAO[0].src,
+        galeria: FOTOS_CANTA_CALLAO,
     },
     {
         id: 3,
@@ -116,6 +158,8 @@ const BRANCHES: Branch[] = [
         type: 'RTP',
         phone: '955403509',
         whatsapp: '51955403509',
+        image: FOTOS_ICA[0].src,
+        galeria: FOTOS_ICA,
     },
     {
         id: 4,
@@ -138,6 +182,8 @@ const BRANCHES: Branch[] = [
         type: 'RTP',
         phone: '939063929',
         whatsapp: '51939063929',
+        image: FOTOS_HUANCAVELICA[0].src,
+        galeria: FOTOS_HUANCAVELICA,
     },
     {
         id: 6,
@@ -149,6 +195,8 @@ const BRANCHES: Branch[] = [
         type: 'RTP',
         phone: '943431908',
         whatsapp: '51943431908',
+        image: FOTOS_AYACUCHO_CUSCO[0].src,
+        galeria: FOTOS_AYACUCHO_CUSCO,
     },
     {
         id: 7,
@@ -160,6 +208,8 @@ const BRANCHES: Branch[] = [
         type: 'RTP',
         phone: '908801161',
         whatsapp: '51908801161',
+        image: FOTOS_AYACUCHO_FENIX[0].src,
+        galeria: FOTOS_AYACUCHO_FENIX,
     },
 ];
 

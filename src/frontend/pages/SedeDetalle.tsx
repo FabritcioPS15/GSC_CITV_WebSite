@@ -202,9 +202,9 @@ function SedeDetalle() {
                         <div className="absolute inset-0 md:transform md:skew-x-[-15deg] md:translate-x-20 overflow-hidden md:border-l-[8px] md:border-[#f97316] shadow-[-20px_0_50px_rgba(0,0,0,0.4)]">
                             <div className="absolute inset-0 md:transform md:skew-x-[15deg] md:-translate-x-24 scale-150">
                                 <img
-                                    src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80"
+                                    src={branch.image ?? 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1200&q=80'}
                                     className="w-full h-full object-cover opacity-40 md:opacity-90 saturate-[1.2]"
-                                    alt="Modern Vehicle"
+                                    alt={branch.image ? `Foto de la ${branch.name}` : 'Vehículo en inspección'}
                                 />
                                 {/* Capas de color adaptativas */}
                                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 md:via-black/60 to-transparent md:to-transparent" />

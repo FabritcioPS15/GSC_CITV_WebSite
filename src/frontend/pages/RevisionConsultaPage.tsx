@@ -23,7 +23,7 @@ export default function RevisionConsultaPage() {
     const handleConsulta = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!codigo || codigo.length < 8) {
-            setError('Ingresa un cÃ³digo de revisiÃ³n vÃ¡lido (mÃ­nimo 8 caracteres)');
+            setError('Ingresa un código de revisión válido (mínimo 8 caracteres)');
             return;
         }
 
@@ -41,13 +41,13 @@ export default function RevisionConsultaPage() {
                 fechaVencimiento: '15/03/2026',
                 resultado: 'APROBADO',
                 sede: 'Sede RTP Callao',
-                inspector: 'ING. Juan PÃ©rez',
-                observaciones: 'VehÃ­culo en buenas condiciones. Todos los sistemas operativos.',
+                inspector: 'ING. Juan Pérez',
+                observaciones: 'Vehículo en buenas condiciones. Todos los sistemas operativos.',
                 itemsVerificados: [
                     { item: 'Frenos', estado: 'APROBADO' },
                     { item: 'Luces', estado: 'APROBADO' },
-                    { item: 'SuspensiÃ³n', estado: 'APROBADO' },
-                    { item: 'NeumÃ¡ticos', estado: 'OBSERVADO' },
+                    { item: 'Suspensión', estado: 'APROBADO' },
+                    { item: 'Neumáticos', estado: 'OBSERVADO' },
                     { item: 'Emisiones', estado: 'APROBADO' },
                     { item: 'DocumentaciÃ³n', estado: 'APROBADO' }
                 ]
@@ -60,7 +60,7 @@ export default function RevisionConsultaPage() {
             {helmetContent}
             <div className="min-h-screen bg-[#f8fafc]">
                 <Header />
-                
+
                 <main className="pt-[90px]">
                     {/* HERO SECTION */}
                     <section className="page-banner">
@@ -77,10 +77,10 @@ export default function RevisionConsultaPage() {
                                 </Link>
                                 <p className="text-orange-500 font-bold tracking-[0.2em] uppercase text-sm mb-4">SERVICIOS DIGITALES</p>
                                 <h1 className="text-5xl md:text-6xl font-bold text-white leading-[1.1] mb-6">
-                                    Consulta de <span className="text-orange-500">RevisiÃ³n TÃ©cnica</span>
+                                    Consulta de <span className="text-orange-500">Revisión Técnica</span>
                                 </h1>
                                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                                    Consulta el resultado de tu revisiÃ³n tÃ©cnica ingresando el cÃ³digo que aparece en tu certificado o sticker.
+                                    Consulta el resultado de tu revisión técnica ingresando el código que aparece en tu certificado o sticker.
                                 </p>
                             </div>
                         </div>
@@ -194,13 +194,12 @@ export default function RevisionConsultaPage() {
                                                     className="flex items-center justify-between bg-gray-50 rounded-xl p-3 border border-gray-200"
                                                 >
                                                     <span className="text-sm font-medium text-gray-700">{item.item}</span>
-                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                                                        item.estado === 'APROBADO'
-                                                            ? 'bg-green-100 text-green-700'
-                                                            : item.estado === 'OBSERVADO'
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${item.estado === 'APROBADO'
+                                                        ? 'bg-green-100 text-green-700'
+                                                        : item.estado === 'OBSERVADO'
                                                             ? 'bg-yellow-100 text-yellow-700'
                                                             : 'bg-red-100 text-red-700'
-                                                    }`}>
+                                                        }`}>
                                                         {item.estado}
                                                     </span>
                                                 </div>
@@ -230,7 +229,7 @@ export default function RevisionConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada, 
+                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada,
                                         utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
                                     </p>
                                 </div>
@@ -238,7 +237,7 @@ export default function RevisionConsultaPage() {
                         </div>
                     </div>
                 </main>
-                
+
                 <Footer />
             </div>
         </>

@@ -3,7 +3,7 @@ import SedesMap from '../components/SedesMap';
 import RevealOnScroll from '../components/RevealOnScroll';
 import ConveniosCarousel from '../components/ConveniosCarousel';
 import HeroCarousel from '../components/HeroCarousel';
-import { ShieldCheck, Award, Zap, Clock, ChevronRight } from 'lucide-react';
+import { ShieldCheck, BadgeDollarSign, Clock, HeartHandshake, ChevronRight } from 'lucide-react';
 import Seo from '../components/Seo';
 import { schemaNegocio } from '../seo/schemas';
 import ServicioModal from '../components/ServicioModal';
@@ -13,24 +13,24 @@ import { useCarrusel } from '../hooks/useCarrusel';
 /** "Por qué elegir GSC". En movil se muestran de a una como carrusel. */
 const VENTAJAS = [
   {
-    icon: ShieldCheck,
-    title: 'Tecnología MTC',
-    desc: 'Equipos certificados y conectados directamente con el MTC para máxima transparencia.',
-  },
-  {
     icon: Clock,
-    title: 'Atención Ágil',
-    desc: 'Procesos optimizados y líneas exclusivas para reducir su tiempo de espera al mínimo.',
+    title: 'Rapidez',
+    desc: 'Revisión técnica en 20 minutos, ágil y sin esperas innecesarias.',
   },
   {
-    icon: Award,
-    title: 'Personal Experto',
-    desc: 'Ingenieros y técnicos capacitados constantemente bajo normativas ISO.',
+    icon: BadgeDollarSign,
+    title: 'Precios Justos',
+    desc: 'Tarifas accesibles y transparentes para cada tipo de vehículo.',
   },
   {
-    icon: Zap,
-    title: 'Entrega Inmediata',
-    desc: 'Resultados y certificados entregados inmediatamente al finalizar la revisión.',
+    icon: HeartHandshake,
+    title: 'Atención Personalizada',
+    desc: 'Priorizamos la atención de cada cliente con un equipo humano y capacitado.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Acreditados por el MTC',
+    desc: 'Autorizados y certificados por el Ministerio de Transportes y Comunicaciones.',
   },
 ];
 
@@ -45,11 +45,11 @@ const VENTAJAS_AUTOPLAY_MS = 10000;
  */
 const SERVICIOS = [
   {
-    title: 'Inspección Livianos',
+    title: 'Autos Particulares',
     img: 'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    desc: 'Automóviles, Camionetas, SUV. Servicio ágil y preciso.',
+    desc: 'Automóviles, camionetas y SUV. Servicio ágil y preciso.',
     detalle:
-      'Revisión técnica vehicular para vehículos livianos, registrada en el sistema del MTC y con entrega del certificado oficial en el acto. El proceso se realiza con líneas calibradas y sin que tengas que salir del vehículo.',
+      'Revisión técnica vehicular para autos particulares, registrada en el sistema del MTC y con entrega del certificado oficial en el acto. El proceso se realiza con líneas calibradas y sin que tengas que salir del vehículo.',
     incluye: [
       'Inspección de luces y señalización',
       'Frenos, suspensión y dirección',
@@ -59,11 +59,25 @@ const SERVICIOS = [
     ]
   },
   {
-    title: 'Transporte Pesado',
-    img: 'https://images.unsplash.com/photo-1506774518161-b710d10e2733?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    desc: 'Camiones, buses y flotas logísticas. Líneas especializadas.',
+    title: 'Transporte de Personas',
+    img: 'https://images.unsplash.com/photo-1741540421036-ec4646b7ad3b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    desc: 'Buses, combis y unidades de transporte público y privado.',
     detalle:
-      'Inspección para camiones, buses y unidades de carga. Contamos con plataforma para vehículos pesados y personal capacitado en la normativa vigente, con líneas pensadas para el flujo de flotas comerciales.',
+      'Inspección para vehículos de transporte de personas: buses, microbuses, combis y unidades de transporte de pasajeros. Contamos con líneas especializadas, personal capacitado en la normativa vigente y flujo pensado para el recorrido de estas unidades.',
+    incluye: [
+      'Frenos, suspensión y dirección',
+      'Sistema de luces y señalización',
+      'Emisiones y estado del motor',
+      'Verificación de elementos de seguridad y extintor',
+      'Certificado oficial MTC'
+    ]
+  },
+  {
+    title: 'Transporte de Mercancías',
+    img: 'https://images.unsplash.com/photo-1506774518161-b710d10e2733?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    desc: 'Camiones, cisternas y flotas logísticas. Líneas especializadas.',
+    detalle:
+      'Inspección para camiones, cisternas y unidades de carga. Contamos con plataforma para vehículos pesados y personal capacitado en la normativa vigente, con líneas pensadas para el flujo de flotas comerciales.',
     incluye: [
       'Frenos y suspensión reforzada',
       'Control de ejes y peso permitido',
@@ -73,11 +87,11 @@ const SERVICIOS = [
     ]
   },
   {
-    title: 'Motocicletas',
+    title: 'Vehículos Menores (L3 y L5)',
     img: 'https://images.unsplash.com/photo-1558981806-ec527fa84c39?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
-    desc: 'Revisión técnica para vehículos menores, motos y mototaxis.',
+    desc: 'Motocicletas y mototaxis en sedes con línea de moto: Canta Callao, Ayacucho, Huancavelica y Andahuaylas.',
     detalle:
-      'Revisión técnica de motocicletas y vehículos menores según el calendario del MTC. Una línea agility para mototaxis y repartidores, con atención rápida y emisión del certificado en el acto.',
+      'Revisión técnica de vehículos menores L3 y L5 (motocicletas y mototaxis) según el calendario del MTC. Atención ágil para repartidores y mototaxis, con emisión del certificado en el acto. Disponible en las sedes Canta Callao, Ayacucho, Huancavelica y Andahuaylas.',
     incluye: [
       'Inspección de luces, claxon y señalización',
       'Frenos, suspensión y dirección',
@@ -98,7 +112,7 @@ function Inicio() {
       <Seo
         path="/"
         title="Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal"
-        description="Revisión técnica vehicular autorizada por el MTC. Inspección técnica de autos, camionetas, camiones y buses con certificado oficial. Sedes en Lima y provincias. Consulta tu revisión técnica, placa o gas."
+        description="Revisión técnica vehicular autorizada por el MTC en 20 minutos: autos particulares, transporte de personas, transporte de mercancías y vehículos menores L3 y L5 (motos). Sedes en Lima y provincias. Consulta tu revisión técnica, placa o gas."
         schema={schemaNegocio}
       />
       {/* Hero Carousel */}
@@ -131,10 +145,18 @@ function Inicio() {
               </h2>
               <div className="w-20 h-1 bg-orange-500 animate-grow-horizontal"></div>
               <p className="content-text text-gray-600 pt-4 max-w-lg">
-                El <strong className="text-gray-900">Grupo San Cristóbal</strong> es una corporación dedicada a garantizar la seguridad vial a nivel nacional, brindando un servicio de inspección técnica vehicular de la más alta calidad y precisión.
+                Somos una empresa comprometida con la{' '}
+                <strong className="text-gray-900">seguridad vial y la certificación técnica vehicular</strong> en el
+                Perú. Ofrecemos revisiones técnicas para autos particulares, transporte de personas y transporte de
+                mercancías, garantizando que cada vehículo cumpla con los requisitos técnicos exigidos por la
+                normativa nacional.
               </p>
               <p className="content-text text-gray-600 max-w-lg">
-                Contamos con tecnología europea de última generación y un equipo de profesionales en constante capacitación, lo que nos permite ofrecer resultados confiables, rápidos y transparentes.
+                Nuestra labor asegura que los vehículos circulen en óptimas condiciones y contribuye a reducir los
+                accidentes de tránsito y la contaminación ambiental. Contamos con un equipo altamente capacitado y
+                tecnología de vanguardia para brindar un servicio eficiente, confiable y accesible, con{' '}
+                <strong className="text-gray-900">más de 10 años de experiencia</strong> y más de 700 000 atenciones
+                que respaldan nuestra trayectoria.
               </p>
 
               <div className="pt-6">
@@ -164,8 +186,8 @@ function Inicio() {
                     </div>
                     <div className="w-[1px] h-12 bg-gray-200"></div>
                     <div className="text-center">
-                      <p className="stat-num text-3xl font-black text-orange-500">15</p>
-                      <p className="text-[10px] font-bold text-gray-800 uppercase tracking-wider mt-1">Plantas</p>
+                      <p className="stat-num text-3xl font-black text-orange-500">700K+</p>
+                      <p className="text-[10px] font-bold text-gray-800 uppercase tracking-wider mt-1">Atenciones</p>
                     </div>
                   </div>
                 </div>
@@ -247,12 +269,12 @@ function Inicio() {
           </div>
 
           {/* Mismo criterio que las ventajas: carrusel de a una en móvil, grilla
-              de tres en desktop. */}
+              de cuatro (una por servicio) en desktop. */}
           <div
             ref={servicios.trackRef}
             onScroll={servicios.alDesplazar}
             onPointerDown={servicios.pausar}
-            className="flex md:grid md:grid-cols-3 gap-4 md:gap-8 overflow-x-auto md:overflow-visible snap-x md:snap-none scrollbar-hide"
+            className="flex md:grid md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 overflow-x-auto md:overflow-visible snap-x md:snap-none scrollbar-hide"
           >
             {SERVICIOS.map((item) => (
               <div
@@ -283,8 +305,8 @@ function Inicio() {
                     <ChevronRight size={20} />
                   </div>
                 </div>
-                <div className="p-8 flex flex-col flex-grow">
-                  <h3 className="text-2xl font-black text-gray-900 mb-3">{item.title}</h3>
+                <div className="p-6 flex flex-col flex-grow">
+                  <h3 className="text-xl font-black text-gray-900 mb-3">{item.title}</h3>
                   <p className="content-text text-gray-500 mb-6 flex-grow">
                     {item.desc}
                   </p>

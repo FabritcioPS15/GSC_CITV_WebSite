@@ -38,3 +38,17 @@ export const GALERIA_DEFAULT: FotoGaleria[] = [
 export function getGaleria(galeriaSede?: FotoGaleria[] | null): FotoGaleria[] {
     return galeriaSede && galeriaSede.length ? galeriaSede : GALERIA_DEFAULT;
 }
+
+/** Carpeta pública con las fotos reales de las sedes. Lleva espacio, por eso el %20. */
+const WEB_FOTOS = '/WEB%20FOTOS';
+
+/**
+ * Galería de una sede a partir de sus fotos en `public/WEB FOTOS/<carpeta>`.
+ * Los nombres de archivo pueden traer espacios, así que se codifican.
+ */
+export function fotosSede(carpeta: string, archivos: string[], sede: string): FotoGaleria[] {
+    return archivos.map((archivo, i) => ({
+        src: `${WEB_FOTOS}/${carpeta}/${encodeURI(archivo)}`,
+        alt: `${sede} - foto ${i + 1}`,
+    }));
+}

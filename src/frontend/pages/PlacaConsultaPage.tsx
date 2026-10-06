@@ -8,9 +8,9 @@ import Footer from '../components/Footer';
 const helmetContent = (
     <Seo
         path="/consulta-placa"
-        title="Consulta tu Placa y RevisiÃ³n TÃ©cnica | Grupo San CristÃ³bal"
-        description="Consulta la revisiÃ³n tÃ©cnica de tu vehÃ­culo por placa. Verifica tu Ãºltima inspecciÃ³n, la fecha de vencimiento y el estado de tu certificado ante el MTC. Gratis y online."
-        keywords={['consulta placa', 'consulta de placa vehicular', 'revisiÃ³n tÃ©cnica por placa', 'estado de revisiÃ³n tÃ©cnica', 'certificado vehicular MTC']}
+        title="Consulta tu Placa y Revisión Técnica | Grupo San CristÃ³bal"
+        description="Consulta la revisión técnica de tu vehículo por placa. Verifica tu última inspección, la fecha de vencimiento y el estado de tu certificado ante el MTC. Gratis y online."
+        keywords={['consulta placa', 'consulta de placa vehicular', 'revisión técnica por placa', 'estado de revisión técnica', 'certificado vehicular MTC']}
     />
 );
 
@@ -54,7 +54,7 @@ export default function PlacaConsultaPage() {
             {helmetContent}
             <div className="min-h-screen bg-[#f8fafc]">
                 <Header />
-                
+
                 <main className="pt-[90px]">
                     {/* HERO SECTION */}
                     <section className="page-banner">
@@ -74,7 +74,7 @@ export default function PlacaConsultaPage() {
                                     Consulta de <span className="text-orange-500">Placa</span>
                                 </h1>
                                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                                    Consulta la informaciÃ³n de tu vehÃ­culo verificando su estado, Ãºltima revisiÃ³n tÃ©cnica y fecha prÃ³xima de renovaciÃ³n.
+                                    Consulta la información de tu vehículo verificando su estado, última revisión técnica y fecha próxima de renovación.
                                 </p>
                             </div>
                         </div>
@@ -217,7 +217,7 @@ export default function PlacaConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada, 
+                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada,
                                         utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
                                     </p>
                                 </div>
@@ -225,7 +225,7 @@ export default function PlacaConsultaPage() {
                         </div>
                     </div>
                 </main>
-                
+
                 <Footer />
             </div>
         </>

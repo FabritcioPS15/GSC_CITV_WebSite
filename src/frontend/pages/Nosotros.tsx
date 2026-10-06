@@ -16,8 +16,7 @@ import {
   Users,
   Wrench,
   Cpu,
-  ClipboardCheck,
-  HeartPulse
+  ClipboardCheck
 } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { useInView } from 'react-intersection-observer';
@@ -27,11 +26,20 @@ import { schemaBreadcrumbs } from '../seo/schemas';
 import PremiumButton from '../components/PremiumButton';
 import ReactDOM from 'react-dom';
 import { useRef, useState, useEffect } from 'react';
-import { branches, whatsappUrl, WHATSAPP_INSPECCION } from '../../backend/data/branches';
+import { whatsappUrl, WHATSAPP_INSPECCION, FOTOS_CANTA_CALLAO, FOTOS_HUANCAVELICA, FOTOS_AYACUCHO_FENIX } from '../../backend/data/branches';
 import { useBloqueoScroll } from '../hooks/useBloqueoScroll';
 
 import escuelaLogo from '../../resources/assets/escuela_logo.png';
 import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
+
+/**
+ * Fotos reales de sedes (public/ WEB FOTOS) para que la página muestre nuestra
+ * propia red en lugar de imágenes genéricas. Si alguna carpeta se mueve, cada
+ * uso vuelve a quedar con la imagen de respaldo.
+ */
+const FOTO_QUIENES = FOTOS_CANTA_CALLAO[0]?.src;
+const FOTO_VISION = FOTOS_HUANCAVELICA[0]?.src;
+const FOTO_MISION = FOTOS_AYACUCHO_FENIX[0]?.src;
 
 /**
  * Ancho de cada card del carrusel de planes.
@@ -45,10 +53,6 @@ import policlinicosLogo from '../../resources/assets/policlinicos_logo.png';
  */
 const PLAN_CARD_WIDTH =
   'shrink-0 snap-start w-[88%] sm:w-[62%] md:w-[calc(50%-0.75rem)] lg:w-[calc(33.3333%-1rem)]';
-
-/* Año de fundación del grupo: base de la cifra "años de experiencia". */
-const ANIO_FUNDACION = 2014;
-const ANIOS_DE_EXPERIENCIA = new Date().getFullYear() - ANIO_FUNDACION;
 
 /* Planes B2B. Cada tarjeta del carrusel se genera desde aquí y el popup de
    "Saber más" consume los mismos campos, así que no hay que duplicar textos. */
@@ -185,11 +189,10 @@ function MilestoneCard({ hito, index }: { hito: Milestone; index: number }) {
           queda desalineado del trazo. En móvil sigue a la insignia del año. */}
       <span
         aria-hidden="true"
-        className={`absolute top-3 z-20 flex h-6 w-6 items-center justify-center rounded-full border-4 shadow-lg lg:left-1/2 lg:top-1/2 lg:h-11 lg:w-11 lg:-translate-x-1/2 lg:-translate-y-1/2 ${
-          hito.featured
-            ? 'border-white/20 bg-gradient-to-br from-orange-400 to-orange-600'
-            : 'border-orange-400 bg-white'
-        } left-6`}
+        className={`absolute top-3 z-20 flex h-6 w-6 items-center justify-center rounded-full border-4 shadow-lg lg:left-1/2 lg:top-1/2 lg:h-11 lg:w-11 lg:-translate-x-1/2 lg:-translate-y-1/2 ${hito.featured
+          ? 'border-white/20 bg-gradient-to-br from-orange-400 to-orange-600'
+          : 'border-orange-400 bg-white'
+          } left-6`}
       >
         <span className={`rounded-full ${hito.featured ? 'bg-orange-500' : 'bg-orange-400'} h-2.5 w-2.5 animate-pulse`} />
       </span>
@@ -201,11 +204,10 @@ function MilestoneCard({ hito, index }: { hito: Milestone; index: number }) {
         className={`pl-14 lg:pl-0 ${isLeft ? 'lg:order-1 lg:pr-4 lg:text-right' : 'lg:order-2 lg:pl-4'}`}
       >
         <div
-          className={`mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${
-            hito.featured
-              ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
-              : 'border border-gray-800 bg-gray-900 text-orange-400'
-          }`}
+          className={`mb-4 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold ${hito.featured
+            ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg'
+            : 'border border-gray-800 bg-gray-900 text-orange-400'
+            }`}
         >
           <span className={`h-2 w-2 shrink-0 rounded-full animate-pulse ${hito.featured ? 'bg-white' : 'bg-orange-400'}`} />
           {hito.year}
@@ -218,9 +220,8 @@ function MilestoneCard({ hito, index }: { hito: Milestone; index: number }) {
           numerado se ancle a la foto y no al `<li>` completo. */}
       <div className={`relative mt-8 lg:mt-0 ${isLeft ? 'lg:order-2' : 'lg:order-1'}`}>
         <div
-          className={`group relative overflow-hidden rounded-2xl shadow-xl transition-transform duration-500 hover:scale-[1.02] ${
-            hito.featured ? 'h-72 border-2 border-orange-400/50 lg:h-96' : 'h-64 border border-gray-200 lg:h-80'
-          }`}
+          className={`group relative overflow-hidden rounded-2xl shadow-xl transition-transform duration-500 hover:scale-[1.02] ${hito.featured ? 'h-72 border-2 border-orange-400/50 lg:h-96' : 'h-64 border border-gray-200 lg:h-80'
+            }`}
         >
           <img
             src={hito.image}
@@ -230,17 +231,15 @@ function MilestoneCard({ hito, index }: { hito: Milestone; index: number }) {
             decoding="async"
           />
           <div
-            className={`absolute inset-0 bg-gradient-to-t from-orange-900/40 to-transparent ${
-              hito.featured ? 'opacity-100' : 'opacity-0 transition-opacity duration-300 group-hover:opacity-100'
-            }`}
+            className={`absolute inset-0 bg-gradient-to-t from-orange-900/40 to-transparent ${hito.featured ? 'opacity-100' : 'opacity-0 transition-opacity duration-300 group-hover:opacity-100'
+              }`}
           />
         </div>
         <span
-          className={`absolute -bottom-4 -left-1 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black shadow-2xl lg:-bottom-6 lg:-left-6 lg:h-20 lg:w-20 lg:text-3xl ${
-            hito.featured
-              ? 'border-2 border-white/20 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-500/50'
-              : 'border-2 border-orange-400 bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400'
-          }`}
+          className={`absolute -bottom-4 -left-1 flex h-14 w-14 items-center justify-center rounded-2xl text-2xl font-black shadow-2xl lg:-bottom-6 lg:-left-6 lg:h-20 lg:w-20 lg:text-3xl ${hito.featured
+            ? 'border-2 border-white/20 bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-500/50'
+            : 'border-2 border-orange-400 bg-gradient-to-br from-gray-900 to-gray-800 text-orange-400'
+            }`}
           aria-hidden="true"
         >
           {number}
@@ -410,12 +409,14 @@ const Counter = ({
   end,
   duration = 2000,
   suffix = '',
-  decimals = 0
+  decimals = 0,
+  format = false
 }: {
   end: number;
   duration?: number;
   suffix?: string;
   decimals?: number;
+  format?: boolean;
 }) => {
   const [count, setCount] = useState(0);
   const { ref, inView } = useInView({ triggerOnce: true });
@@ -444,7 +445,7 @@ const Counter = ({
 
   return (
     <span ref={ref}>
-      {count}
+      {format ? count.toLocaleString('es-PE') : count}
       {suffix}
     </span>
   );
@@ -480,9 +481,8 @@ function ComplementarioCard({
 }: ComplementarioProps) {
   return (
     <div
-      className={`flex flex-col overflow-hidden rounded-[40px] border border-gray-100 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl ${
-        abierto ? 'ring-2 ring-orange-500/30' : ''
-      }`}
+      className={`flex flex-col overflow-hidden rounded-[40px] border border-gray-100 bg-white shadow-xl transition-all duration-500 hover:shadow-2xl ${abierto ? 'ring-2 ring-orange-500/30' : ''
+        }`}
     >
       {/* Cabecera */}
       <div className="group relative h-64 overflow-hidden">
@@ -524,9 +524,8 @@ function ComplementarioCard({
       */}
       <div
         id={`panel-${id}`}
-        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${
-          abierto ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
-        }`}
+        className={`grid transition-[grid-template-rows,opacity] duration-500 ease-out ${abierto ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}
       >
         <div className="min-h-0 overflow-hidden">
           <div className="border-t border-gray-100 p-6 sm:p-8">
@@ -733,15 +732,22 @@ function Nosotros() {
                   </h2>
                   <div className="content-text max-w-2xl space-y-5 text-gray-500">
                     <p>
-                      San Cristóbal nació en 2014 como un taller técnico de la región y hoy es una de las redes de
-                      inspección vehicular más grandes del país. Atendemos a conductores, empresas de transporte,
-                      flotas privadas y aseguradoras con un mismo estándar de trabajo: el mismo rigor en una revisión
-                      breve que en una flota completa.
+                      San Cristóbal es una empresa comprometida con la seguridad vial y la certificación técnica
+                      vehicular en el Perú. Ofrecemos un servicio especializado de revisiones técnicas para autos
+                      particulares, transporte de personas y transporte de mercancías, garantizando que cada vehículo
+                      cumpla con los requisitos técnicos exigidos por la normativa nacional.
                     </p>
                     <p>
-                      Contamos con equipos de última generación, personal técnico capacitado y un sistema de gestión
-                      que deja registro de cada revisión. Por encima del resultado, explicamos por qué el vehículo
-                      pasó o no pasó, con criterios verificables y sin ambigüedades.
+                      Nuestra labor no solo asegura que los vehículos circulen en óptimas condiciones, sino que
+                      también contribuye a la reducción de accidentes de tránsito y de contaminación ambiental.
+                      Contamos con un equipo altamente capacitado y tecnología de vanguardia para brindar un servicio
+                      eficiente, confiable y accesible, priorizando siempre la seguridad y el bienestar de nuestros
+                      clientes y del país.
+                    </p>
+                    <p>
+                      Nacidos en 2014, hemos crecido hasta convertirnos en una de las redes de inspección vehicular
+                      más grandes del país. Más de 10 años de experiencia y más de 700 000 atenciones respaldan
+                      nuestra trayectoria, con el mismo rigor en una revisión breve que en una flota completa.
                     </p>
                     <p>
                       Además de los centros de inspección, operamos una red de academias de conductores y policlínicos
@@ -786,19 +792,6 @@ function Nosotros() {
                       </li>
                     ))}
                   </ul>
-
-                  <div className="mt-10 flex flex-wrap gap-4">
-                    <PremiumButton to="/sedes" className="w-full py-4 text-sm uppercase tracking-widest sm:w-auto">
-                      Conoce nuestras sedes
-                    </PremiumButton>
-                    <PremiumButton
-                      to="/contacto"
-                      plain
-                      className="w-full border-none !bg-gray-100 py-4 text-sm uppercase tracking-widest !text-gray-900 shadow-none hover:!bg-gray-900 hover:!text-white sm:w-auto"
-                    >
-                      Escríbenos
-                    </PremiumButton>
-                  </div>
                 </RevealOnScroll>
               </div>
 
@@ -808,8 +801,11 @@ function Nosotros() {
                   <div className="group relative">
                     <div className="overflow-hidden rounded-[32px] shadow-xl">
                       <img
-                        src="https://images.unsplash.com/photo-1633419461186-7d40a38105ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80"
-                        alt="Técnico del grupo revisando un vehículo en un centro de inspección"
+                        src={
+                          FOTO_QUIENES ??
+                          'https://images.unsplash.com/photo-1633419461186-7d40a38105ec?ixlib=rb-4.0.3&auto=format&fit=crop&w=900&q=80'
+                        }
+                        alt="Instalaciones de una de nuestras sedes de revisión técnica"
                         className="h-80 w-full object-cover transition-transform duration-700 group-hover:scale-105 lg:h-[26rem]"
                         loading="lazy"
                         decoding="async"
@@ -830,33 +826,6 @@ function Nosotros() {
                 </RevealOnScroll>
               </div>
             </div>
-
-            {/* Cifras de la red: se derivan de los datos reales de sedes y servicios. */}
-            <RevealOnScroll className="mt-16">
-              <ul className="grid grid-cols-2 gap-6 lg:grid-cols-4">
-                {[
-                  { end: ANIOS_DE_EXPERIENCIA, suffix: '+', label: 'Años de experiencia', icon: Award },
-                  { end: branches.length, suffix: '', label: 'Centros de inspección', icon: MapPin },
-                  { end: escuelaBranches.length, suffix: '', label: 'Escuelas de conductores', icon: Building2 },
-                  { end: policlinicosBranches.length, suffix: '', label: 'Policlínicos médicos', icon: HeartPulse }
-                ].map(({ end, suffix, label, icon: Icon }) => (
-                  <li
-                    key={label}
-                    className="rounded-3xl border border-gray-100 bg-white p-6 text-center shadow-sm transition-shadow duration-500 hover:shadow-xl"
-                  >
-                    <span className="mx-auto mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-orange-100 text-orange-600">
-                      <Icon size={20} />
-                    </span>
-                    <span className="stat-num block text-4xl font-black text-gray-900">
-                      <Counter end={end} suffix={suffix} />
-                    </span>
-                    <span className="mt-2 block text-[11px] font-bold uppercase tracking-widest text-gray-400">
-                      {label}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </RevealOnScroll>
           </div>
         </section>
 
@@ -872,13 +841,19 @@ function Nosotros() {
                 </div>
                 <h3 className="text-3xl font-bold text-gray-900 leading-tight">Nuestra Visión</h3>
                 <p className="content-text text-gray-500">
-                  Ser el referente global en transparencia técnica, integrando inteligencia artificial y precisión mecánica para eliminar el riesgo en las carreteras del futuro.
+                  Ser la empresa líder en revisiones técnicas vehiculares en el Perú, reconocida por nuestra
+                  excelencia en el servicio, compromiso con la seguridad vial y aporte a la preservación del medio
+                  ambiente. Aspiramos a estar cada vez más cerca de nuestros clientes, expandiendo nuestra cobertura y
+                  consolidándonos como el principal referente en la certificación técnica vehicular.
                 </p>
               </div>
               <div className="flex-1 rounded-xl overflow-hidden h-48 md:h-auto">
                 <img
-                  src="https://images.unsplash.com/photo-1551816230-ef5deaed4a26?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Vision"
+                  src={
+                    FOTO_VISION ??
+                    'https://images.unsplash.com/photo-1551816230-ef5deaed4a26?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                  }
+                  alt="Nuestra red de sedes de revisión técnica"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                   loading="lazy"
                   decoding="async"
@@ -888,12 +863,12 @@ function Nosotros() {
 
             {/* Card: Stats (Orange) */}
             <div className="bg-orange-500 rounded-2xl p-8 flex flex-col justify-center items-center text-center text-white shadow-xl shadow-orange-500/20 group">
-              <h4 className="stat-num text-6xl font-black mb-2 tracking-tighter">
-                <Counter end={99.9} suffix="%" decimals={1} />
+              <h4 className="stat-num text-4xl md:text-5xl font-black mb-2 tracking-tighter">
+                <Counter end={700000} suffix="+" format />
               </h4>
-              <p className="text-xs uppercase tracking-[0.2em] font-bold opacity-80 mb-6">Índice de Precisión</p>
+              <p className="text-xs uppercase tracking-[0.2em] font-bold opacity-80 mb-6">Atenciones realizadas</p>
               <p className="text-sm font-medium opacity-90 border-t border-white/20 pt-6">
-                Avalados por certificaciones internacionales de calibración.
+                Respaldadas por más de 10 años de experiencia en seguridad vial.
               </p>
             </div>
 
@@ -927,13 +902,20 @@ function Nosotros() {
                   <div className="w-16 h-1 bg-orange-500" />
                 </div>
                 <p className="content-text text-gray-400 max-w-xl">
-                  Proveer un servicio de inspección técnica vehicular de élite, garantizando que cada vehículo en circulación cumpla con los más altos estándares de integridad mecánica a través de tecnología de punta y personal experto.
+                  Contribuir a la seguridad vial en el Perú mediante un servicio de revisiones técnicas vehiculares
+                  que garantice el buen estado y funcionamiento de los vehículos. Trabajamos para reducir los
+                  accidentes de tránsito y minimizar la contaminación ambiental, asegurando que cada unidad cumpla con
+                  los estándares técnicos establecidos por la normativa nacional. Nuestro compromiso es ofrecer un
+                  servicio eficiente, confiable y accesible, promoviendo una movilidad más segura y sostenible.
                 </p>
               </div>
               <div className="md:w-1/3 relative">
                 <img
-                  src="https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Mission"
+                  src={
+                    FOTO_MISION ??
+                    'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'
+                  }
+                  alt="Vehículo siendo inspeccionado en una de nuestras sedes"
                   className="w-full h-full object-cover transition-opacity duration-700 opacity-80 group-hover:opacity-100"
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-[#0a0f1a] via-transparent to-transparent" />
@@ -1058,9 +1040,8 @@ function Nosotros() {
                   onClick={() => goToPlan(i)}
                   aria-label={`Ir al plan ${plan.titulo}`}
                   aria-current={planIndex === i}
-                  className={`h-2 transition-all duration-300 ${
-                    planIndex === i ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
-                  } rounded-full`}
+                  className={`h-2 transition-all duration-300 ${planIndex === i ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
+                    } rounded-full`}
                 />
               ))}
             </div>
@@ -1080,9 +1061,8 @@ function Nosotros() {
                 panel desplegado tenga el ancho completo; al cerrar vuelve al
                 comparativo de dos columnas. */}
             <div
-              className={`grid items-start gap-8 transition-[grid-template-columns] duration-500 ease-out ${
-                showEscuela || showPoliclinicos ? 'grid-cols-1' : 'md:grid-cols-2'
-              }`}
+              className={`grid items-start gap-8 transition-[grid-template-columns] duration-500 ease-out ${showEscuela || showPoliclinicos ? 'grid-cols-1' : 'md:grid-cols-2'
+                }`}
             >
               {COMPLEMENTARIOS.map((servicio, i) => (
                 <RevealOnScroll key={servicio.id} className={i === 1 ? 'delay-200' : ''}>
