@@ -12,46 +12,52 @@
     Metadatos de la home.
     React Helmet sobreescribe esto en cada ruta al montar la app; se mantiene
     correcto acá porque es lo que leen los rastreadores que no ejecutan JS.
+
+    data-rh="true" marca las tags como gestionadas por Helmet: sin él, Helmet
+    solo reemplaza tags con ese atributo y la home quedaba con 2 canonicals
+    (la estática y la de la ruta), lo que hacía que Google consolidara las
+    páginas internas contra la home ("página alternativa con canónica adecuada").
   -->
-  <title>Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal</title>
-  <meta name="description"
+  <title>Revisión Técnica Vehicular en el Perú | RTP San Cristóbal</title>
+  <meta name="description" data-rh="true"
     content="Revisión técnica vehicular autorizada por el MTC. Inspección técnica de autos, camionetas, camiones y buses con certificado oficial. Sedes en Lima y provincias. Consulta tu revisión técnica por placa.">
-  <meta name="keywords"
-    content="revisión técnica, revisión técnica vehicular, revisiones técnicas, RTP, RTV, RTP San Cristóbal, grupo san cristobal, inspección técnica vehicular, centro de revisión técnica, revisión técnica Lima, revisión técnica Perú, certificado de inspección vehicular, inspección vehicular MTC">
-  <meta name="author" content="Grupo San Cristóbal">
-  <meta name="robots" content="index, follow, max-image-preview:large">
-  <link rel="canonical" href="https://gruposancristobal.pe/">
+  <meta name="keywords" data-rh="true"
+    content="revisión técnica, revisión técnica vehicular, revisiones técnicas, RTP, RTV, RTP San Cristóbal, RTV San Cristóbal, grupo san cristobal, inspección técnica vehicular, centro de revisión técnica, revisión técnica Lima, revisión técnica Perú, certificado de inspección vehicular, inspección vehicular MTC">
+  <meta name="author" data-rh="true" content="RTP San Cristóbal">
+  <meta name="robots" data-rh="true" content="index, follow, max-image-preview:large">
+  <link rel="canonical" data-rh="true" href="https://gruposancristobal.pe/">
 
   <!-- Open Graph / Facebook -->
-  <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Grupo San Cristóbal">
-  <meta property="og:url" content="https://gruposancristobal.pe/">
-  <meta property="og:title" content="Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal">
-  <meta property="og:description"
+  <meta property="og:type" data-rh="true" content="website">
+  <meta property="og:site_name" data-rh="true" content="RTP San Cristóbal">
+  <meta property="og:url" data-rh="true" content="https://gruposancristobal.pe/">
+  <meta property="og:title" data-rh="true" content="Revisión Técnica Vehicular en el Perú | RTP San Cristóbal">
+  <meta property="og:description" data-rh="true"
     content="Centro de revisión técnica vehicular autorizado por el MTC. Inspección de vehículos livianos y pesados con certificado oficial en Lima y provincias.">
-  <meta property="og:image" content="https://gruposancristobal.pe/og-image.png">
+  <meta property="og:image" data-rh="true" content="https://gruposancristobal.pe/og-image.png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
-  <meta property="og:image:alt" content="Grupo San Cristóbal - Revisión Técnica Vehicular">
-  <meta property="og:locale" content="es_PE">
+  <meta property="og:image:alt" data-rh="true" content="RTP San Cristóbal - Revisión Técnica Vehicular">
+  <meta property="og:locale" data-rh="true" content="es_PE">
   <meta property="og:locale:alternate" content="es_PE">
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:url" content="https://gruposancristobal.pe/">
-  <meta name="twitter:title" content="Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal">
-  <meta name="twitter:description"
+  <meta name="twitter:card" data-rh="true" content="summary_large_image">
+  <meta name="twitter:url" data-rh="true" content="https://gruposancristobal.pe/">
+  <meta name="twitter:title" data-rh="true" content="Revisión Técnica Vehicular en el Perú | RTP San Cristóbal">
+  <meta name="twitter:description" data-rh="true"
     content="Centro de revisión técnica vehicular autorizado por el MTC. Inspección de vehículos livianos y pesados con certificado oficial en Lima y provincias.">
-  <meta name="twitter:image" content="https://gruposancristobal.pe/og-image.png">
+  <meta name="twitter:image" data-rh="true" content="https://gruposancristobal.pe/og-image.png">
 
   <!-- Datos estructurados: grafo local de Google -->
-  <script type="application/ld+json">
+  <script type="application/ld+json" data-rh="true">
   {
     "@context": "https://schema.org",
     "@type": "AutomotiveBusiness",
     "@id": "https://gruposancristobal.pe/#negocio",
-    "name": "Grupo San Cristóbal · Revisión Técnica Vehicular en el Perú",
-    "legalName": "Grupo San Cristóbal",
+    "name": "RTP San Cristóbal · Revisión Técnica Vehicular en el Perú",
+    "legalName": "RTP San Cristóbal",
+    "alternateName": ["RTV San Cristóbal", "Grupo San Cristóbal"],
     "description": "Centro de revisión técnica vehicular autorizado por el MTC en el Perú. Inspección técnica de vehículos livianos y pesados con equipos calibrados y certificación oficial.",
     "url": "https://gruposancristobal.pe/",
     "logo": "https://gruposancristobal.pe/LogoRTPSanCristobal_horizontal.png",

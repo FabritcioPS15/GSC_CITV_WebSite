@@ -5,10 +5,44 @@ import ConveniosCarousel from '../components/ConveniosCarousel';
 import HeroCarousel from '../components/HeroCarousel';
 import { ShieldCheck, BadgeDollarSign, Clock, HeartHandshake, ChevronRight } from 'lucide-react';
 import Seo from '../components/Seo';
-import { schemaNegocio } from '../seo/schemas';
+import { schemaNegocio, schemaFaq, schemaGrafo } from '../seo/schemas';
 import ServicioModal from '../components/ServicioModal';
 import PremiumButton from '../components/PremiumButton';
 import { useCarrusel } from '../hooks/useCarrusel';
+
+/**
+ * FAQ de la home.
+ *
+ * Cubre las consultas que ya llegan desde Google Search Console (consulta por
+ * placa, costo, descarga del certificado, duración) para que la home pueda
+ * competir por esas respuestas con un resultado enriquecido.
+ */
+const FAQ_HOME = [
+  {
+    q: '¿Qué es la revisión técnica vehicular?',
+    a: 'Es la inspección obligatoria que verifica el estado de tu vehículo antes de circular. En RTP San Cristóbal la realizan líneas autorizadas por el MTC: revisamos frenos, luces, suspensión, neumáticos y emisiones, y al aprobar recibes el certificado oficial en el acto.'
+  },
+  {
+    q: '¿Cuánto demora y cuánto cuesta la revisión técnica?',
+    a: 'La inspección de un vehículo liviano toma menos de 20 minutos. El costo varía según el tipo de vehículo (auto, camioneta, camión o bus); en la página de Sedes y en el Tarifico de cada sede encuentras la tarifa vigente de tu unidad, siempre con impuestos incluidos.'
+  },
+  {
+    q: '¿Cómo consulto mi revisión técnica por placa?',
+    a: 'Ingresa a la sección Consulta con tu número de placa en la página de consulta de placa: mostramos la fecha de tu última inspección, la vigencia del certificado y el estado ante el MTC. También puedes consultar con el código impreso en tu sticker.'
+  },
+  {
+    q: '¿Dónde descargo el certificado de revisión técnica?',
+    a: 'El certificado oficial se entrega en el acto al aprobar la inspección en cualquiera de nuestras sedes. Para verificar o descargar una copia usa la consulta por código con el número de tu certificado, o solicítalo en WhatsApp indicando tu placa y el número de documento.'
+  },
+  {
+    q: '¿Necesito cita previa?',
+    a: 'No. Atendemos por orden de llegada de lunes a viernes de 7:00 a. m. a 7:00 p. m. y sábado de 8:00 a. m. a 5:00 p. m. Si prefieres coordinar tu llegada, escríbenos por WhatsApp y te confirmamos el horario con menos espera.'
+  },
+  {
+    q: '¿Qué pasa si mi vehículo no aprueba?',
+    a: 'Si la inspección detecta una observación, te indicamos qué componente requiere corrección. Una vez reparado vuelves a la sede: en RTP San Cristóbal te acompañamos con el proceso para que apruebes sin contratiempos.'
+  }
+];
 
 /** "Por qué elegir GSC". En movil se muestran de a una como carrusel. */
 const VENTAJAS = [
@@ -111,9 +145,9 @@ function Inicio() {
     <div className="bg-[#f8fafc]">
       <Seo
         path="/"
-        title="Revisión Técnica Vehicular en el Perú | Grupo San Cristóbal"
+        title="Revisión Técnica Vehicular en el Perú | RTP San Cristóbal"
         description="Revisión técnica vehicular autorizada por el MTC en 20 minutos: autos particulares, transporte de personas, transporte de mercancías y vehículos menores L3 y L5 (motos). Sedes en Lima y provincias. Consulta tu revisión técnica, placa o gas."
-        schema={schemaNegocio}
+        schema={schemaGrafo([schemaNegocio, schemaFaq(FAQ_HOME)])}
       />
       {/* Hero Carousel */}
       <RevealOnScroll>
@@ -349,6 +383,31 @@ function Inicio() {
           </div>
           <div className="shadow-2xl">
             <SedesMap />
+          </div>
+        </section>
+      </RevealOnScroll>
+
+      {/* FAQ: mismo contenido que el schema FAQPage de arriba. Sin este bloque
+          visible Google no muestra los desplegables en los resultados. */}
+      <RevealOnScroll>
+        <section className="max-w-4xl mx-auto px-4 section">
+          <div className="text-center mb-10">
+            <h4 className="text-orange-500 font-bold uppercase tracking-widest text-sm mb-3">Resolvemos tus dudas</h4>
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight">Preguntas Frecuentes</h2>
+          </div>
+          <div className="space-y-4">
+            {FAQ_HOME.map(faq => (
+              <details
+                key={faq.q}
+                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm open:shadow-md transition-shadow"
+              >
+                <summary className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 text-left">
+                  <span className="text-base font-black text-gray-900">{faq.q}</span>
+                  <span className="text-orange-500 font-black text-xl leading-none shrink-0 transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <p className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">{faq.a}</p>
+              </details>
+            ))}
           </div>
         </section>
       </RevealOnScroll>

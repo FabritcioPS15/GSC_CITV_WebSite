@@ -18,8 +18,8 @@ function Contacto() {
         <div>
             <Seo
                 path="/contacto"
-                title="Contacto | Group San Cristóbal, Revisión Técnica Vehicular"
-                description="Contacta a Grupo San Cristóbal para información sobre revisión técnica vehicular, sedes, requisitos y servicios corporativos. Atención de lunes a sábado en todo el Perú."
+                title="Contacto | RTP San Cristóbal, Revisión Técnica Vehicular"
+                description="Contacta a RTP San Cristóbal para información sobre revisión técnica vehicular, sedes, requisitos y servicios corporativos. Atención de lunes a sábado en todo el Perú."
                 schema={schemaNegocio}
             />
             {/* Standardized Left-Aligned Banner (Compact) */}

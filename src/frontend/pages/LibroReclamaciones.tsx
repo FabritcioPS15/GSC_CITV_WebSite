@@ -14,7 +14,7 @@ const LibroReclamaciones = () => {
       title="Libro de Reclamaciones"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"
       icon={<BookOpen size={26} />}
-      intro="Conforme al Codigo de Proteccion y Defensa del Consumidor (Ley N. 29571) y su Reglamento (Decreto Supremo N. 017-2009-JUS), Grupo San Cristobal pone a disposicion de los consumidores el Libro de Reclamaciones en su version virtual. Este canal le permite registrar InvestigativeTrack su reclamo o queja de manera directa y con constancia."
+      intro="Conforme al Codigo de Proteccion y Defensa del Consumidor (Ley N. 29571) y su Reglamento (Decreto Supremo N. 017-2009-JUS), RTP San Cristóbal pone a disposicion de los consumidores el Libro de Reclamaciones en su version virtual. Este canal le permite registrar InvestigativeTrack su reclamo o queja de manera directa y con constancia."
       sections={[
         {
           id: 'identificacion-lr',

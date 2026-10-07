@@ -12,7 +12,7 @@ import { getGaleria } from '../../backend/data/galeria';
 import { EMAIL_CONTACTO } from '../../backend/data/contacto';
 import ServicioModal from '../components/ServicioModal';
 import Seo from '../components/Seo';
-import { schemaSede } from '../seo/schemas';
+import { schemaSede, schemaFaq, schemaBreadcrumbs, schemaGrafo } from '../seo/schemas';
 
 /** Servicios de inspección que ofrece cada sede, con el detalle que abre el popup. */
 const SERVICIOS_SEDE = [
@@ -168,17 +168,67 @@ function SedeDetalle() {
     }
 
     const emailContacto = EMAIL_CONTACTO;
-    const ciudad = branch.address.split(',').pop()?.trim() ?? '';
+    // Localidad real de la sede (no la última coma de la dirección, que a veces
+    // es una referencia: "referencia curva Llama Gas").
+    const ciudad = branch.locality;
     const sedeNombre = branch.name.replace('Sede RTP ', '').replace('Sede RTV ', '');
+    const zonas = branch.zonas ?? [];
+
+    // FAQ local: responde a la intención "revisión técnica cerca de <distrito>"
+    // y a las dudas típicas antes de ir a la sede.
+    const faqsSede = [
+        {
+            q: `¿Dónde está la sede de revisión técnica de RTP San Cristóbal en ${ciudad}?`,
+            a: `Nuestra sede en ${sedeNombre} está en ${branch.address}. Atendemos en ${ciudad}${zonas.length ? ` y distritos cercanos como ${zonas.slice(0, 4).join(', ')}` : ''}. Puedes abrir la ruta en Google Maps o Waze desde esta página.`
+        },
+        {
+            q: `¿Necesito cita para la revisión técnica en ${sedeNombre}?`,
+            a: `No necesitas cita previa: te atendemos por orden de llegada. Si prefieres coordinar antes tu llegada, escríbenos por WhatsApp y confirmamos el horario con menos espera.`
+        },
+        {
+            q: `¿Cuánto demora la revisión técnica en ${sedeNombre}?`,
+            a: `La inspección de un vehículo liviano toma menos de 20 minutos con la línea de esta sede. El certificado oficial del MTC se entrega en el acto una vez aprobada la inspección.`
+        },
+        {
+            q: `¿Qué horario tiene la sede de ${sedeNombre}?`,
+            a: `Atendemos de lunes a viernes de 7:00 a. m. a 7:00 p. m. y sábado de 8:00 a. m. a 5:00 p. m. Domingos cerrado.`
+        },
+        {
+            q: `¿La sede de ${sedeNombre} revisa camiones y buses?`,
+            a: `Sí. Además de autos y camionetas, esta sede inspecciona vehículos pesados (camiones y buses) y emite certificados especiales de operatividad, con plataforma habilitada para unidades de carga.`
+        }
+    ];
+
+    // Un solo grafo JSON-LD con la sede, su FAQ local y las migas de pan:
+    // es lo que Google fusiona en el panel de conocimiento local.
+    const schemaGrafoSede = schemaGrafo([
+        schemaSede(branch.id),
+        schemaFaq(faqsSede),
+        schemaBreadcrumbs([
+            { name: 'Inicio', path: '/' },
+            { name: 'Sedes', path: '/sedes' },
+            { name: sedeNombre, path: branchHref(branch) }
+        ])
+    ]);
+
+    // "Sede Callao" -> "Callao". Evita titles duplicados ("en Callao | Callao").
+    const mismaCiudad = sedeNombre.toLowerCase() === ciudad.toLowerCase();
+    const sufijoCiudad = mismaCiudad ? '' : ` | ${ciudad}`;
 
     return (
         <div className="min-h-screen bg-white">
             <Seo
                 path={branchHref(branch)}
-                title={`Revisión Técnica en ${sedeNombre} | ${ciudad} | Grupo San Cristóbal`}
+                title={`Revisión Técnica en ${sedeNombre}${sufijoCiudad} | RTP San Cristóbal`}
                 description={`Centro de revisión técnica vehicular autorizado por el MTC en ${sedeNombre}, ${ciudad}. Inspección de vehículos livianos y pesados, certificado oficial, dirección ${branch.address}. Agenda tu cita por WhatsApp.`}
-                keywords={[`revisión técnica ${sedeNombre}`, `revisión técnica ${ciudad}`, `RTP ${sedeNombre}`, 'inspección técnica vehicular cerca']}
-                schema={schemaSede(branch.id)}
+                keywords={[
+                    `revisión técnica ${sedeNombre}`,
+                    `revisión técnica ${ciudad}`,
+                    `revisión técnica ${branch.addressRegion}`,
+                    `RTP ${sedeNombre}`,
+                    'inspección técnica vehicular cerca'
+                ]}
+                schema={schemaGrafoSede}
             />
             {/* HERO SECTION - ADAPTADO CON ESTÉTICA PREMIUM */}
             <section className="page-banner w-full">
@@ -225,11 +275,9 @@ function SedeDetalle() {
 
                         <div className="text-white max-w-2xl">
                             <h1 className="banner-title text-white animate-grow-text">
-                                {branch.name.split(' ').map((word, idx, arr) => (
-                                    <span key={idx} className={idx === arr.length - 1 ? 'text-[#f97316]' : 'text-white'}>
-                                        {word}{' '}
-                                    </span>
-                                ))}
+                                <span>Revisión Técnica en </span>
+                                <span className="text-[#f97316]">{sedeNombre}</span>
+                                {!mismaCiudad && <span className="text-white">, {ciudad}</span>}
                             </h1>
 
 <p className="banner-description text-gray-400 max-w-lg mt-5 animate-entry-fade animate-stagger-3">
@@ -422,6 +470,68 @@ function SedeDetalle() {
                             </div>
                         </div>
                     </RevealOnScroll>
+                </div>
+            </section>
+
+            {/* ZONAS Y FAQ LOCAL: contenido pensado para búsquedas
+                "revisión técnica + distrito" y para los People Also Ask. */}
+            {zonas.length > 0 && (
+                <section className="section bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex items-start gap-6 mb-10">
+                            <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
+                            <div>
+                                <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
+                                    Zonas que <span className="text-[#f97316]">atendemos</span>
+                                </h2>
+                                <p className="content-text text-gray-500 max-w-3xl">
+                                    Esta sede atiende vehículos de {sedeNombre} y de los distritos vecinos de{' '}
+                                    {ciudad}: acércate con tu vehículo desde {zonas.slice(0, -1).join(', ')} y{' '}
+                                    {zonas[zonas.length - 1]}.
+                                </p>
+                            </div>
+                        </div>
+                        <ul className="flex flex-wrap gap-3">
+                            {zonas.map(zona => (
+                                <li
+                                    key={zona}
+                                    className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-bold text-gray-700 shadow-sm"
+                                >
+                                    {zona}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </section>
+            )}
+
+            <section className="section">
+                <div className="max-w-4xl mx-auto px-4">
+                    <div className="flex items-start gap-6 mb-10">
+                        <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
+                        <div>
+                            <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
+                                Preguntas <span className="text-[#f97316]">frecuentes</span>
+                            </h2>
+                            <p className="content-text text-gray-500">
+                                Dudas habituales antes de acercarte a la sede de {sedeNombre}.
+                            </p>
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        {faqsSede.map(faq => (
+                            <details
+                                key={faq.q}
+                                className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm open:shadow-md transition-shadow"
+                            >
+                                <summary className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 text-left">
+                                    <span className="text-base font-black text-gray-900">{faq.q}</span>
+                                    <span className="text-orange-500 font-black text-xl leading-none shrink-0 transition-transform group-open:rotate-45">+</span>
+                                </summary>
+                                <p className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">{faq.a}</p>
+                            </details>
+                        ))}
+                    </div>
                 </div>
             </section>
 

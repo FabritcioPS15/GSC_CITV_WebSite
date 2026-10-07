@@ -4,13 +4,18 @@ import Seo from '../components/Seo';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import { schemaBreadcrumbs } from '../seo/schemas';
 
 const helmetContent = (
     <Seo
         path="/consulta-gas"
-        title="Consulta de Certificación de Gas GNV y GLP | Grupo San Cristóbal"
+        title="Consulta de Certificación de Gas GNV y GLP | RTP San Cristóbal"
         description="Consulta la certificación de gas de tu vehículo (GNV o GLP) verificando el estado del cilindro y los componentes del sistema. Revisión vehicular autorizada por el MTC."
         keywords={['consulta gas vehicular', 'certificación GNV', 'certificación GLP', 'inspección de gas vehicular', 'cilindro GNV MTC']}
+        schema={schemaBreadcrumbs([
+            { name: 'Inicio', path: '/' },
+            { name: 'Consulta de gas', path: '/consulta-gas' }
+        ])}
     />
 );
 
@@ -23,7 +28,7 @@ export default function GasConsultaPage() {
     const handleConsulta = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!codigo || codigo.length < 8) {
-            setError('Ingresa un cÃ³digo de certificaciÃ³n vÃ¡lido (mÃ­nimo 8 caracteres)');
+            setError('Ingresa un código de certificación válido (mínimo 8 caracteres)');
             return;
         }
 
@@ -31,7 +36,7 @@ export default function GasConsultaPage() {
         setError('');
         setResult(null);
 
-        // SimulaciÃ³n de consulta
+        // Simulación de consulta
         setTimeout(() => {
             setLoading(false);
             // Datos de ejemplo
@@ -42,8 +47,8 @@ export default function GasConsultaPage() {
                 fechaVencimiento: '10/02/2026',
                 resultado: 'APROBADO',
                 sede: 'Sede RTP Callao',
-                tecnico: 'TEC. Carlos RodrÃ­guez',
-                observaciones: 'Sistema de gas en Ã³ptimas condiciones. Sin fugas detectadas.',
+                tecnico: 'TEC. Carlos Rodríguez',
+                observaciones: 'Sistema de gas en óptimas condiciones. Sin fugas detectadas.',
                 cilindro: {
                     marca: 'Tomasetto',
                     capacidad: '60L',
@@ -52,9 +57,9 @@ export default function GasConsultaPage() {
                 },
                 itemsVerificados: [
                     { item: 'Cilindro', estado: 'APROBADO' },
-                    { item: 'VÃ¡lvula', estado: 'APROBADO' },
+                    { item: 'Válvula', estado: 'APROBADO' },
                     { item: 'Regulador', estado: 'APROBADO' },
-                    { item: 'TuberÃ­a', estado: 'APROBADO' },
+                    { item: 'Tubería', estado: 'APROBADO' },
                     { item: 'Conexiones', estado: 'APROBADO' },
                     { item: 'Fugas', estado: 'APROBADO' }
                 ]
@@ -87,7 +92,7 @@ export default function GasConsultaPage() {
                                     Consulta de <span className="text-orange-500">Gas (GNV/GLP)</span>
                                 </h1>
                                 <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                                    Consulta la certificaciÃ³n de tu sistema de gas vehicular (GNV o GLP) verificando el estado del cilindro y componentes.
+                                    Consulta la certificación de tu sistema de gas vehicular (GNV o GLP) verificando el estado del cilindro y componentes.
                                 </p>
                             </div>
                         </div>
@@ -97,13 +102,13 @@ export default function GasConsultaPage() {
                         {/* Formulario de consulta */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                             <div className="p-6 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-gray-900">Ingresa el CÃ³digo de CertificaciÃ³n</h3>
+                                <h3 className="text-xl font-bold text-gray-900">Ingresa el Código de Certificación</h3>
                             </div>
                             <form onSubmit={handleConsulta} className="p-6">
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            CÃ³digo de CertificaciÃ³n
+                                            Código de Certificación
                                         </label>
                                         <input
                                             type="text"
@@ -114,7 +119,7 @@ export default function GasConsultaPage() {
                                             maxLength={15}
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            El cÃ³digo se encuentra en tu certificado de gas
+                                            El código se encuentra en tu certificado de gas
                                         </p>
                                     </div>
 
@@ -152,14 +157,14 @@ export default function GasConsultaPage() {
                                 <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-cyan-50 to-cyan-100">
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="text-cyan-600" size={24} />
-                                        <h3 className="text-xl font-bold text-gray-900">Resultado de CertificaciÃ³n Gas</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">Resultado de Certificación Gas</h3>
                                     </div>
                                 </div>
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div className="space-y-4">
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">CÃ³digo</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Código</p>
                                                 <p className="text-lg font-bold text-gray-900 font-mono">{result.codigo}</p>
                                             </div>
                                             <div className="bg-cyan-50 rounded-xl p-4 border border-cyan-200">
@@ -167,7 +172,7 @@ export default function GasConsultaPage() {
                                                 <p className="text-2xl font-bold text-cyan-600">{result.tipoGas}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de EmisiÃ³n</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de Emisión</p>
                                                 <p className="text-lg font-semibold text-gray-900">{result.fechaEmision}</p>
                                             </div>
                                         </div>
@@ -187,11 +192,11 @@ export default function GasConsultaPage() {
                                         </div>
                                     </div>
 
-                                    {/* InformaciÃ³n del cilindro */}
+                                    {/* Información del cilindro */}
                                     <div className="bg-gray-900 rounded-xl p-4 border border-gray-800 mb-6">
                                         <div className="flex items-center gap-2 mb-3">
                                             <Shield className="text-orange-500" size={20} />
-                                            <h4 className="text-sm font-bold text-white">InformaciÃ³n del Cilindro</h4>
+                                            <h4 className="text-sm font-bold text-white">Información del Cilindro</h4>
                                         </div>
                                         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                                             <div>
@@ -203,7 +208,7 @@ export default function GasConsultaPage() {
                                                 <p className="text-sm font-semibold text-white">{result.cilindro.capacidad}</p>
                                             </div>
                                             <div>
-                                                <p className="text-xs text-orange-500 mb-1">FabricaciÃ³n</p>
+                                                <p className="text-xs text-orange-500 mb-1">Fabricación</p>
                                                 <p className="text-sm font-semibold text-white">{result.cilindro.fechaFabricacion}</p>
                                             </div>
                                             <div>
@@ -219,7 +224,7 @@ export default function GasConsultaPage() {
                                     </div>
 
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ãtems Verificados</h4>
+                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ítems Verificados</h4>
                                         <div className="space-y-2">
                                             {result.itemsVerificados.map((item: any, index: number) => (
                                                 <div
@@ -248,7 +253,7 @@ export default function GasConsultaPage() {
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm transition-colors"
                                         >
-                                            Ver mÃ¡s detalles en el portal del MTC
+                                            Ver más detalles en el portal del MTC
                                             <ExternalLink size={14} />
                                         </a>
                                     </div>
@@ -263,8 +268,8 @@ export default function GasConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada, 
-                                        utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
+                                        Esta es una consulta de demostración. Para obtener información oficial y actualizada, 
+                                        utiliza el portal del MTC o acércate a nuestras sedes.
                                     </p>
                                 </div>
                             </div>

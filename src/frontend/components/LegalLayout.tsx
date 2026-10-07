@@ -37,7 +37,7 @@ const LegalLayout = ({
     <>
       <Seo
         path={path}
-        title={`${title} | Grupo San Cristóbal`}
+        title={`${title} | RTP San Cristóbal`}
         description={intro}
         schema={schemaBreadcrumbs([
           { name: 'Inicio', path: '/' },

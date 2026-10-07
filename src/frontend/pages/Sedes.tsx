@@ -123,7 +123,7 @@ function Sedes() {
     <div className="bg-white">
 <Seo
             path="/sedes"
-            title="Sedes de Revisión Técnica Vehicular en Lima y Provincias | Grupo San Cristóbal"
+            title="Sedes de Revisión Técnica Vehicular en Lima y Provincias | RTP San Cristóbal"
             description="Encuentra el centro de revisión técnica vehicular más cercano. Sedes autorizadas por el MTC en Callao, Ica, Ayacucho, Andahuaylas y Huancavelica. Dirección, horarios y contacto por WhatsApp."
             schema={{ ...schemaSedes, ...schemaBreadcrumbs([{ name: 'Inicio', path: '/' }, { name: 'Sedes', path: '/sedes' }]) }}
         />

@@ -51,10 +51,10 @@ export default function Footer() {
         <div className="block lg:hidden space-y-4">
           {/* Fila 1: Logo + Redes Sociales en una sola línea compacta */}
           <div className="flex items-center justify-between gap-3 pb-3 border-b border-white/10">
-            <Link to="/" className="inline-block" aria-label="Grupo San Cristóbal - Inicio">
+            <Link to="/" className="inline-block" aria-label="RTP San Cristóbal - Inicio">
               <img
                 src="/LogoRTPSanCristobal_horizontal.png"
-                alt="Grupo San Cristóbal Logo"
+                alt="RTP San Cristóbal Logo"
                 className="h-9 w-auto object-contain brightness-0 invert"
               />
             </Link>
@@ -113,7 +113,7 @@ export default function Footer() {
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Centro Autorizado MTC</span>
             </div>
-            <p className="text-[9px] text-gray-500/80">© {new Date().getFullYear()} Grupo San Cristóbal. Todos los derechos reservados.</p>
+            <p className="text-[9px] text-gray-500/80">© {new Date().getFullYear()} RTP San Cristóbal. Todos los derechos reservados.</p>
           </div>
         </div>
 
@@ -126,10 +126,10 @@ export default function Footer() {
 
               {/* Columna 1: Logo, Descripción y Redes (4 cols) */}
               <div className="col-span-4">
-                <Link to="/" className="inline-block group" aria-label="Grupo San Cristóbal - Inicio">
+                <Link to="/" className="inline-block group" aria-label="RTP San Cristóbal - Inicio">
                   <img
                     src="/LogoRTPSanCristobal_horizontal.png"
-                    alt="Grupo San Cristóbal Logo"
+                    alt="RTP San Cristóbal Logo"
                     className="h-16 w-auto object-contain brightness-0 invert transition-opacity duration-300 group-hover:opacity-80"
                   />
                 </Link>
@@ -285,7 +285,7 @@ export default function Footer() {
               </div>
 
               <p className="text-[11px] text-gray-500">
-                © {new Date().getFullYear()} <span className="text-gray-400 font-semibold">Grupo San Cristóbal</span>. Todos los derechos reservados.
+                © {new Date().getFullYear()} <span className="text-gray-400 font-semibold">RTP San Cristóbal</span>. Todos los derechos reservados.
               </p>
             </div>
           </RevealOnScroll>

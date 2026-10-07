@@ -26,9 +26,22 @@ function telefonoSede(phone?: string): string {
     return phone ? `+51 ${phone}` : TELEFONO_CONTACTO;
 }
 
-/** La última coma de la dirección suele ser la ciudad o el distrito. */
-function ciudadDe(address: string): string {
-    return address.split(',').pop()?.trim() ?? address;
+/**
+ * Localidad y región de una sede.
+ *
+ * Viene del campo explícito `locality` de `branches.ts`. Antes se infería de la
+ * última coma de `address`, y salían errores como
+ * `addressLocality: "la Av. Canta Callao"` o `"referencia curva Llama Gas"`,
+ * que Google descarta al validar los datos estructurados.
+ */
+function direccionSede(sede: { locality: string; addressRegion: string; address: string }) {
+    return {
+        '@type': 'PostalAddress',
+        streetAddress: sede.address,
+        addressLocality: sede.locality,
+        addressRegion: sede.addressRegion,
+        addressCountry: 'PE'
+    };
 }
 
 /** Redondea a 6 decimales: Google ignora más precisión y evita ruido. */
@@ -46,6 +59,7 @@ export const schemaNegocio: Record<string, unknown> = {
     '@id': `${SITE_URL}/#negocio`,
     name: `${SITE_NAME} · ${SITE_TAGLINE}`,
     legalName: SITE_NAME,
+    alternateName: ['RTV San Cristóbal', 'Grupo San Cristóbal', 'RTP San Cristóbal S.A.C.'],
     description:
         'Centro de revisión técnica vehicular autorizado por el MTC en el Perú. Inspección técnica de vehículos livianos y pesados con equipos calibrados y certificación oficial.',
     url: SITE_URL,
@@ -55,13 +69,7 @@ export const schemaNegocio: Record<string, unknown> = {
     email: EMAIL_CONTACTO,
     priceRange: '$$',
     currenciesAccepted: 'PEN',
-    address: {
-        '@type': 'PostalAddress',
-        streetAddress: principal.address,
-        addressLocality: 'Callao',
-        addressRegion: 'Lima',
-        addressCountry: 'PE'
-    },
+    address: direccionSede(principal),
     geo: {
         '@type': 'GeoCoordinates',
         latitude: round6(principal.position[0]),
@@ -106,7 +114,7 @@ export const schemaNegocio: Record<string, unknown> = {
 export const schemaSedes: Record<string, unknown> = {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
-    name: 'Sedes de Grupo San Cristóbal',
+    name: `Sedes de ${SITE_NAME}`,
     numberOfItems: branches.length,
     itemListElement: branches.map((sede, i) => ({
         '@type': 'ListItem',
@@ -117,12 +125,7 @@ export const schemaSedes: Record<string, unknown> = {
             name: `${SITE_NAME} · ${sede.name}`,
             url: `${SITE_URL}${branchHref(sede)}`,
             telephone: telefonoSede(sede.phone),
-            address: {
-                '@type': 'PostalAddress',
-                streetAddress: sede.address,
-                addressLocality: ciudadDe(sede.address),
-                addressCountry: 'PE'
-            },
+            address: direccionSede(sede),
             geo: {
                 '@type': 'GeoCoordinates',
                 latitude: round6(sede.position[0]),
@@ -151,12 +154,7 @@ export function schemaSede(sedeId: number): Record<string, unknown> {
         telephone: telefonoSede(sede.phone),
         logo: LOGO,
         image: OG_IMAGE,
-        address: {
-            '@type': 'PostalAddress',
-            streetAddress: sede.address,
-            addressLocality: ciudadDe(sede.address),
-            addressCountry: 'PE'
-        },
+        address: direccionSede(sede),
         geo: {
             '@type': 'GeoCoordinates',
             latitude: round6(sede.position[0]),
@@ -177,6 +175,28 @@ export function schemaFaq(faqs: { q: string; a: string }[]): Record<string, unkn
             name: f.q,
             acceptedAnswer: { '@type': 'Answer', text: f.a }
         }))
+    };
+}
+
+/**
+ * Une varios schemas en un solo bloque `@graph`.
+ *
+ * `Seo` emite un único `<script>` por página: sin esto, agregar una FAQ habría
+ * obligado a dos JSON-LD y Google avisa cuando dos nodos declaran el mismo
+ * negocio. El `@context` interno se quita para que el grafo quede válido.
+ */
+export function schemaGrafo(nodos: Record<string, unknown>[]): Record<string, unknown> {
+    const graph = nodos.map(nodo => {
+        const limpio: Record<string, unknown> = {};
+        for (const [clave, valor] of Object.entries(nodo)) {
+            if (clave !== '@context') limpio[clave] = valor;
+        }
+        return limpio;
+    });
+
+    return {
+        '@context': 'https://schema.org',
+        '@graph': graph
     };
 }
 

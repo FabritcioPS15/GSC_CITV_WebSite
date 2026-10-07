@@ -10,7 +10,7 @@ const Cookies = () => {
       title="Politica de Cookies"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"
       icon={<Cookie size={26} />}
-      intro="Esta politica explica que cookies y tecnologias similares utiliza Grupo San Cristobal en este sitio web, para que fines utilizan, como puede rechazarlas y como gestionarlas. Respetamos su derecho a elegir libremente conforme a la Ley N. 29733 y a las directrices de la Autoridad Nacional de Proteccion de Datos Personales."
+      intro="Esta politica explica que cookies y tecnologias similares utiliza RTP San Cristóbal en este sitio web, para que fines utilizan, como puede rechazarlas y como gestionarlas. Respetamos su derecho a elegir libremente conforme a la Ley N. 29733 y a las directrices de la Autoridad Nacional de Proteccion de Datos Personales."
       sections={[
         {
           id: 'que-son',
@@ -72,28 +72,28 @@ const Cookies = () => {
                   <tbody className="divide-y divide-gray-100 text-gray-600">
                     <tr>
                       <td className="px-4 py-3 font-mono text-xs">cookieConsent</td>
-                      <td className="px-4 py-3">Grupo San Cristobal</td>
+                      <td className="px-4 py-3">RTP San Cristóbal</td>
                       <td className="px-4 py-3">Registra su decision sobre el aviso de cookies y evita mostrarlo novamente.</td>
                       <td className="px-4 py-3">Persistente</td>
                       <td className="px-4 py-3">Estrictamente necesaria</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 font-mono text-xs">hasAskedLocation</td>
-                      <td className="px-4 py-3">Grupo San Cristobal</td>
+                      <td className="px-4 py-3">RTP San Cristóbal</td>
                       <td className="px-4 py-3">Registra si ya respondio al aviso de geolocalizacion.</td>
                       <td className="px-4 py-3">Persistente</td>
                       <td className="px-4 py-3">Preferencia</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 font-mono text-xs">hasSeenWelcomePopup</td>
-                      <td className="px-4 py-3">Grupo San Cristobal</td>
+                      <td className="px-4 py-3">RTP San Cristóbal</td>
                       <td className="px-4 py-3">Evita mostrar el mensaje de bienvenida en cada visita.</td>
                       <td className="px-4 py-3">Persistente</td>
                       <td className="px-4 py-3">Estrictamente necesaria</td>
                     </tr>
                     <tr>
                       <td className="px-4 py-3 font-mono text-xs">userLat / userLon</td>
-                      <td className="px-4 py-3">Grupo San Cristobal</td>
+                      <td className="px-4 py-3">RTP San Cristóbal</td>
                       <td className="px-4 py-3">Guarda temporalmente sus coordenadas para calcular la distancia a la sede mas cercana. No se envia a nuestros servidores.</td>
                       <td className="px-4 py-3">Sesion</td>
                       <td className="px-4 py-3">Preferencia</td>
@@ -174,7 +174,7 @@ const Cookies = () => {
               <p>
                 Algunos componentes del sitio interactuan con servicios de terceros que pueden instalar cookies o
                 almacenar datos tecnicos en su navegador. Estos servicios se encuentran sujetos a sus propias
-                politicas de privacidad, sobre las cuales Grupo San Cristobal no tiene control:
+                politicas de privacidad, sobre las cuales RTP San Cristóbal no tiene control:
               </p>
               <ul className="space-y-2.5 list-disc pl-5 marker:text-orange-500">
                 <li><strong>OpenStreetMap:</strong> politica de privacidad disponible en openstreetmap.org.</li>

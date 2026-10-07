@@ -49,7 +49,7 @@ export default function WelcomePopup() {
 
                 <div className="pt-16 pb-8 px-8 text-center">
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                        ¡Bienvenido a Grupo San Cristóbal!
+                        ¡Bienvenido a RTP San Cristóbal!
                     </h2>
                     <p className="text-gray-600 mb-6">
                         Expertos en revisiones técnicas vehiculares. Garantizamos tu seguridad y la de tu vehículo con el mejor servicio.

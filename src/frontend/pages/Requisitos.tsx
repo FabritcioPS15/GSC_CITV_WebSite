@@ -19,7 +19,6 @@ import {
     FaPlay,
     FaPause
 } from 'react-icons/fa';
-import { Link } from 'react-router-dom';
 import Seo from '../components/Seo';
 import { schemaFaq } from '../seo/schemas';
 import PremiumButton from '../components/PremiumButton';
@@ -288,7 +287,7 @@ function Requisitos() {
         <div className="bg-gray-50 min-h-screen">
             <Seo
             path="/requisitos"
-            title="Requisitos para la Revisión Técnica Vehicular | Grupo San Cristóbal"
+            title="Requisitos para la Revisión Técnica Vehicular | RTP San Cristóbal"
             description="Todos los requisitos para pasar la revisión técnica vehicular en el Perú: documentos, cronograma según tu placa, costo, qué revisar y qué pasa si no apruebas. Guía actualizada por el MTC."
             keywords={['requisitos revisión técnica', 'documentos para revisión técnica vehicular', 'qué se necesita para la inspección vehicular', 'requisitos MTC revisión técnica']}
             schema={schemaFaq(faqs)}

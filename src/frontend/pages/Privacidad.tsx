@@ -14,7 +14,7 @@ const Privacidad = () => {
       title="Politica de Privacidad"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"
       icon={<ShieldCheck size={26} />}
-      intro="En Grupo San Cristobal (en adelante, la Empresa, nosotros o RTP/RTV San Cristobal) tratamos los datos personales que usted nos proporciona a traves de este sitio web con transparencia y conforme a la Ley N. 29733, Ley de Proteccion de Datos Personales, su Reglamento aprobado por Decreto Supremo N. 003-2013-JUS, y el Codigo de Proteccion y Defensa del Consumidor (Ley N. 29571). Esta politica explica que datos recopilamos, para que los usamos, con quien los compartimos y como usted puede ejercer sus derechos."
+      intro="En RTP San Cristóbal (en adelante, la Empresa, nosotros o RTP/RTV San Cristobal) tratamos los datos personales que usted nos proporciona a traves de este sitio web con transparencia y conforme a la Ley N. 29733, Ley de Proteccion de Datos Personales, su Reglamento aprobado por Decreto Supremo N. 003-2013-JUS, y el Codigo de Proteccion y Defensa del Consumidor (Ley N. 29571). Esta politica explica que datos recopilamos, para que los usamos, con quien los compartimos y como usted puede ejercer sus derechos."
       sections={[
         {
           id: 'identificacion',

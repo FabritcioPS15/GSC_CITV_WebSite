@@ -3,7 +3,10 @@ Allow: /
 
 # Rutas privadas o sin valor de búsqueda: rastrearlas no aporta nada y
 # consume presupuesto de rastreo.
-Disallow: /404
+#
+# Ojo con /404: NO debe ir en Disallow. La página 404 ya sale con meta
+# noindex desde Seo.tsx; si Google no puede rastrearla, tampoco puede ver
+# el noindex y termina indexando rutas inexistentes.
 Disallow: /*?utm_
 Disallow: /*?ref=
 

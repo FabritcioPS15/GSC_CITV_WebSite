@@ -4,6 +4,7 @@ import PremiumButton from '../components/PremiumButton';
 import RevealOnScroll from '../components/RevealOnScroll';
 import Seo from '../components/Seo';
 import { scrollToTop } from '../components/SmoothScroll';
+import { schemaBreadcrumbs } from '../seo/schemas';
 
 const CuponPage: React.FC = () => {
     const [step, setStep] = useState<'form' | 'success'>('form');
@@ -30,9 +31,13 @@ const CuponPage: React.FC = () => {
         <div className="min-h-screen bg-[#f8fafc]">
             <Seo
                 path="/cupon"
-                title="Cupón de Descuento para Revisión Técnica | Grupo San Cristóbal"
-                description="Registra tus datos y obtén un cupón de descuento para tu revisión técnica vehicular. Válido en todas las sedes de Grupo San Cristóbal en el Perú, para autos, camionetas, motos y vehículos pesados."
+                title="Cupón de Descuento para Revisión Técnica | RTP San Cristóbal"
+                description="Registra tus datos y obtén un cupón de descuento para tu revisión técnica vehicular. Válido en todas las sedes de RTP San Cristóbal en el Perú, para autos, camionetas, motos y vehículos pesados."
                 keywords={['cupón revisión técnica', 'descuento revisión vehicular', 'promo revisión técnica Perú', 'cupón inspección técnica']}
+                schema={schemaBreadcrumbs([
+                    { name: 'Inicio', path: '/' },
+                    { name: 'Cupón', path: '/cupon' }
+                ])}
             />
 
             {/* Hero Section. Misma plantilla `page-banner` que el resto de páginas:

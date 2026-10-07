@@ -2,61 +2,20 @@ import { Search, Car, Fuel, AlertCircle, ExternalLink } from 'lucide-react';
 import Seo from '../components/Seo';
 import RevealOnScroll from '../components/RevealOnScroll';
 import InspectionWheel from '../components/InspectionWheel';
+import { schemaBreadcrumbs } from '../seo/schemas';
 
 const helmetContent = (
     <Seo
         path="/cronograma"
-        title="Cronograma de Revisión Técnica Vehicular 2026 | Grupo San Cristóbal"
+        title="Cronograma de Revisión Técnica Vehicular 2026 | RTP San Cristóbal"
         description="Consulta el cronograma de revisión técnica vehicular en el Perú: fechas límite por placa, consulta de revisión, certificación de gas y renovación del certificado MTC."
         keywords={['cronograma revisión técnica 2026', 'plazo revisión técnica vehicular', 'fecha de revisión técnica por placa', 'cronograma MTC Perú']}
+        schema={schemaBreadcrumbs([
+            { name: 'Inicio', path: '/' },
+            { name: 'Cronograma', path: '/cronograma' }
+        ])}
     />
 );
-
-// Datos del cronograma por mes
-const cronogramaData = [
-    {
-        mes: 'Enero 2026',
-        ultimoDigito: '1 y 2',
-        fechas: '15-20 Enero',
-        estado: 'completado',
-        descripcion: 'Placas terminadas en 1 y 2'
-    },
-    {
-        mes: 'Febrero 2026',
-        ultimoDigito: '3 y 4',
-        fechas: '15-20 Febrero',
-        estado: 'completado',
-        descripcion: 'Placas terminadas en 3 y 4'
-    },
-    {
-        mes: 'Marzo 2026',
-        ultimoDigito: '5 y 6',
-        fechas: '15-20 Marzo',
-        estado: 'activo',
-        descripcion: 'Placas terminadas en 5 y 6'
-    },
-    {
-        mes: 'Abril 2026',
-        ultimoDigito: '7 y 8',
-        fechas: '15-20 Abril',
-        estado: 'pendiente',
-        descripcion: 'Placas terminadas en 7 y 8'
-    },
-    {
-        mes: 'Mayo 2026',
-        ultimoDigito: '9 y 0',
-        fechas: '15-20 Mayo',
-        estado: 'pendiente',
-        descripcion: 'Placas terminadas en 9 y 0'
-    },
-    {
-        mes: 'Junio 2026',
-        ultimoDigito: '1 y 2',
-        fechas: '15-20 Junio',
-        estado: 'futuro',
-        descripcion: 'Placas terminadas en 1 y 2'
-    }
-];
 
 function Cronograma() {
     return (
@@ -106,7 +65,7 @@ function Cronograma() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-bold text-gray-900 mb-1">Consulta Placa</h3>
-                                        <p className="text-sm text-gray-600">Verifica tu vehÃ­culo</p>
+                                        <p className="text-sm text-gray-600">Verifica tu vehículo</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
                                 </div>
@@ -142,7 +101,7 @@ function Cronograma() {
                                     </div>
                                     <div className="flex-1">
                                         <h3 className="font-bold text-gray-900 mb-1">Gas (GNV/GLP)</h3>
-                                        <p className="text-sm text-gray-600">CertificaciÃ³n de gas</p>
+                                        <p className="text-sm text-gray-600">Certificación de gas</p>
                                     </div>
                                     <ExternalLink size={18} className="text-gray-400 group-hover:text-orange-500 transition-colors" />
                                 </div>
@@ -167,9 +126,9 @@ function Cronograma() {
                                         <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                         <p className="text-gray-600 text-sm leading-relaxed">
                                             Este cronograma es referencial. Verifica siempre la fecha exacta en tu tarjeta de propiedad
-                                            o consulta directamente con el MTC, ya que las fechas pueden variar segÃºn disposiciones oficiales.
-                                            El incumplimiento de la inspecciÃ³n en el mes asignado conlleva multas y recargos adicionales,
-                                            y las citas estÃ¡n sujetas a disponibilidad segÃºn la sede elegida.
+                                            o consulta directamente con el MTC, ya que las fechas pueden variar según disposiciones oficiales.
+                                            El incumplimiento de la inspección en el mes asignado conlleva multas y recargos adicionales,
+                                            y las citas están sujetas a disponibilidad según la sede elegida.
                                         </p>
                                     </div>
                                 </div>

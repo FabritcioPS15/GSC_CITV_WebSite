@@ -9,7 +9,7 @@ export default function NotFound() {
             {/* Una 404 no debe indexarse: si se indexa, compite con páginas reales. */}
             <Seo
                 path="/404"
-                title="Página no encontrada | Grupo San Cristóbal"
+                title="Página no encontrada | RTP San Cristóbal"
                 description="La página que buscas no existe o cambió de dirección."
                 noindex
             />
@@ -60,7 +60,7 @@ export default function NotFound() {
                             { label: "Nosotros", path: "/nosotros" },
                             { label: "Sedes", path: "/sedes" },
                             { label: "Requisitos", path: "/requisitos" },
-                            { label: "Convenios", path: "/convenios" }
+                            { label: "Contacto", path: "/contacto" }
                         ].map((link) => (
                             <Link
                                 key={link.path}

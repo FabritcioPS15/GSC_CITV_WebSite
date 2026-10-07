@@ -183,7 +183,7 @@ export default function Header() {
                             >
                                 <img
                                     src="/LogoRTPSanCristobal_horizontal.png"
-                                    alt="Grupo San Cristóbal Logo"
+                                    alt="RTP San Cristóbal Logo"
                                     className="h-12 md:h-14 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
                                 />
                             </Link>
@@ -381,7 +381,7 @@ export default function Header() {
                         >
                             <img
                                 src="/LogoRTPSanCristobal_horizontal.png"
-                                alt="Grupo San Cristóbal Logo"
+                                alt="RTP San Cristóbal Logo"
                                 className="h-10 w-auto object-contain"
                             />
                         </Link>

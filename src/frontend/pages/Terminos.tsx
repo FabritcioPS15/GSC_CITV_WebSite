@@ -14,7 +14,7 @@ const Terminos = () => {
       title="Terminos y Condiciones"
       lastUpdated="[FECHA DE ULTIMA ACTUALIZACION]"
       icon={<FileText size={26} />}
-      intro="Los presentes Terminos y Condiciones regulan el acceso y uso del sitio web de Grupo San Cristobal, asi como la utilizacion de sus canales digitales de atencion, consultas en linea y servicios de informacion. Al utilizar este sitio, usted declara haber leido, entendido y aceptado en su totalidad las condiciones aqui establecidas."
+      intro="Los presentes Terminos y Condiciones regulan el acceso y uso del sitio web de RTP San Cristóbal, asi como la utilizacion de sus canales digitales de atencion, consultas en linea y servicios de informacion. Al utilizar este sitio, usted declara haber leido, entendido y aceptado en su totalidad las condiciones aqui establecidas."
       sections={[
         {
           id: 'aceptacion',

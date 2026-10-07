@@ -4,19 +4,27 @@
 # fisico que no existe y devuelve 404 antes de que React Router pueda
 # resolver la ruta en el cliente.
 #
-# Solo se redirige a index.html lo que NO existe como archivo. Por eso el
-# condicion !-f: los assets reales (/assets/index-abc123.js, /favicon.png,
-# /bannermtc.png) siguen sirviéndose con normalidad.
+# Solo se redirige a index.html lo que NO existe como archivo y ademas
+# coincide con una ruta real de src/App.tsx (allowlist). Cualquier otra
+# URL inexistente cae al 404 nativo de Apache: antes devolia index.html
+# con estado 200, que Google clasificaba como soft-404 y ensuciaba el
+# informe de cobertura.
+#
+# Al agregar una ruta nueva en App.tsx hay que agregarla aca y al sitemap.
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
-  # Rewrite condicional para hosting compartido: no pisa archivos ni carpetas
-  # que existen de verdad.
+  # Ruta exacta o con slug anidado (ej. /sedes/sede-ica)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} ^/(|nosotros|sedes(/[^/]+)?|requisitos|contacto|cronograma|consulta-placa|consulta-revision|consulta-gas|cupon|privacidad|cookies|terminos|libro-de-reclamaciones)/?$
   RewriteRule ^ index.html [L]
 </IfModule>
+
+# El 404 se resuelve con el propio index.html para que React Router muestre
+# la pantalla NotFound (con noindex). El estado de respuesta sigue siendo 404.
+ErrorDocument 404 /index.html
 
 # Cache de assets con hash en el nombre (Vite los genera, ej.
 # index-DqY6bDHt.js). Son inmutables, se pueden cachear para siempre.

@@ -392,8 +392,8 @@ const policlinicosBranches: ServiceBranch[] = [
 const helmetContent = (
   <Seo
     path="/nosotros"
-    title="Sobre Nosotros | Grupo San Cristóbal, Revisión Técnica Vehicular"
-    description="Conoce Grupo San Cristóbal: más de 15 años en revisión técnica vehicular en el Perú. Tecnología europea, profesionales certificados por el MTC y sedes a nivel nacional."
+    title="Sobre Nosotros | RTP San Cristóbal, Revisión Técnica Vehicular"
+    description="Conoce RTP San Cristóbal: más de 15 años en revisión técnica vehicular en el Perú. Tecnología europea, profesionales certificados por el MTC y sedes a nivel nacional."
     schema={schemaBreadcrumbs([
       { name: 'Inicio', path: '/' },
       { name: 'Nosotros', path: '/nosotros' }

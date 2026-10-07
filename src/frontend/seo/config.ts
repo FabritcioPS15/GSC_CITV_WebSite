@@ -14,7 +14,7 @@ import { EMAIL_CONTACTO, TELEFONO_CONTACTO } from '../../backend/data/contacto';
 export const SITE_URL = 'https://gruposancristobal.pe';
 
 /** Nombre corto de la marca, para Open Graph y titles. */
-export const SITE_NAME = 'Grupo San Cristóbal';
+export const SITE_NAME = 'RTP San Cristóbal';
 
 /** Lema principal: es lo que la gente busca ("revisiones técnicas"). */
 export const SITE_TAGLINE = 'Revisión Técnica Vehicular en el Perú';
@@ -52,7 +52,9 @@ export const KEYWORDS_PRINCIPALES = [
     'RTP',
     'RTV',
     'RTP San Cristóbal',
+    'RTV San Cristóbal',
     'grupo san cristobal',
+    'rtv san cristobal',
     'inspección técnica vehicular',
     'centro de revisión técnica',
     'revisión técnica Lima',

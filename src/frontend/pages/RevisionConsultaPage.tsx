@@ -1,16 +1,48 @@
 import { useState } from 'react';
 import { FileText, AlertCircle, CheckCircle2, ExternalLink, ArrowLeft } from 'lucide-react';
 import Seo from '../components/Seo';
+import { schemaFaq } from '../seo/schemas';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 
+/**
+ * FAQ de la consulta de revisión.
+ *
+ * Responde a la baja "descargar revisión técnica vehicular": el sitio no
+ * almacena PDFs, así que la respuesta explica dónde y cómo obtener el
+ * certificado en vez de dejar la consulta sin respuesta.
+ */
+const FAQ_CONSULTA = [
+    {
+        q: '¿Cómo descargo mi certificado de revisión técnica?',
+        a: 'El certificado oficial se emite en el acto al aprobar la inspección y se entrega impreso en la sede. Si necesitas una copia digital, usa esta consulta con el código de tu certificado para verificar su vigencia y luego solicítala por WhatsApp indicando tu placa y número de documento; te la enviamos en formato PDF.'
+    },
+    {
+        q: '¿Qué hago si no encuentro el código de mi revisión?',
+        a: 'El código está impreso en el sticker y en el certificado, arriba a la derecha. Si ya no lo tienes, escríbenos por WhatsApp con tu placa y te ayudamos a localizar tu última inspección registrada.'
+    },
+    {
+        q: '¿Dónde veo si mi revisión técnica está vigente?',
+        a: 'Ingresa el código en el formulario de arriba: verás la fecha de emisión, el vencimiento y el resultado de la inspección. También puedes hacerlo con tu número de placa en la consulta de placa.'
+    },
+    {
+        q: '¿Qué significa el resultado OBSERVADO?',
+        a: 'OBSERVADO indica que uno de los ítems verificados requiere corrección. Revisa las observaciones detalladas del resultado, repáralo y vuelve a la sede: la reinspección se agenda sin trámites adicionales.'
+    },
+    {
+        q: '¿Esta consulta reemplaza al portal del MTC?',
+        a: 'No. Esta herramienta muestra la información registrada por nuestras sedes para tu comodidad. Para trámites oficiales o reclamos ante el Ministerio de Transportes y Comunicaciones, ingresa al portal del MTC.'
+    }
+];
+
 const helmetContent = (
     <Seo
         path="/consulta-revision"
-        title="Consulta de Revisión Técnica por Código | Grupo San Cristóbal"
+        title="Consulta de Revisión Técnica por Código | RTP San Cristóbal"
         description="Consulta el resultado de tu revisión técnica vehicular ingresando el código de tu certificado o sticker. Verifica si aprobaste, las observaciones y la fecha de vigencia ante el MTC."
-        keywords={['consulta revisión técnica', 'consultar revisión vehicular', 'resultado de inspección técnica', 'código de certificado vehicular', 'consulta sticker MTC']}
+        keywords={['consulta revisión técnica', 'consultar revisión vehicular', 'resultado de inspección técnica', 'código de certificado vehicular', 'consulta sticker MTC', 'descargar revisión técnica vehicular', 'certificado revisión técnica PDF']}
+        schema={schemaFaq(FAQ_CONSULTA)}
     />
 );
 
@@ -31,7 +63,7 @@ export default function RevisionConsultaPage() {
         setError('');
         setResult(null);
 
-        // SimulaciÃ³n de consulta
+        // Simulación de consulta
         setTimeout(() => {
             setLoading(false);
             // Datos de ejemplo
@@ -49,7 +81,7 @@ export default function RevisionConsultaPage() {
                     { item: 'Suspensión', estado: 'APROBADO' },
                     { item: 'Neumáticos', estado: 'OBSERVADO' },
                     { item: 'Emisiones', estado: 'APROBADO' },
-                    { item: 'DocumentaciÃ³n', estado: 'APROBADO' }
+                    { item: 'Documentación', estado: 'APROBADO' }
                 ]
             });
         }, 1500);
@@ -90,13 +122,13 @@ export default function RevisionConsultaPage() {
                         {/* Formulario de consulta */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden mb-8">
                             <div className="p-6 border-b border-gray-200">
-                                <h3 className="text-xl font-bold text-gray-900">Ingresa el CÃ³digo de RevisiÃ³n</h3>
+                                <h3 className="text-xl font-bold text-gray-900">Ingresa el Código de Revisión</h3>
                             </div>
                             <form onSubmit={handleConsulta} className="p-6">
                                 <div className="space-y-4">
                                     <div>
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            CÃ³digo de RevisiÃ³n
+                                            Código de Revisión
                                         </label>
                                         <input
                                             type="text"
@@ -107,7 +139,7 @@ export default function RevisionConsultaPage() {
                                             maxLength={15}
                                         />
                                         <p className="text-xs text-gray-500 mt-1">
-                                            El cÃ³digo se encuentra en tu certificado o sticker de revisiÃ³n
+                                            El código se encuentra en tu certificado o sticker de revisión
                                         </p>
                                     </div>
 
@@ -131,7 +163,7 @@ export default function RevisionConsultaPage() {
                                         ) : (
                                             <>
                                                 <FileText size={20} />
-                                                <span>Consultar RevisiÃ³n</span>
+                                                <span>Consultar Revisión</span>
                                             </>
                                         )}
                                     </button>
@@ -145,18 +177,18 @@ export default function RevisionConsultaPage() {
                                 <div className="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-green-100">
                                     <div className="flex items-center gap-3">
                                         <CheckCircle2 className="text-green-600" size={24} />
-                                        <h3 className="text-xl font-bold text-gray-900">Resultado de RevisiÃ³n</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">Resultado de Revisión</h3>
                                     </div>
                                 </div>
                                 <div className="p-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                                         <div className="space-y-4">
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">CÃ³digo</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Código</p>
                                                 <p className="text-lg font-bold text-gray-900 font-mono">{result.codigo}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
-                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de EmisiÃ³n</p>
+                                                <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Fecha de Emisión</p>
                                                 <p className="text-lg font-semibold text-gray-900">{result.fechaEmision}</p>
                                             </div>
                                             <div className="bg-gray-50 rounded-xl p-4">
@@ -186,7 +218,7 @@ export default function RevisionConsultaPage() {
                                     </div>
 
                                     <div className="mb-6">
-                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ãtems Verificados</h4>
+                                        <h4 className="text-sm font-bold text-gray-900 mb-3">Ítems Verificados</h4>
                                         <div className="space-y-2">
                                             {result.itemsVerificados.map((item: any, index: number) => (
                                                 <div
@@ -214,7 +246,7 @@ export default function RevisionConsultaPage() {
                                             rel="noopener noreferrer"
                                             className="inline-flex items-center gap-2 text-orange-600 hover:text-orange-700 font-medium text-sm transition-colors"
                                         >
-                                            Ver mÃ¡s detalles en el portal del MTC
+                                            Ver más detalles en el portal del MTC
                                             <ExternalLink size={14} />
                                         </a>
                                     </div>
@@ -229,10 +261,31 @@ export default function RevisionConsultaPage() {
                                 <div>
                                     <h4 className="font-bold text-gray-900 mb-2 text-sm">Nota Importante</h4>
                                     <p className="text-gray-600 text-sm leading-relaxed">
-                                        Esta es una consulta de demostraciÃ³n. Para obtener informaciÃ³n oficial y actualizada,
-                                        utiliza el portal del MTC o acÃ©rcate a nuestras sedes.
+                                        Esta es una consulta de demostración. Para obtener información oficial y actualizada,
+                                        utiliza el portal del MTC o acércate a nuestras sedes.
                                     </p>
                                 </div>
+                            </div>
+                        </div>
+
+                        {/* FAQ: respaldo visible del schema FAQPage del <head>. */}
+                        <div className="mt-12">
+                            <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-6">
+                                Preguntas <span className="text-orange-500">frecuentes</span>
+                            </h2>
+                            <div className="space-y-4">
+                                {FAQ_CONSULTA.map(faq => (
+                                    <details
+                                        key={faq.q}
+                                        className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm open:shadow-md transition-shadow"
+                                    >
+                                        <summary className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 text-left">
+                                            <span className="text-base font-black text-gray-900">{faq.q}</span>
+                                            <span className="text-orange-500 font-black text-xl leading-none shrink-0 transition-transform group-open:rotate-45">+</span>
+                                        </summary>
+                                        <p className="px-6 pb-6 text-sm text-gray-600 leading-relaxed">{faq.a}</p>
+                                    </details>
+                                ))}
                             </div>
                         </div>
                     </div>

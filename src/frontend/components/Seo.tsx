@@ -37,7 +37,9 @@ export default function Seo({
             <meta name="keywords" content={tags.join(', ')} />
             <meta name="author" content={SITE_NAME} />
             <meta name="robots" content={noindex ? 'noindex, follow' : 'index, follow'} />
-            <link rel="canonical" href={canonical} />
+            {/* Una página noindex no debe declarar canonical: la canonical apunta
+                a otra URL y Google la usaría como señal de consolidación. */}
+            {!noindex && <link rel="canonical" href={canonical} />}
 
             {/* Open Graph */}
             <meta property="og:type" content="website" />

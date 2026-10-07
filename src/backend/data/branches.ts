@@ -10,6 +10,16 @@ export interface Branch {
     slug?: string;
     position: [number, number];
     address: string;
+    /**
+     * Distrito o ciudad real de la sede (`addressLocality` en schema.org).
+     * No se infiere de la dirección: el texto de `address` a veces termina en
+     * una referencia ("al lado de ESSALUD") y eso rompía los datos estructurados.
+     */
+    locality: string;
+    /** Región administrativa (`addressRegion`): Callao, Lima, Ica, Apurímac… */
+    addressRegion: string;
+    /** Distritos y zonas cercanas que atiende la sede: copy local y keywords. */
+    zonas?: string[];
     region: 'lima' | 'provincia';
     type: 'RTP' | 'RTV';
     googleMapsUrl?: string;
@@ -129,6 +139,9 @@ const BRANCHES: Branch[] = [
         // Google Maps: Av. Néstor Gambeta Mz. 1, 2 y 3, Las Orquídeas 2, Callao
         position: [-11.9844532, -77.1249420],
         address: 'Av. Néstor Gambeta Mz. 1, 2 y 3 - Las Orquídeas 2, Callao',
+        locality: 'Callao',
+        addressRegion: 'Callao',
+        zonas: ['Las Orquídeas', 'Bellavista', 'La Perla', 'Carmen de la Legua', 'Mi Perú', 'Ventanilla', 'San Miguel'],
         region: 'lima',
         type: 'RTP',
         phone: '975759712',
@@ -141,6 +154,9 @@ const BRANCHES: Branch[] = [
         // OSM: Avenida Canta Callao, Santa Rosa, San Martín de Porres
         position: [-11.9843640, -77.1004699],
         address: 'Av. Canta Callao 164 - SMP, al lado de ESSALUD Bicentenario, entre la Av. Marañón y la Av. Canta Callao',
+        locality: 'San Martín de Porres',
+        addressRegion: 'Lima',
+        zonas: ['San Martín de Porres', 'Santa Rosa', 'Los Olivos', 'Independencia', 'Comas', 'Puente Piedra'],
         region: 'lima',
         type: 'RTP',
         phone: '933697419',
@@ -151,9 +167,13 @@ const BRANCHES: Branch[] = [
     {
         id: 3,
         name: 'Sede Ica',
-        // OSM: "Donde Come El Rey", Subtanjalla (coincide con la referencia del local)
-        position: [-14.0358645, -75.7545937],
+        // Ubicación exacta de Google Maps (maps.app.goo.gl/AmDuW6jXTJnNvXGh8),
+        // place 0x9110fd014a7650e7:0x7221bb9f92f3ef53, Km 299 Panamericana Sur.
+        position: [-14.0363738, -75.7545413],
         address: 'Panamericana Sur km 299, frente al Grifo PECSA, al lado del restaurante "Donde Come el Rey", Subtanjalla',
+        locality: 'Ica',
+        addressRegion: 'Ica',
+        zonas: ['Ica', 'Subtanjalla', 'La Tinguiña', 'Santiago', 'Los Aquijes', 'Parcona'],
         region: 'provincia',
         type: 'RTP',
         phone: '955403509',
@@ -167,6 +187,9 @@ const BRANCHES: Branch[] = [
         // OSM: Avenida Sesquicentenario, Cuncataca, Andahuaylas
         position: [-13.6607055, -73.4219941],
         address: 'Av. Sesquicentenario S/N, Predio Cuncataca - Valle Chumbao - Andahuaylas',
+        locality: 'Andahuaylas',
+        addressRegion: 'Apurímac',
+        zonas: ['Andahuaylas', 'Talavera', 'San Jerónimo', 'Huancaraylla', 'Andarapa', 'Kishuara'],
         region: 'provincia',
         type: 'RTP',
         phone: '990906999',
@@ -178,6 +201,9 @@ const BRANCHES: Branch[] = [
         // OSM: Malecón Fray Martín, Yananaco, San Cristobal, Huancavelica
         position: [-12.7844644, -74.9841287],
         address: 'Malecón Fray Martín 119, barrio de Yanacancha - Huancavelica',
+        locality: 'Huancavelica',
+        addressRegion: 'Huancavelica',
+        zonas: ['Huancavelica', 'Ascensión', 'Santa Ana', 'Yauli', 'Acobamba', 'Mariscal Cáceres'],
         region: 'provincia',
         type: 'RTP',
         phone: '939063929',
@@ -191,6 +217,9 @@ const BRANCHES: Branch[] = [
         // OSM: Avenida Cusco, San Juan Bautista. Número de puerta no disponible.
         position: [-13.1771520, -74.2002780],
         address: 'Av. Cusco 1633-1639, San Juan Bautista - Ayacucho, referencia curva Llama Gas',
+        locality: 'Ayacucho',
+        addressRegion: 'Ayacucho',
+        zonas: ['Ayacucho', 'San Juan Bautista', 'Santa Ana', 'Tinga', 'Carmen Alto', 'Quinua'],
         region: 'provincia',
         type: 'RTP',
         phone: '943431908',
@@ -204,6 +233,9 @@ const BRANCHES: Branch[] = [
         // OSM: Avenida Cusco, San Juan Bautista. Separada ~200 m de la sede 6.
         position: [-13.1761990, -74.2020590],
         address: 'Av. Cusco Nº 1250, a una cuadra del Grifo Fénix y al frente del Grifo San Miguelito - Ayacucho',
+        locality: 'Ayacucho',
+        addressRegion: 'Ayacucho',
+        zonas: ['Ayacucho', 'San Juan Bautista', 'Santa Ana', 'Tinga', 'Carmen Alto', 'Quinua'],
         region: 'provincia',
         type: 'RTP',
         phone: '908801161',
