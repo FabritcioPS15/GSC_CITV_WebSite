@@ -38,7 +38,7 @@ export interface Branch {
  * WhatsApp central de atención para inspecciones vehiculares (RTV).
  * Formato internacional: código de país 51 + número, solo dígitos.
  */
-export const WHATSAPP_INSPECCION = '51958077827';
+export const WHATSAPP_INSPECCION = '51902796493';
 
 /**
  * Normaliza un número al formato que exige wa.me (solo dígitos, con código de país).
