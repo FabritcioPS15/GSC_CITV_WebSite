@@ -1,6 +1,6 @@
 import { useParams, Navigate } from 'react-router-dom';
 import { findBranch, branchSlug, branchHref } from '../../backend/data/branches';
-import { MapPin, Phone, ArrowRight, Mail, ChevronLeft, ChevronRight } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 import { SiGooglemaps, SiWaze } from 'react-icons/si';
 import SimpleBranchMap from '../components/SimpleBranchMap';
 import RevealOnScroll from '../components/RevealOnScroll';
@@ -10,147 +10,14 @@ import Tarifico from '../components/Tarifico';
 import GalleryCarousel from '../components/GalleryCarousel';
 import { getGaleria } from '../../backend/data/galeria';
 import { EMAIL_CONTACTO } from '../../backend/data/contacto';
-import ServicioModal from '../components/ServicioModal';
 import Seo from '../components/Seo';
 import { schemaSede, schemaFaq, schemaBreadcrumbs, schemaGrafo } from '../seo/schemas';
-
-/** Servicios de inspección que ofrece cada sede, con el detalle que abre el popup. */
-const SERVICIOS_SEDE = [
-    {
-        id: 'livianos',
-        titulo: 'Vehículos Livianos',
-        imagen: 'https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=800',
-        resumen: 'Autos, camionetas y SUV con tiempo estimado de proceso de menos de 20 minutos.',
-        detalle:
-            'Revisión técnica vehicular para vehículos livianos, registrada en el sistema del MTC y con entrega del certificado oficial en el acto. El proceso se realiza con líneas calibradas y sin que tengas que salir del vehículo.',
-        incluye: [
-            'Inspección de luces y elementos de señalización',
-            'Frenos, suspensión y dirección',
-            'Medición de emisiones de gases',
-            'Neumáticos y estado general del vehículo',
-            'Entrega del certificado oficial MTC'
-        ]
-    },
-    {
-        id: 'pesados',
-        titulo: 'Vehículos Pesados',
-        imagen: 'https://images.unsplash.com/photo-1586191582151-f70351799633?q=80&w=800',
-        resumen: 'Camiones, buses y transporte de carga especializado hasta 12 toneladas.',
-        detalle:
-            'Inspección para camiones, buses y unidades de carga. Contamos con plataforma para vehículos pesados y personal capacitado en la normativa vigente.',
-        incluye: [
-            'Inspección de frenos y suspensión reforzada',
-            'Control de ejes y peso permitido',
-            'Medición de emisiones para motor diésel',
-            'Verificación de elementos de seguridad',
-            'Entrega del certificado oficial MTC'
-        ]
-    },
-    {
-        id: 'especiales',
-        titulo: 'Certificados Especiales',
-        imagen: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=800',
-        resumen: 'Modificaciones, bonificaciones por neumáticos y certificados de operatividad.',
-        detalle:
-            'Emitimos los certificados especiales que requieren unidades con modificaciones o condiciones particulares, evaluando cada caso según lo establecido por el MTC.',
-        incluye: [
-            'Certificado de operatividad para transporte público',
-            'Bonificaciones por uso de neumáticos',
-            'Modificaciones de estructura o carrocería',
-            'Verificación de equipos de seguridad',
-            'Acompañamiento del trámite ante el MTC'
-        ]
-    }
-];
-
-type ServicioSede = (typeof SERVICIOS_SEDE)[number];
-
-/**
- * En móvil los servicios se muestran de a uno. En lugar de un carrusel con
- * scroll horizontal, se muestra solo la tarjeta activa y se cambia con las
- * flechas o los puntos inferiores.
- */
-function ServiciosCarousel({
-    servicios,
-    onMasInfo
-}: {
-    servicios: readonly ServicioSede[];
-    onMasInfo: (servicio: ServicioSede) => void;
-}) {
-    const [activo, setActivo] = useState(0);
-    const total = servicios.length;
-
-    const ir = (i: number) => setActivo((i + total) % total);
-    const servicio = servicios[activo];
-
-    return (
-        <div>
-            <div className="relative">
-                <div
-                    key={servicio.id}
-                    className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 animate-entry-fade"
-                >
-                    <img
-                        src={servicio.imagen}
-                        alt={servicio.titulo}
-                        className="absolute inset-0 w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
-                    <div className="absolute bottom-12 left-8 right-8 text-white">
-                        <h3 className="text-2xl font-black mb-3">{servicio.titulo}</h3>
-                        <p className="content-text text-gray-300 mb-6">{servicio.resumen}</p>
-                        <button
-                            onClick={() => onMasInfo(servicio)}
-                            className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all"
-                        >
-                            Más Información <ArrowRight size={16} />
-                        </button>
-                    </div>
-                </div>
-
-                {total > 1 && (
-                    <>
-                        <button
-                            onClick={() => ir(activo - 1)}
-                            aria-label="Servicio anterior"
-                            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all"
-                        >
-                            <ChevronLeft size={20} />
-                        </button>
-                        <button
-                            onClick={() => ir(activo + 1)}
-                            aria-label="Siguiente servicio"
-                            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white active:scale-95 transition-all"
-                        >
-                            <ChevronRight size={20} />
-                        </button>
-                    </>
-                )}
-            </div>
-
-            {/* Puntos de posición */}
-            <div className="mt-6 flex items-center justify-center gap-2">
-                {servicios.map((s, i) => (
-                    <button
-                        key={s.id}
-                        onClick={() => setActivo(i)}
-                        aria-label={`Ver ${s.titulo}`}
-                        aria-current={i === activo}
-                        className={`h-2 rounded-full transition-all duration-300 ${
-                            i === activo ? 'w-8 bg-[#f97316]' : 'w-2 bg-gray-300 hover:bg-gray-400'
-                        }`}
-                    />
-                ))}
-            </div>
-        </div>
-    );
-}
-
 
 function SedeDetalle() {
     const { slug } = useParams<{ slug: string }>();
     const branch = findBranch(slug);
-    const [servicioAbierto, setServicioAbierto] = useState<ServicioSede | null>(null);
+    // Solo una pregunta abierta a la vez.
+    const [faqAbierta, setFaqAbierta] = useState<number | null>(null);
 
     useEffect(() => {
         scrollToTop();
@@ -173,6 +40,11 @@ function SedeDetalle() {
     const ciudad = branch.locality;
     const sedeNombre = branch.name.replace('Sede RTP ', '').replace('Sede RTV ', '');
     const zonas = branch.zonas ?? [];
+
+    // Lista legible de zonas ("A, B y C") para el copy local sin repetir la ciudad.
+    const listaZonas = zonas.length > 1
+        ? `${zonas.slice(0, -1).join(', ')} y ${zonas[zonas.length - 1]}`
+        : zonas[0] ?? '';
 
     // FAQ local: responde a la intención "revisión técnica cerca de <distrito>"
     // y a las dudas típicas antes de ir a la sede.
@@ -225,6 +97,7 @@ function SedeDetalle() {
                     `revisión técnica ${sedeNombre}`,
                     `revisión técnica ${ciudad}`,
                     `revisión técnica ${branch.addressRegion}`,
+                    ...zonas.map(z => `revisión técnica ${z}`),
                     `RTP ${sedeNombre}`,
                     'inspección técnica vehicular cerca'
                 ]}
@@ -291,48 +164,25 @@ function SedeDetalle() {
                 <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-orange-500 via-orange-500/0 to-transparent opacity-50" />
             </section>
 
-            {/* SERVICIOS SECTION */}
+            {/* DESCRIPCIÓN DE LA SEDE: copy único por sede para SEO local. */}
             <section className="section max-w-7xl mx-auto px-4">
-                <div className="flex items-start gap-6 mb-14">
+                <div className="flex items-start gap-6">
                     <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
-                    <div>
-                        <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
-                            Servicios de <span className="text-[#f97316]">Inspección</span>
+                    <div className="max-w-4xl">
+                        <h2 className="text-4xl font-black text-gray-900 mb-6 tracking-tight uppercase">
+                            Sobre la sede de <span className="text-[#f97316]">{sedeNombre}</span>
                         </h2>
-                        <p className="content-text text-gray-500 max-w-2xl">
-                            Nuestra sede en {branch.name.replace('Sede RTP ', '').replace('Sede RTV ', '')} equipada con tecnología de última generación para procesar todo tipo de certificaciones técnicas vigentes.
-                        </p>
+                        <div className="content-text text-gray-500">
+                            <p>
+                                La sede de RTP San Cristóbal en {ciudad} es un centro de revisión técnica
+                                vehicular autorizado por el MTC. Realizamos la inspección técnica de vehículos
+                                livianos (autos, camionetas y SUV), vehículos pesados (camiones, buses y unidades
+                                de carga) y emitimos certificados especiales de operatividad. Al aprobar tu
+                                inspección recibes el certificado oficial en el acto, con el resultado registrado
+                                en el sistema del MTC.
+                            </p>
+                        </div>
                     </div>
-                </div>
-
-                {/* Móvil: un servicio a la vez. Escritorio: las tres columnas. */}
-                <div className="md:hidden">
-                    <ServiciosCarousel servicios={SERVICIOS_SEDE} onMasInfo={setServicioAbierto} />
-                </div>
-
-                <div className="hidden md:grid grid-cols-3 gap-8">
-                    {SERVICIOS_SEDE.map((servicio, i) => (
-                        <RevealOnScroll key={servicio.id} className={`delay-${(i + 1) * 100}`}>
-                            <div className="group relative h-[450px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/5 hover:shadow-orange-500/10 transition-all duration-500">
-                                <img
-                                    src={servicio.imagen}
-                                    alt={servicio.titulo}
-                                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                                />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                                <div className="absolute bottom-12 left-10 right-10 text-white">
-                                    <h3 className="text-2xl font-black mb-3">{servicio.titulo}</h3>
-                                    <p className="content-text text-gray-300 mb-6">{servicio.resumen}</p>
-                                    <button
-                                        onClick={() => setServicioAbierto(servicio)}
-                                        className="flex items-center gap-2 font-black text-[11px] uppercase tracking-widest hover:gap-3 transition-all"
-                                    >
-                                        Más Información <ArrowRight size={16} />
-                                    </button>
-                                </div>
-                            </div>
-                        </RevealOnScroll>
-                    ))}
                 </div>
             </section>
 
@@ -352,9 +202,13 @@ function SedeDetalle() {
                     </div>
 
                     {/* Alto fijo en escritorio: cambiar de categoría con más o menos
-                        vehículos ya no debe cambiar el tamaño de la sección. */}
-                    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8 lg:h-[32rem]">
-                        <RevealOnScroll className="h-full">
+                        vehículos ya no debe cambiar el tamaño de la sección.
+                        La fila se fija en minmax(0,1fr) para que una categoría con
+                        muchas filas NO estire el cuadro: hace scroll dentro.
+                        El ancho de la galería (segunda columna) se ajusta acá: subir
+                        ese valor la ensancha y angosta el tarifario, y viceversa. */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_25rem] gap-8 lg:h-[32rem] lg:grid-rows-1">
+                        <RevealOnScroll className="h-full min-h-0">
                             <Tarifico
                                 sedeId={branch.id}
                                 sedeNombre={branch.name}
@@ -362,7 +216,7 @@ function SedeDetalle() {
                             />
                         </RevealOnScroll>
 
-                        <RevealOnScroll className="h-full delay-200">
+                        <RevealOnScroll className="h-full min-h-0 delay-200">
                             <GalleryCarousel
                                 imagenes={getGaleria(branch.galeria)}
                                 titulo={`Galería · ${branch.name}`}
@@ -473,34 +327,23 @@ function SedeDetalle() {
                 </div>
             </section>
 
-            {/* ZONAS Y FAQ LOCAL: contenido pensado para búsquedas
-                "revisión técnica + distrito" y para los People Also Ask. */}
+            {/* ZONAS: contenido local para búsquedas "revisión técnica + distrito". */}
             {zonas.length > 0 && (
                 <section className="section bg-gray-50">
                     <div className="max-w-7xl mx-auto px-4">
-                        <div className="flex items-start gap-6 mb-10">
+                        <div className="flex items-start gap-6">
                             <div className="w-1.5 h-20 bg-[#f97316] rounded-full shrink-0" />
                             <div>
                                 <h2 className="text-4xl font-black text-gray-900 mb-5 tracking-tight uppercase">
                                     Zonas que <span className="text-[#f97316]">atendemos</span>
                                 </h2>
                                 <p className="content-text text-gray-500 max-w-3xl">
-                                    Esta sede atiende vehículos de {sedeNombre} y de los distritos vecinos de{' '}
-                                    {ciudad}: acércate con tu vehículo desde {zonas.slice(0, -1).join(', ')} y{' '}
-                                    {zonas[zonas.length - 1]}.
+                                    Esta sede atiende vehículos de {ciudad} y de zonas cercanas como{' '}
+                                    {listaZonas}. Si vienes de alguno de estos lugares, puedes coordinar tu
+                                    llegada por WhatsApp para reducir la espera y aprovechar mejor tu visita.
                                 </p>
                             </div>
                         </div>
-                        <ul className="flex flex-wrap gap-3">
-                            {zonas.map(zona => (
-                                <li
-                                    key={zona}
-                                    className="px-4 py-2 rounded-full bg-white border border-gray-200 text-sm font-bold text-gray-700 shadow-sm"
-                                >
-                                    {zona}
-                                </li>
-                            ))}
-                        </ul>
                     </div>
                 </section>
             )}
@@ -519,12 +362,19 @@ function SedeDetalle() {
                         </div>
                     </div>
                     <div className="space-y-4">
-                        {faqsSede.map(faq => (
+                        {faqsSede.map((faq, i) => (
                             <details
                                 key={faq.q}
+                                open={faqAbierta === i}
                                 className="group bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm open:shadow-md transition-shadow"
                             >
-                                <summary className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 text-left">
+                                <summary
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setFaqAbierta(prev => (prev === i ? null : i));
+                                    }}
+                                    className="cursor-pointer list-none px-6 py-5 flex items-start justify-between gap-4 text-left"
+                                >
                                     <span className="text-base font-black text-gray-900">{faq.q}</span>
                                     <span className="text-orange-500 font-black text-xl leading-none shrink-0 transition-transform group-open:rotate-45">+</span>
                                 </summary>
@@ -534,18 +384,6 @@ function SedeDetalle() {
                     </div>
                 </div>
             </section>
-
-            {servicioAbierto && (
-<ServicioModal
-                          titulo={servicioAbierto.titulo}
-                          imagen={servicioAbierto.imagen}
-                          detalle={servicioAbierto.detalle}
-                          incluye={servicioAbierto.incluye}
-                          sedeNombre={branch.name}
-                          whatsapp={branch.whatsapp}
-                          onClose={() => setServicioAbierto(null)}
-                      />
-            )}
         </div>
     );
 }

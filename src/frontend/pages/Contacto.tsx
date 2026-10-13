@@ -13,6 +13,19 @@ const socialIcons: Record<string, React.ReactNode> = {
     TikTok: <FaTiktok size={20} />,
 };
 
+/** Color de marca que toma cada tarjeta al hacer hover. */
+const socialBrand: Record<string, string> = {
+    Facebook: 'hover:bg-[#1877F2]',
+    Instagram: 'hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7]',
+    TikTok: 'hover:bg-black',
+};
+
+/** Extrae el usuario (@handle) desde la URL del perfil. */
+function handleFromUrl(url: string): string {
+    const last = url.replace(/\/+$/, '').split('/').pop() ?? '';
+    return last.startsWith('@') ? last : `@${last}`;
+}
+
 function Contacto() {
     return (
         <div>
@@ -107,25 +120,22 @@ function Contacto() {
                                 <p className="content-text text-gray-600 mb-6">
                                     Escríbenos o síguenos para estar al tanto de nuestras sedes, promociones y novedades de seguridad vehicular.
                                 </p>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div className="flex flex-wrap gap-3">
                                     {socialLinks.map((s, i) => (
                                         <a
                                             key={i}
                                             href={s.url}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="group flex items-center gap-4 border-2 border-gray-200 px-5 py-4 hover:border-orange-500 transition-colors duration-300"
+                                            aria-label={`${s.name}: ${handleFromUrl(s.url)}`}
+                                            className={`group flex h-16 w-16 items-center overflow-hidden rounded-2xl border-2 border-gray-200 text-white transition-all duration-300 ease-out hover:w-56 hover:border-transparent focus:w-56 focus:border-transparent ${socialBrand[s.name] ?? 'hover:bg-gray-900'}`}
                                         >
-                                            <span className="w-11 h-11 rounded-full bg-black text-white flex items-center justify-center shrink-0 group-hover:bg-orange-500 transition-colors duration-300">
+                                            <span className="flex h-16 w-16 shrink-0 items-center justify-center text-gray-700 transition-colors duration-300 group-hover:text-white group-focus:text-white">
                                                 {socialIcons[s.name]}
                                             </span>
-                                            <span className="flex flex-col">
-                                                <span className="font-bold text-gray-900 group-hover:text-orange-600 transition-colors">
-                                                    {s.name}
-                                                </span>
-                                                <span className="text-sm text-gray-500 group-hover:text-gray-600 transition-colors">
-                                                    @gruposancristobal
-                                                </span>
+                                            <span className="flex -translate-x-2 flex-col whitespace-nowrap pr-5 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100 group-focus:translate-x-0 group-focus:opacity-100">
+                                                <span className="font-bold leading-tight">{s.name}</span>
+                                                <span className="text-xs opacity-80">{handleFromUrl(s.url)}</span>
                                             </span>
                                         </a>
                                     ))}

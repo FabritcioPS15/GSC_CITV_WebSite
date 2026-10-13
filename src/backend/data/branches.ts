@@ -237,7 +237,7 @@ const BRANCHES: Branch[] = [
         addressRegion: 'Ayacucho',
         zonas: ['Ayacucho', 'San Juan Bautista', 'Santa Ana', 'Tinga', 'Carmen Alto', 'Quinua'],
         region: 'provincia',
-        type: 'RTP',
+        type: 'RTV',
         phone: '908801161',
         whatsapp: '51908801161',
         image: FOTOS_AYACUCHO_FENIX[0].src,

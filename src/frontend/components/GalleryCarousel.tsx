@@ -6,10 +6,17 @@ interface GalleryCarouselProps {
     imagenes: FotoGaleria[];
     /** Etiqueta del lugar, se muestra junto al título. */
     titulo?: string;
+    /**
+     * Cómo encaja la foto en el marco en escritorio:
+     *   'cover'   → la foto llena todo el espacio (recorta lo que sobra).
+     *   'contain' → la foto se ve entera (puede dejar franjas vacías).
+     * Cambiando este valor se ajusta el encuadre sin tocar el layout.
+     */
+    ajuste?: 'cover' | 'contain';
 }
 
 /** Carrusel de fotos con bordes rectos, en línea con el estilo de la tabla de tarifas. */
-export default function GalleryCarousel({ imagenes, titulo }: GalleryCarouselProps) {
+export default function GalleryCarousel({ imagenes, titulo, ajuste = 'cover' }: GalleryCarouselProps) {
     const [indice, setIndice] = useState(0);
     const total = imagenes.length;
 
@@ -32,14 +39,17 @@ export default function GalleryCarousel({ imagenes, titulo }: GalleryCarouselPro
                 </span>
             </div>
 
-            {/* En móvil manda el ratio; en escritorio se estira para igualar la tabla. */}
+            {/* Móvil: 4:3 fijo. Escritorio: la foto ocupa todo el alto que deja
+                la tarjeta, así entra completa en el espacio disponible. */}
             <div className="relative aspect-[4/3] lg:aspect-auto lg:flex-1 lg:min-h-0 bg-gray-100 overflow-hidden">
                 <img
                     key={actual.src}
                     src={actual.src}
                     alt={actual.alt}
                     loading="lazy"
-                    className="w-full h-full object-cover animate-fade-in"
+                    className={`absolute inset-0 w-full h-full animate-fade-in ${
+                        ajuste === 'contain' ? 'object-contain' : 'object-cover'
+                    }`}
                 />
                 <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-4">
                     <p className="text-xs text-white leading-relaxed">{actual.alt}</p>
@@ -47,7 +57,7 @@ export default function GalleryCarousel({ imagenes, titulo }: GalleryCarouselPro
             </div>
 
             {/* Controles */}
-            <div className="lg:shrink-0 flex items-center justify-between px-3 py-2.5 border-t border-gray-200">
+            <div className="lg:shrink-0 lg:mt-auto flex items-center justify-between px-3 py-2.5 border-t border-gray-200">
                 <button
                     type="button"
                     onClick={() => ir(-1)}

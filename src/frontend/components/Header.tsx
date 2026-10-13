@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useMemo, type ReactNode } from 'react';
 import { X, Menu, ChevronDown, ChevronRight, MapPin, Home, Users, FileText, Phone, Calendar, Search, FileCheck, Fuel, Tag, ExternalLink, ArrowRight } from 'lucide-react';
-import PremiumButton from './PremiumButton';
 import { Link, useLocation } from 'react-router-dom';
 import { branches, branchSlug } from '../../backend/data/branches';
 import { useBloqueoScroll } from '../hooks/useBloqueoScroll';
@@ -323,10 +322,13 @@ export default function Header() {
 
                             {/* Contact Desktop */}
                             <div className="flex items-center gap-4 pl-6 animate-entry-fade animate-stagger-4">
-                                <PremiumButton to="/contacto" className="gap-2 !py-2.5 !px-5 text-sm">
-                                    <Phone size={16} />
+                                <Link
+                                    to="/contacto"
+                                    className="btn-header-cta group gap-2 px-5 py-2.5 text-sm"
+                                >
+                                    <Phone size={16} className="transition-transform duration-300 group-hover:-rotate-12" />
                                     <span>Contáctanos</span>
-                                </PremiumButton>
+                                </Link>
                             </div>
                         </div>
 

@@ -81,12 +81,14 @@ export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps
     const cerrar = useCallback(() => setSeleccion(null), []);
 
     return (
-        <div className="lg:h-full lg:flex lg:flex-col">
-            {/* Marco de la tabla. Sin bordes redondeados: todo recto. */}
-            <div className="bg-white border border-gray-200 lg:grid lg:grid-cols-[230px_1fr] lg:flex-1 lg:min-h-0">
+        <div className="flex flex-col lg:h-full">
+            {/* Marco de la tabla. Sin bordes redondeados: todo recto.
+                Alto fijo: si la categoría tiene más filas, se hace scroll
+                dentro de la lista y el cuadro no cambia de tamaño. */}
+            <div className="bg-white border border-gray-200 flex flex-col h-[26rem] sm:h-[30rem] lg:grid lg:grid-cols-[230px_1fr] lg:grid-rows-1 lg:h-auto lg:flex-1 lg:min-h-0">
                 {/* Columna izquierda: categorías */}
-                <nav className="border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50">
-                    <p className="hidden lg:block px-5 py-3.5 text-[11px] font-black text-gray-500 uppercase tracking-widest border-b border-gray-200">
+                <nav className="shrink-0 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-50 lg:flex lg:flex-col lg:min-h-0">
+                    <p className="hidden lg:block lg:shrink-0 px-5 py-3.5 text-[11px] font-black text-gray-500 uppercase tracking-widest border-b border-gray-200">
                         Categoría
                     </p>
 
@@ -111,8 +113,9 @@ export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps
                         </select>
                     </div>
 
-                    {/* Escritorio: tira vertical con indicador lateral */}
-                    <ul className="hidden lg:flex lg:flex-col lg:overflow-visible">
+                    {/* Escritorio: tira vertical con indicador lateral. Si hubiera más
+                        categorías de las que entran, scrollea dentro de la columna. */}
+                    <ul className="hidden lg:flex lg:flex-col lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
                         {categoriasVisibles.map((idCat) => {
                             const c = categorias.find((x) => x.id === idCat);
                             if (!c) return null;
@@ -139,7 +142,7 @@ export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps
                 </nav>
 
                 {/* Columna derecha: tabla de tarifas */}
-                <div className="lg:flex lg:flex-col lg:min-h-0">
+                <div className="flex flex-1 flex-col min-h-0">
                     {/* Cabecera de columnas. Debe compartir el mismo grid-cols que las filas
                         para que cada rótulo caiga sobre su columna. */}
                     <div className="hidden lg:grid lg:shrink-0 grid-cols-[1fr_8.5rem_9.5rem] bg-gray-900 text-white">
@@ -154,7 +157,7 @@ export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps
 
                     {/* Filas con scroll propio: el alto de la caja no depende de la
                         cantidad de vehículos de la categoría. */}
-                    <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto">
+                    <div className="flex-1 min-h-0 overflow-y-auto">
                     {items.length === 0 ? (
                         <p className="px-5 py-10 text-center text-sm text-gray-500">
                             Esta sede no ofrece servicios de esta categoría.
@@ -244,7 +247,7 @@ export default function Tarifico({ sedeId, sedeNombre, whatsapp }: TarificoProps
                 precio={seleccion?.precio}
                 esPrecioDeSede={seleccion ? getPrecioEsPropio(sedeId, seleccion.id) : false}
                 sedeNombre={sede}
-                requisitos={seleccion ? getRequisitos(seleccion.id) : []}
+                requisitos={seleccion ? getRequisitos(seleccion.id, seleccion.categoria) : []}
                 onClose={cerrar}
                 onConsultar={() => {
                     if (seleccion) consultar(seleccion, seleccion.precio);

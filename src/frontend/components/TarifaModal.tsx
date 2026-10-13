@@ -1,17 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import {
-    X,
-    Car,
-    Bus,
-    Truck,
-    AlertTriangle,
-    Star,
-    Tag,
-    Building2,
-    ClipboardList,
-    Check,
-} from 'lucide-react';
+import { X, Car, Bus, Truck, AlertTriangle, Star, Tag, Building2, ClipboardList, Check, } from 'lucide-react';
 import { FaWhatsapp } from 'react-icons/fa';
 import { TarifaItem } from '../../backend/data/tarifario';
 

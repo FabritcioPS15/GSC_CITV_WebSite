@@ -3,7 +3,8 @@ export type TarifaCategoriaId =
     | 'publico'
     | 'mercancias'
     | 'residuos'
-    | 'especiales';
+    | 'especiales'
+    | 'adicionales';
 
 export interface TarifaCategoria {
     id: TarifaCategoriaId;
@@ -50,6 +51,12 @@ export const categorias: TarifaCategoria[] = [
         label: 'Especiales',
         descripcion: 'Motocicletas, vehículos menores y de prueba.',
         icon: 'star',
+    },
+    {
+        id: 'adicionales',
+        label: 'Adicionales',
+        descripcion: 'Certificaciones y pruebas adicionales a la inspección regular.',
+        icon: 'cert',
     },
 ];
 
@@ -222,11 +229,18 @@ export const requisitosPorCategoria: Record<TarifaCategoriaId, string[]> = {
     especiales: [
         'Certificado de matrícula del vehículo, si corresponde.',
     ],
+    adicionales: [
+        'Presentar el vehículo en la sede para realizar la prueba.',
+        'Documento que acredite la certificación solicitada, si corresponde.',
+    ],
 };
 
 /** Requisitos que aplican a una tarifa concreta: los generales más los de su categoría. */
-export function getRequisitos(tarifaId: string): string[] {
+export function getRequisitos(tarifaId: string, categoria?: TarifaCategoriaId): string[] {
     const item = tarifas.find((t) => t.id === tarifaId);
-    if (!item) return requisitosBase;
-    return [...requisitosBase, ...requisitosPorCategoria[item.categoria]];
+    const cat = categoria ?? item?.categoria;
+    if (!cat) return requisitosBase;
+    // Las certificaciones adicionales no son vehículos: no piden los documentos base.
+    if (cat === 'adicionales') return requisitosPorCategoria.adicionales;
+    return [...requisitosBase, ...requisitosPorCategoria[cat]];
 }
