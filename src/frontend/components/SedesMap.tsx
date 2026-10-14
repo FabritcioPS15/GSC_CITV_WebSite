@@ -9,6 +9,7 @@ import rtvLogo from '../../resources/logos/RTV LOGO CIRCULAR.png';
 import rtpLogo from '../../resources/logos/RTP LOGO CIRCULAR.png';
 import { branches, branchSlug, Branch, whatsappUrl } from '../../backend/data/branches';
 import { getConsent } from '../utils/consent';
+import { coincideBusqueda } from '../utils/buscarSede';
 
 // Pin para sedes RTV
 const RtvPinIcon = L.divIcon({
@@ -98,24 +99,6 @@ function getDistanceKm(a: [number, number], b: [number, number]): number {
     return R * d;
 }
 
-/** Quita tildes y pasa a minúsculas, para que "Sede Principal" encuentre "sede principal". */
-function normalizar(texto: string): string {
-    return texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-}
-
-const ETIQUETA_REGION: Record<Branch['region'], string> = {
-    lima: 'Lima',
-    provincia: 'Provincia',
-};
-
-/** Campos por los que se puede buscar una sede. */
-function coincideBusqueda(branch: Branch, consulta: string): boolean {
-    const q = normalizar(consulta).trim();
-    if (!q) return true;
-    return [branch.name, branch.address, ETIQUETA_REGION[branch.region], branch.type]
-        .some((campo) => normalizar(campo).includes(q));
-}
-
 // Controlador unificado de cámara para evitar conflictos de animación
 function UnifiedMapController({
     center,
@@ -181,9 +164,9 @@ function UnifiedMapController({
     return null;
 }
 
-export default function SedesMap({ selectedBranchId }: { selectedBranchId?: number }) {
-    const [filter, setFilter] = useState<'all' | 'lima' | 'provincia'>('lima');
-    const [searchQuery, setSearchQuery] = useState('');
+export default function SedesMap({ selectedBranchId, initialQuery = '' }: { selectedBranchId?: number; initialQuery?: string }) {
+    const [filter, setFilter] = useState<'all' | 'lima' | 'provincia'>(initialQuery.trim() ? 'all' : 'lima');
+    const [searchQuery, setSearchQuery] = useState(initialQuery);
     const [mapState, setMapState] = useState<{ center: [number, number], zoom: number }>({
         center: [-12.046374, -77.042793],
         zoom: 12
@@ -228,6 +211,14 @@ export default function SedesMap({ selectedBranchId }: { selectedBranchId?: numb
             return 0;
         });
     }, [displayBranches, userLocation]);
+
+    // La busqueda tambien puede llegar por la URL (/sedes?q=...), que es el
+    // destino del SearchAction de Google y del autocompletado del header. Se
+    // sincroniza para que una nueva busqueda actualice el mapa ya montado.
+    useEffect(() => {
+        setSearchQuery(initialQuery);
+        if (initialQuery.trim()) setFilter('all');
+    }, [initialQuery]);
 
     // Inicializar mapa si viene prop
     useEffect(() => {

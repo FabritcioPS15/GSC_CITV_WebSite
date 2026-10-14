@@ -4,6 +4,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { branches, branchSlug } from '../../backend/data/branches';
 import { useBloqueoScroll } from '../hooks/useBloqueoScroll';
 import { useMobileMenu } from '../context/MobileMenuContext';
+import SedeSearch from './SedeSearch';
 
 /**
  * Una consulta puede ser un portal externo (el Estado lo tiene mejor mantido y
@@ -28,10 +29,12 @@ export default function Header() {
     const [mobileRegion, setMobileRegion] = useState<'lima' | 'provincia'>('lima');
     const [isScrolled, setIsScrolled] = useState(false);
     const [portalAbierto, setPortalAbierto] = useState<string | null>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
     const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
     const location = useLocation();
 
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLDivElement>(null);
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const menuToggleRef = useRef<HTMLButtonElement | null>(null);
     const drawerCloseRef = useRef<HTMLButtonElement | null>(null);
@@ -53,6 +56,11 @@ export default function Header() {
                 setSedesDropdownOpen(false);
             }
 
+            // Buscador de sedes (desktop)
+            if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+                setSearchOpen(false);
+            }
+
             // Mobile menu
             if (mobileMenuOpen && mobileMenuRef.current &&
                 !mobileMenuRef.current.contains(event.target as Node) &&
@@ -70,6 +78,7 @@ export default function Header() {
         setMobileMenuOpen(false);
         setSedesDropdownOpen(false);
         setMobileSedesOpen(false);
+        setSearchOpen(false);
     }, [location.pathname]);
 
     // Bloquea el scroll con el menú abierto.
@@ -320,6 +329,25 @@ export default function Header() {
                             ))}
                             </div>
 
+                            {/* Buscador de sedes (desktop) */}
+                            <div ref={searchRef} className="relative flex items-center h-full pl-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setSearchOpen((v) => !v)}
+                                    aria-label={searchOpen ? 'Cerrar buscador de sedes' : 'Buscar sede'}
+                                    aria-expanded={searchOpen}
+                                    className={`p-2 rounded-full transition-colors ${searchOpen ? 'bg-orange-500 text-white' : 'text-gray-700 hover:text-orange-500 hover:bg-orange-50'}`}
+                                >
+                                    <Search size={19} />
+                                </button>
+
+                                {searchOpen && (
+                                    <div className="absolute right-0 top-full mt-1 w-[360px] rounded-2xl border border-gray-100 bg-white p-3 shadow-2xl z-50">
+                                        <SedeSearch autoFocus onNavigate={() => setSearchOpen(false)} />
+                                    </div>
+                                )}
+                            </div>
+
                             {/* Contact Desktop */}
                             <div className="flex items-center gap-4 pl-6 animate-entry-fade animate-stagger-4">
                                 <Link
@@ -399,6 +427,9 @@ export default function Header() {
 
                     {/* Drawer Body - Con scroll suave */}
                     <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                        {/* Buscador de sedes rapido */}
+                        <SedeSearch onNavigate={() => setMobileMenuOpen(false)} />
+
                         {/* Enlaces Principales */}
                         <div className="space-y-1.5">
                             {navLinks.map((link) => {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import RevealOnScroll from '../components/RevealOnScroll';
 import SedesMap from '../components/SedesMap';
 import { branches, branchSlug } from '../../backend/data/branches';
@@ -28,6 +28,10 @@ const SEDE_BENEFITS = [
 ];
 
 function Sedes() {
+  const [searchParams] = useSearchParams();
+  // Termino de busqueda entrante (/sedes?q=...): es el destino del cajon de
+  // busqueda de Google y del autocompletado del header.
+  const q = searchParams.get('q') ?? '';
   const [loadingLocation, setLoadingLocation] = useState(false);
   const [nearestBranchId, setNearestBranchId] = useState<number | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
@@ -457,7 +461,7 @@ function Sedes() {
 
           <div className="relative rounded-[2.5rem] overflow-hidden border border-white/10 shadow-2xl">
             <div className="absolute inset-0 bg-orange-500/5 pointer-events-none z-10" />
-            <SedesMap />
+            <SedesMap initialQuery={q} />
           </div>
         </div>
       </section>

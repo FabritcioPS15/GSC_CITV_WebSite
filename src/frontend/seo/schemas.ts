@@ -138,6 +138,31 @@ export const schemaSedes: Record<string, unknown> = {
 };
 
 /**
+ * Nodo del sitio con el cajon de busqueda de Google (Sitelinks Searchbox).
+ *
+ * Declara que el sitio tiene un buscador interno y donde caen los terminos: la
+ * pagina de sedes con el filtro aplicado. Google puede mostrar asi un cajon de
+ * busqueda bajo el resultado del sitio.
+ */
+export const schemaWebSite: Record<string, unknown> = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_URL}/#website`,
+    url: `${SITE_URL}/`,
+    name: SITE_NAME,
+    inLanguage: 'es-PE',
+    publisher: { '@id': `${SITE_URL}/#negocio` },
+    potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+            '@type': 'EntryPoint',
+            urlTemplate: `${SITE_URL}/sedes?q={search_term_string}`
+        },
+        'query-input': 'required name=search_term_string'
+    }
+};
+
+/**
  * Schema de una sede concreta, para su página de detalle. Debe llevar el mismo
  * `@id` que su entrada en `schemaSedes`, así Google los fusiona en un nodo.
  */

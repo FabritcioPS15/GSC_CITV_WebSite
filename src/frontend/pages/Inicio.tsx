@@ -5,7 +5,7 @@ import ConveniosCarousel from '../components/ConveniosCarousel';
 import HeroCarousel from '../components/HeroCarousel';
 import { ShieldCheck, BadgeDollarSign, Clock, HeartHandshake, ChevronRight } from 'lucide-react';
 import Seo from '../components/Seo';
-import { schemaNegocio, schemaFaq, schemaGrafo } from '../seo/schemas';
+import { schemaNegocio, schemaSedes, schemaWebSite, schemaFaq, schemaGrafo } from '../seo/schemas';
 import ServicioModal from '../components/ServicioModal';
 import PremiumButton from '../components/PremiumButton';
 import { useCarrusel } from '../hooks/useCarrusel';
@@ -147,7 +147,7 @@ function Inicio() {
         path="/"
         title="Revisión Técnica Vehicular en el Perú | RTP San Cristóbal"
         description="Revisión técnica vehicular autorizada por el MTC en 20 minutos: autos particulares, transporte de personas, transporte de mercancías y vehículos menores L3 y L5 (motos). Sedes en Lima y provincias. Consulta tu revisión técnica, placa o gas."
-        schema={schemaGrafo([schemaNegocio, schemaFaq(FAQ_HOME)])}
+        schema={schemaGrafo([schemaNegocio, schemaWebSite, schemaSedes, schemaFaq(FAQ_HOME)])}
       />
       {/* Hero Carousel */}
       <RevealOnScroll>
